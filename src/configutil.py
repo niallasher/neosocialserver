@@ -3,6 +3,7 @@ from types import SimpleNamespace
 from os import path
 from rich import print
 from copy import copy
+from cryptography.fernet import Fernet
 
 
 """
@@ -41,6 +42,14 @@ DEFAULT_CONFIG = {
             "regen_invite_codes_for_admins": True,
             "users_can_invite": False,
             "invites_per_user": 5
+        },
+        "totp": {
+            # you probably don't want to change this.
+            # especially if you already have users :)
+            # it's here just to protect the secret in case of
+            # a database leak.
+            "encryption_enabed": True,
+            "encryption_key": Fernet.generate_key().decode()
         }
     },
     "debug": {
