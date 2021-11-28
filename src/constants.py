@@ -7,6 +7,7 @@ BIO_MAX_LEN = 256
 POST_MAX_LEN = 256
 TAG_MAX_LEN = 12
 REPORT_SUPPLEMENTARY_INFO_MAX_LEN = 256
+COMMENT_MAX_LEN = 256
 # these two aren't enforeced by the database.
 # need to check whenever somebody makes a new post.
 MAX_IMAGES_PER_POST = 4
