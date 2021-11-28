@@ -6,3 +6,4 @@ Library/
 **.no_commit
 **/config.json
 **/.DS_Store
+**/media
