@@ -20,6 +20,12 @@ DEFAULT_CONFIG = {
         "host": "0.0.0.0",
         "port": 80
     },
+    "database": {
+        "connector": "sqlite",
+        "address": "./algo.db",
+        "username": None,
+        "password": None
+    },
     "debug": {
         "enable_flask_debug_mode": False,
         "auto_reload_templates": False,
@@ -164,7 +170,11 @@ def dump_namespace_to_dict(namespace) -> dict:
 
 def _load_config() -> SimpleNamespace:
     with open(CONFIG_FILE_PATH, 'r') as config_file:
-        return load_json_to_namespace(config_file.read())
+        try:
+            return load_json_to_namespace(config_file.read())
+        except:
+            print("Error reading config file.")
+            exit(1)
 
 
 """
