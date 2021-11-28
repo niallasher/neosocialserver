@@ -33,6 +33,28 @@ class AccountAttributes(Enum):
     # basically could be aliases to GOD_EMPEROR, but that's a bit of a stretch.
 
 
+class ErrorCodes(Enum):
+    INCORRECT_PASSWORD = 0
+    PASSWORD_DAMAGED = 1
+    TOTP_REQUIRED = 2
+    TOTP_INCORRECT = 3
+    TOTP_DAMAGED = 4
+    IMAGE_TO_BIG = 5
+    IMAGE_UPLOAD_FAILED = 6
+    CONNECTION_ERROR = 7
+    USER_BANNED = 8
+    USER_BLOCKED = 9
+    USERNAME_INVALID = 10
+    USERNAME_TAKEN = 11
+    USERNAME_NOT_FOUND = 12
+    TAG_INVALID = 13
+    ACTION_FAILED = 14
+    MALFORMED_CONTENT = 15
+    TOKEN_REVOKED = 16
+    TOKEN_INVALID = 17
+    POST_INVALID = 18
+
+
 """
   ReportReasons
   A list of reasons to report a post
