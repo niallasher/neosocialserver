@@ -6,6 +6,7 @@ USERNAME_MAX_LEN = 20
 BIO_MAX_LEN = 256
 POST_MAX_LEN = 256
 TAG_MAX_LEN = 12
+REPORT_SUPPLEMENTARY_INFO_MAX_LEN = 256
 # these two aren't enforeced by the database.
 # need to check whenever somebody makes a new post.
 MAX_IMAGES_PER_POST = 4
@@ -29,3 +30,17 @@ class AccountAttributes(Enum):
     INSTANCE_ADMIN = 7  # can control webui when it's added.
     # might even get a tab in the mobile app for some cleanup tasks?
     # basically could be aliases to GOD_EMPEROR, but that's a bit of a stretch.
+
+
+"""
+  ReportReasons
+  A list of reasons to report a post
+"""
+
+
+class ReportReasons(Enum):
+    SPAM = 0
+    OFFENSIVE = 1
+    DISCRIMINATION = 2
+    ILLEGAL_CONTENT = 3
+    OTHER = 4
