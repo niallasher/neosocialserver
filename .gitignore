@@ -1,0 +1,7 @@
+venv/
+Library/
+**db
+**env
+**pycache**
+**.no_commit
+**/config.json
