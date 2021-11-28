@@ -96,10 +96,14 @@ class DbPostReport(db.Entity):
 
 class DbImage(db.Entity):
     uploader = orm.Set('DbUser')
-    hash = orm.Required(str, unique=True)
+    creation_time = orm.Required(datetime.datetime)
     associated_profile_pics = orm.Set('DbUser', reverse='profile_pic')
     associated_header_pics = orm.Set('DbUser', reverse='header_pic')
     associated_posts = orm.Set('DbPost', reverse='images')
+
+    @property
+    def is_orphan(self):
+        return len(self.associated_posts) == 0 and len(self.associated_profile_pics) == 0 and len(self.associated_header_pics) == 0
 
 
 class DbHashtag(db.Entity):
