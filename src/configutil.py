@@ -19,7 +19,6 @@ DEFAULT_CONFIG = {
     "network": {
         "host": "0.0.0.0",
         "port": 80,
-        "web_addr": None
     },
     "database": {
         "connector": "sqlite",
