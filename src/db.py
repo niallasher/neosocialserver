@@ -97,6 +97,8 @@ class DbPostReport(db.Entity):
 class DbImage(db.Entity):
     uploader = orm.Set('DbUser')
     creation_time = orm.Required(datetime.datetime)
+    # uuid used to retrieve the image from storage
+    uuid = orm.Required(str)
     associated_profile_pics = orm.Set('DbUser', reverse='profile_pic')
     associated_header_pics = orm.Set('DbUser', reverse='header_pic')
     associated_posts = orm.Set('DbPost', reverse='images')
