@@ -1,5 +1,6 @@
 aniso8601==9.0.1
 argon2-cffi==21.1.0
+autopep8==1.6.0
 cffi==1.15.0
 click==8.0.3
 colorama==0.4.4
@@ -14,10 +15,12 @@ Jinja2==3.0.3
 MarkupSafe==2.0.1
 Pillow==8.4.0
 pony==0.7.14
+pycodestyle==2.8.0
 pycparser==2.21
 Pygments==2.10.0
 pyotp==2.6.0
 pytz==2021.3
 rich==10.14.0
 six==1.16.0
+toml==0.10.2
 Werkzeug==2.0.2
