@@ -20,6 +20,7 @@ class DbUser(db.Entity):
     account_attributes = orm.Required(orm.IntArray)
     bio = orm.Required(str, nullable=True, max_len=BIO_MAX_LEN)
     totp_secret = orm.Optional(str, nullable=True)
+    last_used_totp = orm.Optional(str, nullable=True)
     posts = orm.Set('DbPost', cascade_delete=True)
     comments = orm.Set('DbComment', cascade_delete=True)
     post_likes = orm.Set('DbPostLike', cascade_delete=True)
