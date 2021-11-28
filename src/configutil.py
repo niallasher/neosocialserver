@@ -18,13 +18,31 @@ CONFIG_FILE_PATH = "./config.json"
 DEFAULT_CONFIG = {
     "network": {
         "host": "0.0.0.0",
-        "port": 80
+        "port": 80,
+        "web_addr": None
     },
     "database": {
         "connector": "sqlite",
         "address": "./algo.db",
         "username": None,
         "password": None
+    },
+    "media": {
+        "images": {
+            "compress": True,
+            "max_width": 1000,
+            "quality": 80
+        },
+    },
+    "auth": {
+        "invite_only": {
+            "enabled": False,
+            "master_invite_code": None,
+            "admins_can_invite": True,
+            "regen_invite_codes_for_admins": True,
+            "users_can_invite": False,
+            "invites_per_user": 5
+        }
     },
     "debug": {
         "enable_flask_debug_mode": False,
