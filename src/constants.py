@@ -1,5 +1,13 @@
 from enum import Enum
 
+
+USERNAME_MAX_LEN = 20
+BIO_MAX_LEN = 256
+POST_MAX_LEN = 256
+TAG_MAX_LEN = 12
+MAX_IMAGES_PER_POST = 4
+
+
 """
   AccountAttributes
   A list of modifiers and accolades for an account.
