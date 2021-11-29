@@ -1,7 +1,7 @@
 from types import SimpleNamespace
 import argon2
 from cryptography.fernet import Fernet
-from secrets import randbits, randbytes
+from secrets import randbits
 from hashlib import sha256
 from configutil import config
 from secrets import token_urlsafe
@@ -24,7 +24,7 @@ fernet_inst = Fernet(config.auth.totp.encryption_key)
 """
 
 
-def generate_key():
+def generate_key() -> SimpleNamespace(key=str, hash=str):
     # 32 random bytes. sufficently secure, not too big payload-wise
     # if we send it with each request
     key = token_urlsafe(32)
@@ -32,6 +32,17 @@ def generate_key():
         key=key,
         hash=sha256(key.encode()).hexdigest()
     )
+
+
+"""
+    verify_plaintext_against_hash_sha256
+    verify that plaintext matches a provided hash
+    (use this to check auth token and api key hashes)
+"""
+
+
+def verify_plaintext_against_hash_sha256(plaintext, hash) -> bool:
+    return sha256(plaintext.encode()).hexdigest() == hash
 
 
 def generate_salt() -> str:
