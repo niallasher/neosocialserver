@@ -40,3 +40,13 @@
 # Images
 
 - Max count per post: 4
+- When sending a cropped image, we should send the original too. The client should send a json string in the payload, like the following:
+
+```
+  {
+    "original": "ORIGINAL_BASE64_STRING",
+    ""cropped": "CROPPED_BASE64_STRING"
+  }
+```
+
+If no cropped image is present, then cropped can be ommited, and the server will understand.
