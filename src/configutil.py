@@ -29,8 +29,6 @@ DEFAULT_CONFIG = {
     },
     "media": {
         "images": {
-            "compress": True,
-            "max_width": 1000,
             "quality": 80,
             "storage_dir": './media/images'
         },
