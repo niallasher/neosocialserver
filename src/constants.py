@@ -33,6 +33,12 @@ class AccountAttributes(Enum):
     # basically could be aliases to GOD_EMPEROR, but that's a bit of a stretch.
 
 
+"""
+  ErrorCodes
+  A list of error codes, to increase code readability.
+"""
+
+
 class ErrorCodes(Enum):
     INCORRECT_PASSWORD = 0
     PASSWORD_DAMAGED = 1
