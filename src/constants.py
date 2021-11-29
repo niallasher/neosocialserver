@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 DISPLAY_NAME_MAX_LEN = 32
 USERNAME_MAX_LEN = 20
 BIO_MAX_LEN = 256
@@ -61,6 +60,7 @@ class ErrorCodes(Enum):
     TOKEN_ASSIGNMENT_FAILED = 18
     TOKEN_REVOKE_FAILED = 19
     POST_INVALID = 20
+    API_KEY_INVALID = 21
 
 
 """
@@ -75,3 +75,19 @@ class ReportReasons(Enum):
     DISCRIMINATION = 2
     ILLEGAL_CONTENT = 3
     OTHER = 4
+
+
+"""
+  ApiKeyPermissions
+  A list of permissions for an API key.
+"""
+
+
+class ApiKeyPermissions(Enum):
+    READ = 0  # read only access to the socialshare api.
+    POST = 1  # can post comments, posts and upload images
+    MODIFY_FOLLOWERS = 2  # can add/remove followers
+    MODIFY_ACCOUNT_SETTINGS = 3  # can change account settings
+    ACCESS_MODERATION = 4  # can access the moderation zone
+    ACCESS_ADMIN = 5  # can access the admin zone
+    DELETE_ACCOUNT = 6  # can delete the account (still requires a password)

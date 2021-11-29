@@ -153,6 +153,16 @@ class DbInviteCode(db.Entity):
     used = orm.Required(bool)
 
 
+class DbApiKey(db.Entity):
+    owner = orm.Required('DbUser')
+    creation_time = orm.Required(datetime.datetime)
+    # we store this with sha256, not pbkdf2 or argon2,
+    # since we want it to be super fast, as each request
+    # will have to verify it if it's in use.
+    key_hash = orm.Required(str)
+    permissions = orm.Required(orm.IntArray)  # constants.ApiKeyPermissions
+
+
 def _bind_db():
     if config.database.connector == 'sqlite':
         db.bind('sqlite', config.database.address, create_db=True)
