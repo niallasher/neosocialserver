@@ -1,11 +1,37 @@
+from types import SimpleNamespace
 import argon2
 from cryptography.fernet import Fernet
-from secrets import randbits
+from secrets import randbits, randbytes
 from hashlib import sha256
 from configutil import config
+from secrets import token_urlsafe
 
 hasher = argon2.PasswordHasher()
 fernet_inst = Fernet(config.auth.totp.encryption_key)
+
+"""
+    generate_key
+    generate a random key. returns the key and it's sha256 hash
+    (for storage) in a SimpleNamespace.
+    used for API keys and login tokens.
+    We just use SHA256 for this; it's fast af, an we need to check
+    these with every request to the API.
+
+    No salt is used; these values already have a high entropy
+    (i.e. it's near impossible to compute a lookup table for them)
+    and we don't want to take any longer than we have to to verify
+    them
+"""
+
+
+def generate_key():
+    # 32 random bytes. sufficently secure, not too big payload-wise
+    # if we send it with each request
+    key = token_urlsafe(32)
+    return SimpleNamespace(
+        key=key,
+        hash=sha256(key.encode()).hexdigest()
+    )
 
 
 def generate_salt() -> str:

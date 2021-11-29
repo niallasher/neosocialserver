@@ -58,11 +58,12 @@ class DbUser(db.Entity):
 
 
 class DbUserSession(db.Entity):
-    # here for security purposes.
-    # need to make sure this collection is clear,
-    # and it's made obvious to the user that its
-    # not for advertising purposes.
-    access_token = orm.Required(str)
+    # data collection is for security purposes.
+    # need to note that it's not used for advertising.
+    # we hash the access token unsalted & hashed with sha256,
+    # same as an API key.
+    # check DbApiKey for a quick explanation of why.
+    access_token_hash = orm.Required(str)
     user = orm.Required('DbUser')
     creation_ip = orm.Required(str)
     creation_time = orm.Required(datetime.datetime)
@@ -159,6 +160,8 @@ class DbApiKey(db.Entity):
     # we store this with sha256, not pbkdf2 or argon2,
     # since we want it to be super fast, as each request
     # will have to verify it if it's in use.
+    # no point salting it since it's high entropy already,
+    # and practically impossible to build a lookup table for
     key_hash = orm.Required(str)
     permissions = orm.Required(orm.IntArray)  # constants.ApiKeyPermissions
 
