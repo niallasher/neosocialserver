@@ -30,6 +30,7 @@ DEFAULT_CONFIG = {
     "media": {
         "images": {
             "quality": 80,
+            "post_quality": 90,
             "storage_dir": './media/images'
         },
     },
