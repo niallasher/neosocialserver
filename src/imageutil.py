@@ -3,7 +3,7 @@ from hashlib import sha256
 import re
 from base64 import b64decode
 from io import BytesIO
-from math import ceil
+from math import ceil, gcd
 from os import access, makedirs, mkdir, path
 from types import SimpleNamespace
 import PIL
@@ -110,12 +110,18 @@ def resize_image_aspect_aware(image, size):
     #  want to make the size LARGER!
     images = []
     if image.size[0] < size[0] or image.size[1] < size[1]:
+        # create the largest possible image within max_image_size
+        size = calculate_largest_fit(image, size)
         return
     for pixel_ratio in range(1, MAX_PIXEL_RATIO + 1):
+        scaled_size = mult_size_tuple(size, pixel_ratio)
+        # if the scaled size is larger than the original, use the original
+        if scaled_size[0] > image.size[0] or scaled_size[1] > image.size[1]:
+            scaled_size = size
         images.append(
             ImageOps.fit(
                 image,
-                mult_size_tuple(size, pixel_ratio),
+                scaled_size,
                 PIL.Image.BICUBIC,
                 centering=(0.5, 0.5)
             )
@@ -124,12 +130,22 @@ def resize_image_aspect_aware(image, size):
 
 
 """
-    calculate_largest_aspect_by_resolution
+    calculate largest image size to fit in the aspect ratio
+    given by a side.
+    used to prevent resizing an image to be larger than
+    it was originally, since that is pretty bad for optimization 
+    (mind blowing, i know)
 """
 
 
-def calculate_largest_aspect_by_resolution():
-    return
+def calculate_largest_fit(image, max_size):
+    # calculate *target* aspect ratio from max size
+    divisor = gcd(max_size[0], max_size[1])
+    target_aspect_ratio = (max_size[0] / divisor, max_size[1] / divisor)
+    # create the largest possible image within the original image size, and the aspect ratio
+    new_width = image.size[0] - (image.size[0] % target_aspect_ratio[0])
+    new_height = new_width * (target_aspect_ratio[0] / target_aspect_ratio[1])
+    return (new_width, new_height)
 
 
 """
