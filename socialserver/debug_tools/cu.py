@@ -1,7 +1,7 @@
-from db import DbUser
+from socialserver.db import DbUser
 import datetime
 from pony.orm import db_session, commit
-from authutil import generate_salt, hash_password
+from socialserver.util.auth import generate_salt, hash_password
 from constants import AccountAttributes
 
 

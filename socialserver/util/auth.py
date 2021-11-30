@@ -3,7 +3,7 @@ import argon2
 from cryptography.fernet import Fernet
 from secrets import randbits
 from hashlib import sha256
-from .config import config
+from socialserver.util.config import config
 from secrets import token_urlsafe
 
 hasher = argon2.PasswordHasher()
