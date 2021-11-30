@@ -16,6 +16,11 @@ class DbUser(db.Entity):
     password_hash = orm.Required(str)
     password_salt = orm.Required(str)
     creation_time = orm.Required(datetime.datetime)
+    birthday = orm.Optional(datetime.date)
+    # legacy accounts are the ones imported from socialserver 2.x during migration
+    # this doesn't mean much now, but might becomne important in the future
+    # so might as well have it.
+    is_legacy_account = orm.Required(bool)
     # check out AccountAttributes enum in constants for more info
     account_attributes = orm.Required(orm.IntArray)
     bio = orm.Required(str, nullable=True, max_len=BIO_MAX_LEN)
@@ -35,6 +40,7 @@ class DbUser(db.Entity):
     uploaded_images = orm.Set("DbImage", reverse="uploader")
     # deleting user should leave reports intact
     submitted_reports = orm.Set("DbPostReport", cascade_delete=False)
+    associated_api_keys = orm.Set("DbApiKey", cascade_delete=True)
 
     @property
     def is_private(self):
@@ -96,13 +102,16 @@ class DbPostReport(db.Entity):
 
 
 class DbImage(db.Entity):
-    uploader = orm.Set('DbUser')
+    uploader = orm.Required('DbUser')
     creation_time = orm.Required(datetime.datetime)
     # uuid used to retrieve the image from storage
-    uuid = orm.Required(str)
+    identifier = orm.Required(str)
+    # upload_hash = orm.Required(str)
     associated_profile_pics = orm.Set('DbUser', reverse='profile_pic')
     associated_header_pics = orm.Set('DbUser', reverse='header_pic')
     associated_posts = orm.Set('DbPost', reverse='images')
+    # SHA256 hash of the original file, for later adaption
+    # original_hash = orm.Required(str)
 
     @property
     def is_orphan(self):
@@ -171,7 +180,7 @@ def _bind_db():
         db.bind('sqlite', config.database.address, create_db=True)
     elif config.database.connector == 'postgres':
         # TODO: add postgres support back in
-        print("Sorry, postgres support has not been reintegrated yet.")
+        db.bind('postgres', config.database.address)
     else:
         raise ValueError("Invalid connector specified in config file.")
 

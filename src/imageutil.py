@@ -1,25 +1,29 @@
 import datetime
+from hashlib import sha256
 import re
 from base64 import b64decode
 from io import BytesIO
 from math import ceil
-from os import makedirs, mkdir, path
-from uuid import uuid4
+from os import access, makedirs, mkdir, path
+from types import SimpleNamespace
 import PIL
-from PIL import Image
+from PIL import Image, ImageOps
 from pony.orm import commit, db_session
 from configutil import config
-from db import DbImage
+from db import DbImage, DbUser
+from constants import ImageUploadTypes, ImageTypes,  MAX_PIXEL_RATIO, MAX_IMAGE_SIZE_GALLERY_PREVIEW, MAX_IMAGE_SIZE_POST_PREVIEW, MAX_IMAGE_SIZE_POST, MAX_IMAGE_SIZE_HEADER, MAX_IMAGE_SIZE_PROFILE_PICTURE, MAX_IMAGE_SIZE_PROFILE_PICTURE_LARGE
+from secrets import randbits, token_urlsafe
+from json import loads, dumps
+from copy import copy
+from rich import print
 
-IMAGE_QUALITY = config.media.images.quality
-# for post images
-IMAGE_MAX_WIDTH = config.media.images.max_width
-# for image previews
-IMAGE_MAX_WIDTH_HALF = ceil(IMAGE_MAX_WIDTH / 2)
-# for pfps
-IMAGE_MAX_WIDTH_QUARTER = 128
 
 IMAGE_DIR = config.media.images.storage_dir
+# where straight uploaded images are stored.
+# the optimized ones are stored one above it
+IMAGE_DIR_ORIGINAL = IMAGE_DIR + '/originals'
+IMAGE_QUALITY = config.media.images.quality
+
 
 # check if the image directory exists,
 # if it doesn't, create it
@@ -28,61 +32,235 @@ if not path.exists(IMAGE_DIR):
     print(f"Created image storage directory, {IMAGE_DIR}")
 
 
-def resize_image(width, image):
-  # TODO: find out why this doesn't work...
-  # it just goes forward all the time.
-  # but it's 2 am, so i'll just leave it for now
-  # for the record, copilot authored the last half
-  # of that comment, but i do agree with it
-    if image.size[1] >= width:
-        return image
-    else:
-        width_percentage = (width / float(image.size[0]))
-        horiz_size = int((float(image.size[1]) * float(width_percentage)))
-        image_resized = image.resize(
-            (width, horiz_size), PIL.Image.ANTIALIAS)
-        return image_resized
+"""
+    save_imageset_to_disk
+    Saves an imageset (e.g. profile pic sm, lg) to disk, in the correct directory, with consistent naming.
+    Does not create a database entry.
+    in the future, this might be moved into amazon s3?
+"""
 
 
-def save_image(image, uuid, scale):
-    with open(f"{IMAGE_DIR}/{uuid}/{scale}.jpg", 'wb') as file:
-        image.save(file, format="JPEG", quality=IMAGE_QUALITY)
+def save_images_to_disk(images, access_id):
+
+    def save_with_pixel_ratio(image, filename, pixel_ratio):
+        image.save(f"{IMAGE_DIR}/{access_id}/{filename}_{pixel_ratio}x.jpg",
+                   type="JPEG", quality=IMAGE_QUALITY)
+
+    mkdir(f"{IMAGE_DIR}/{access_id}")
+    print(images.keys())
+    for i in images.keys():
+        print(i.value)
+        if i == ImageTypes.ORIGINAL:
+            print("saving original image.")
+            images[i][0].save(
+                f"{IMAGE_DIR}/{access_id}/{ImageTypes.ORIGINAL.value}.jpg", type="JPEG", quality=IMAGE_QUALITY)
+        else:
+            for j in images[i]:
+                save_with_pixel_ratio(j, i.value, images[i].index(j)+1)
 
 
-# converts dataurl to image, resizes, optimizes 3 variants,
-# and saves to disk. also handles db entry.
-# returns the id of the database entry,
-# and it's access uuid.
+"""
+    create_random_image_identier
+    return a random identifier to be associated with an image,
+    for retrieval purposes
+"""
+
+
+def create_random_image_identifier():
+    return token_urlsafe(32)
+
+
+"""
+    mult_size_tuple
+    returns a new size tuple, multipled from the given
+    one, for pixel ratio stuff
+"""
+
+
+def mult_size_tuple(size, multiplier):
+    return (size[0]*multiplier, size[1]*multiplier)
+
+
+"""
+    fit_image_to_size
+    Resizes an image to fit within the given size.
+    Doesn't care about MAX_PIXEL_RATIO; it's just the
+    unmodified original image.
+"""
+
+
+def fit_image_to_size(image, size):
+    img = copy(image)
+    img.thumbnail(size, PIL.Image.ANTIALIAS)
+    return img
+
+
+"""
+    resize_image_aspect_aware
+    Resize an image, aspect aware.
+    Returns the result of fit_image_to_size after cropping to aspect
+    ratio from the top left. (i.e. you will get back an array of images,
+    for different pixel ratios, from 1 to MAX_PIXEL_RATIO)
+"""
+
+
+def resize_image_aspect_aware(image, size):
+    #  TODO: this really need to make sure the image isn't
+    #  smaller than the requested size already, since we don't
+    #  want to make the size LARGER!
+    images = []
+    if image.size[0] < size[0] or image.size[1] < size[1]:
+        return
+    for pixel_ratio in range(1, MAX_PIXEL_RATIO + 1):
+        images.append(
+            ImageOps.fit(
+                image,
+                mult_size_tuple(size, pixel_ratio),
+                PIL.Image.BICUBIC,
+                centering=(0.5, 0.5)
+            )
+        )
+    return images
+
+
+"""
+    calculate_largest_aspect_by_resolution
+"""
+
+
+def calculate_largest_aspect_by_resolution():
+    return
+
+
+"""
+    convert_data_url_to_image
+    Converts a data url to a PIL image, for further processing.
+    Does not resize, compress or save the image. Just loads it,
+    and returns it.
+"""
+
+
+def convert_data_url_to_image(data_url):
+    # strip the mime type declaration, and the data: prefix
+    # so we can convert to binary and create an image
+    data_url = re.sub(r'^data:image/.+;base64,', '', data_url)
+    # we're storing in BytesIO so we don't have to
+    # write to disk, and we can use the image directly.
+    # we only want to store it once processing is done.
+    binary_data = BytesIO(b64decode(data_url))
+    image = Image.open(binary_data).convert('RGB')
+    return image
+
+
+"""
+    save_original_image_to_disk
+    Saves the original image as a JPEG, for later processing
+    if the user wants to use it for something else.
+    Returns the hash of the image, for inclusion in the database.
+    Note that the hash corresponds to the original image, not the
+    JPEG converted one.
+"""
+
+
+def save_original_image_to_disk(image):
+    hash = sha256(image.tobytes()).hexdigest()
+    # save this in max quality i.e. very close
+    # to how we recieved it (but in JPEG regardless of
+    # recieved image format, so there is still *some*
+    # compression).
+    # NOTE: might be a good idea to make this configurable?
+    # A 100 quality JPEG thats like 10k by 10k is probably gonna
+    # be pretty massive. Better yet, make sure we have a large but
+    # fair max size for images to get compressed down to!
+    image.save(f"{IMAGE_DIR_ORIGINAL}/{hash}.jpg",
+               format="JPEG", quality=100)
+
+
+"""
+    commit_image_to_db
+    Commit DbImage entry to the database, and then return it's id.
+"""
 
 
 @db_session
-def handle_data_url_upload(data_url):
-    # strip the header so we can decode into binary data
-    # that we can feed to PIL
-    # random id for the db
-    uuid = uuid4().__str__()
-    data_url_stripped = re.sub(r'^data:image/.+;base64,', '', data_url)
-    binary_data = BytesIO(b64decode(data_url_stripped))
-    image = Image.open(binary_data)
-    image = image.convert('RGB')
-    image_full = resize_image(IMAGE_MAX_WIDTH, image)
-    image_half = resize_image(IMAGE_MAX_WIDTH_HALF, image)
-    image_quarter = resize_image(IMAGE_MAX_WIDTH_QUARTER, image)
-    mkdir(f"{IMAGE_DIR}/{uuid}")
-    save_image(image_full, uuid, "full")
-    save_image(image_half, uuid, "half")
-    save_image(image_quarter, uuid, "quarter")
-    image = DbImage(
-        uuid=uuid,
-        creation_time=datetime.datetime.now())
-    commit()
-    return {
-        "uuid": uuid,
-        "image_id": image.id
+def commit_image_to_db(identifier, userid):
+    uploader = DbUser.get(id=userid)
+    if uploader == None:
+        print("Could not commit to DB: user id does not exist!")
+    else:
+        entry = DbImage(
+            creation_time=datetime.datetime.now(),
+            identifier=identifier,
+            uploader=DbUser.get(id=userid)
+        )
+        commit()
+        return entry.id
+
+
+"""
+    handle_upload
+    Take a JSON string (read notes.md, #images) containing b64 images, and process it.
+    Will save it, store a db entry, and return
+    a SimpleNamespace with the following keys:
+        - id: DbImage ID
+        - uid: Image identifier
+"""
+
+
+def handle_upload(image_package, upload_type_int, userid):
+    # Retrieve enum value for upload type
+    upload_type = ImageUploadTypes(upload_type_int)
+    # deserialize the JSON containing image dataurls
+    images = loads(image_package)
+    # if the client didn't supply a cropped image for the purpose,
+    # we'll just use the original image in it's place.
+    # this is a fallback, in case of a client that doesn't do
+    # due diligence.
+    # tldr: unlike customer service, it's usually the client who is wrong.
+    if ('cropped' not in images.keys()):
+        image = convert_data_url_to_image(images['original'])
+        original_image = copy(image)
+    else:
+        image = convert_data_url_to_image(images['cropped'])
+        original_image = convert_data_url_to_image(images['original'])
+    upload_type = ImageUploadTypes(upload_type_int)
+    access_id = create_random_image_identifier()
+
+    # all resized images get 4 different pixel ratios, returned in an array from
+    # 0 to 3, where the pixel ratio is the index + 1. except for posts.
+    # we always deliver them in ''full'' quality (defined by MAX_IMAGE_SIZE_POST)
+    arr_gallery_preview_image = resize_image_aspect_aware(
+        image, MAX_IMAGE_SIZE_GALLERY_PREVIEW)
+
+    images = {
+        ImageTypes.ORIGINAL: [original_image],
+        ImageTypes.GALLERY_PREVIEW: arr_gallery_preview_image
     }
 
+    if upload_type == ImageUploadTypes.PROFILE_PICTURE:
+        arr_profilepic = resize_image_aspect_aware(
+            image, MAX_IMAGE_SIZE_PROFILE_PICTURE)
+        arr_profilepic_lg = resize_image_aspect_aware(
+            image, MAX_IMAGE_SIZE_PROFILE_PICTURE_LARGE)
+        images[ImageTypes.PROFILE_PICTURE] = arr_profilepic
+        images[ImageTypes.PROFILE_PICTURE_LARGE] = arr_profilepic_lg
 
-if __name__ == "__main__":
-    dataurl = "data:image/png;base64,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"
-    res = handle_data_url_upload(dataurl)
-    print(res)
+    if upload_type == ImageUploadTypes.POST:
+        img_post = fit_image_to_size(
+            image, MAX_IMAGE_SIZE_POST)
+        arr_post_preview = resize_image_aspect_aware(
+            image, MAX_IMAGE_SIZE_POST_PREVIEW)
+        images[ImageTypes.POST] = [img_post]
+        images[ImageTypes.POST_PREVIEW] = arr_post_preview
+
+    if upload_type == ImageUploadTypes.HEADER:
+        header = resize_image_aspect_aware(
+            image, MAX_IMAGE_SIZE_HEADER)
+        images[ImageTypes.HEADER] = [header]
+
+    save_images_to_disk(images, access_id)
+    entry = commit_image_to_db(access_id, userid)
+    return SimpleNamespace(
+        id=entry,
+        identifier=access_id
+    )
