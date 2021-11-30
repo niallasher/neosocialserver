@@ -1,5 +1,6 @@
 import click
 from socialserver import application
+from socialserver.cli.mkuser import mk_user_interactive
 
 
 @click.group()
@@ -20,10 +21,14 @@ def devel_run(port, bind_addr, template_auto_reload, max_file_age):
 
 
 @click.command()
-def test():
-    click.echo("This is just a test")
+@click.option('interactive', '--interactive', '-i', default=True, help='Enable interactive mode.')
+def mkuser(interactive):
+    if not interactive:
+        print("Sorry, non-interactive mode is not avaliable yet.")
+    else:
+        mk_user_interactive()
 
 
 # register commands with cli group
 cli.add_command(devel_run)
-cli.add_command(test)
+cli.add_command(mkuser)
