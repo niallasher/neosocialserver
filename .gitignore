@@ -1,13 +1,13 @@
 venv/
 Library/
+# we definitely do not want to commit the database 😆
 **db
 **env
 **pycache**
 **.no_commit
+# could contain secrets, don't commit.
 **/config.json
+# finder, i hate you.
 **/.DS_Store
+# don't commit media folder, since that could contain user generated content
 **/media
-
-# this is just test data (random images.)
-# maybe it should be included? i don't know.
-src/test/*

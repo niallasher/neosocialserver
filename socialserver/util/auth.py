@@ -3,7 +3,7 @@ import argon2
 from cryptography.fernet import Fernet
 from secrets import randbits
 from hashlib import sha256
-from configutil import config
+from socialserver.util.config import config
 from secrets import token_urlsafe
 
 hasher = argon2.PasswordHasher()
@@ -45,17 +45,50 @@ def verify_plaintext_against_hash_sha256(plaintext, hash) -> bool:
     return sha256(plaintext.encode()).hexdigest() == hash
 
 
-def generate_salt() -> str:
+"""
+    legacy_generate_salt
+    generate a 2.x format salt. this should never be needed,
+    but in case of unforseen circumstances, it's here
+"""
+
+
+def legacy_generate_salt() -> str:
+    # NOTE: any migrated account will have one of these
+    # old format salts, however, it's stored in the database,
+    # and it doesn't make a difference to the verify function,
+    # which is compatible anyway
     salt_basis = randbits(128).__str__().encode()
-    # yes, this is longer than any salt need be,
-    # but socialshare used this, so we need compat for passwords.
-    # might introduce a new password requirement later?
     return sha256(salt_basis).hexdigest()
+
+
+"""
+    generate_salt
+    return a random token, appended to a password to prevent precomputed tables
+    in the event of a database leak
+"""
+
+
+def generate_salt() -> str:
+    return token_urlsafe(32)
+
+
+"""
+    hash_password
+    hash a password with a salt. you can generate a salt using
+    generate_salt()
+"""
 
 
 def hash_password(plaintext, salt) -> str:
     assembled_password = plaintext + salt
     return hasher.hash(assembled_password)
+
+
+"""
+    verify_password_valid
+    take a plaintext password and a hash, and verify that the password is ok
+
+"""
 
 
 def verify_password_valid(plaintext, salt, hash) -> bool:
@@ -74,8 +107,8 @@ def verify_password_valid(plaintext, salt, hash) -> bool:
 #     return fernet_inst.decrypt(string.encode())
 
 
+# test that hashing works ok if running from the command line
 if __name__ == "__main__":
-    # test pw stuff
     print(" --= argon2 hashing =-- ")
     plaintext = "hello world"
     salt = generate_salt()
