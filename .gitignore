@@ -7,3 +7,7 @@ Library/
 **/config.json
 **/.DS_Store
 **/media
+
+# this is just test data (random images.)
+# maybe it should be included? i don't know.
+src/test/*
