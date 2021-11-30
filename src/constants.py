@@ -1,5 +1,8 @@
 from enum import Enum
 
+"""
+  Max string length for different user generated areas.
+"""
 DISPLAY_NAME_MAX_LEN = 32
 USERNAME_MAX_LEN = 20
 BIO_MAX_LEN = 256
@@ -7,10 +10,28 @@ POST_MAX_LEN = 256
 TAG_MAX_LEN = 12
 REPORT_SUPPLEMENTARY_INFO_MAX_LEN = 256
 COMMENT_MAX_LEN = 256
-# these two aren't enforeced by the database.
-# need to check whenever somebody makes a new post.
+
+"""
+  Maximum amounts of attribs per post
+  Not enforced by the database, make doubly sure the API doesn't break
+"""
 MAX_IMAGES_PER_POST = 4
 MAX_TAGS_PER_POST = 5
+
+"""
+  Image sizing
+  These still
+"""
+
+# highest pixel ratio we generate. anything higher will be given the max.
+# client should round up to the next integer, but we'll do it if they dont.
+MAX_PIXEL_RATIO = 4
+MAX_IMAGE_SIZE_POST = (1500, 1500)
+MAX_IMAGE_SIZE_POST_PREVIEW = (256, 256)
+MAX_IMAGE_SIZE_PROFILE_PICTURE = (64, 64)
+MAX_IMAGE_SIZE_PROFILE_PICTURE_LARGE = (128, 128)
+MAX_IMAGE_SIZE_HEADER = (600, 400)
+MAX_IMAGE_SIZE_GALLERY_PREVIEW = (256, 256)
 
 
 """
@@ -91,3 +112,36 @@ class ApiKeyPermissions(Enum):
     ACCESS_MODERATION = 4  # can access the moderation zone
     ACCESS_ADMIN = 5  # can access the admin zone
     DELETE_ACCOUNT = 6  # can delete the account (still requires a password)
+
+
+"""
+  ImageUploadTypes
+  A list of image upload types. Used to define
+  what the size of the image should be.
+  Note these are seperate from ImageTypes, since
+  they can define multiple images (e.g. profile picture, and profile picture large). While ImageTypes
+  represent a single one.
+"""
+
+
+class ImageUploadTypes(Enum):
+    POST = 0
+    HEADER = 1
+    PROFILE_PICTURE = 2
+
+
+"""
+  ImageTypes
+  A list of imageset save types and their respective filenames,
+  for imageutil.save_images_to_disk
+"""
+
+
+class ImageTypes(Enum):
+    GALLERY_PREVIEW = "gal-prev"
+    POST_PREVIEW = "post-prev"
+    POST = "post"
+    PROFILE_PICTURE = "prof-pic"
+    PROFILE_PICTURE_LARGE = "prof-pic-l"
+    HEADER = "header"
+    ORIGINAL = "orig"
