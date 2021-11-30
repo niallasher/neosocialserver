@@ -23,9 +23,7 @@ DEFAULT_CONFIG = {
     },
     "database": {
         "connector": "sqlite",
-        "address": "./algo.db",
-        "username": None,
-        "password": None
+        "address": "./algo.db"
     },
     "media": {
         "images": {
