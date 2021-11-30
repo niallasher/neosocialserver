@@ -11,7 +11,7 @@ def get_input_bool(prompt):
             return False
 
 
-def get_str_input(prompt):
+def get_input_string(prompt):
     while True:
         user_input = input(prompt)
         if user_input:
