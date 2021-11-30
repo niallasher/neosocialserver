@@ -10,7 +10,15 @@ def landing_page():
     return render_template('server_landing.html')
 
 
-if __name__ == '__main__':
+"""
+    run_debug
+    Run using local flask debugging server.
+    Used when invoking main.py with the -d/--debug flag.
+    NEVER USE THIS IN PRODUCTION!
+"""
+
+
+def run_debug():
     if config.debug.auto_reload_templates:
         print("Debug: templates auto reloading")
         app.config['TEMPLATES_AUTO_RELOAD'] = True
