@@ -131,7 +131,7 @@ def resize_image_aspect_aware(image, size):
 
 """
     calculate largest image size to fit in the aspect ratio
-    given by a side.
+    given by a size.
     used to prevent resizing an image to be larger than
     it was originally, since that is pretty bad for optimization 
     (mind blowing, i know)
