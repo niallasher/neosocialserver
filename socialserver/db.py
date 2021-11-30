@@ -23,7 +23,7 @@ class DbUser(db.Entity):
     is_legacy_account = orm.Required(bool)
     # check out AccountAttributes enum in constants for more info
     account_attributes = orm.Required(orm.IntArray)
-    bio = orm.Required(str, nullable=True, max_len=BIO_MAX_LEN)
+    bio = orm.Optional(str, max_len=BIO_MAX_LEN)
     totp_secret = orm.Optional(str, nullable=True)
     last_used_totp = orm.Optional(str, nullable=True)
     posts = orm.Set('DbPost', cascade_delete=True)
