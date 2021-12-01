@@ -2,7 +2,6 @@ from enum import unique
 from pony import orm
 import datetime
 from socialserver.constants import BIO_MAX_LEN, COMMENT_MAX_LEN, DISPLAY_NAME_MAX_LEN, REPORT_SUPPLEMENTARY_INFO_MAX_LEN, TAG_MAX_LEN, USERNAME_MAX_LEN, AccountAttributes
-from pony.orm import ormtypes
 from socialserver.util.config import config
 
 
