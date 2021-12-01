@@ -104,17 +104,30 @@ def verify_password_valid(plaintext, salt, hash) -> bool:
 
 
 """
+    hash_plaintext_sha256
+    hash plaintext with the sha256 algo
+"""
+
+
+def hash_plaintext_sha256(plaintext):
+    return sha256(plaintext.encode()).hexdigest()
+
+
+"""
     get_user_from_session
     Returns [user, session] if session is valid. Otherwise raises an exception.
 """
 
 
 @db_session
-def get_user_and_session_from_token(session_token):
-    existing_session = select(
-        s for s in DbUserSession if s.session_token == session_token)
+def get_username_from_token(session_token):
+    print(
+        hash_plaintext_sha256(session_token)
+    )
+    existing_session = DbUserSession.get(
+        access_token_hash=hash_plaintext_sha256(session_token))
     if existing_session is not None:
-        return [existing_session.user, existing_session]
+        return existing_session.user
     raise Exception("Invalid session token")
 
 
