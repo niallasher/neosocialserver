@@ -22,7 +22,7 @@ class UserSession(Resource):
             access_token_hash=hash_plaintext_sha256(args['access_token']))
 
         if session is None:
-            return {'error': ErrorCodes.INVALID_TOKEN.value}, 401
+            return {'error': ErrorCodes.TOKEN_INVALID.value}, 401
 
         return ({
             "owner": session.user.username,
@@ -62,5 +62,17 @@ class UserSession(Resource):
 
         return {"access_token": secret.key}, 200
 
+    @db_session
     def delete(self):
-        return {'message': 'Goodbye World!'}
+
+        parser = reqparse.RequestParser()
+        parser.add_argument('access_token', type=str, required=True)
+        args = parser.parse_args()
+
+        session = DbUserSession.get(
+            access_token_hash=hash_plaintext_sha256(args['access_token']))
+        if session == None:
+            return {'error': ErrorCodes.TOKEN_INVALID.value}, 401
+
+        session.delete()
+        return {}, 201
