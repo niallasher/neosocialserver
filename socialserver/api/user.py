@@ -4,12 +4,34 @@ from flask_restful import Resource, Api, reqparse
 from pony.orm import db_session
 from flask import request
 from socialserver.constants import ErrorCodes
-from socialserver.util.auth import generate_key, get_ip_from_request, verify_password_valid
+from socialserver.util.auth import generate_key, get_ip_from_request, get_username_from_token, hash_plaintext_sha256, verify_password_valid
 
 
 class UserSession(Resource):
+
+    @db_session
     def get(self):
-        return {'message': "ok"}
+
+        # TODO: some sort of generic token check instead
+        # of having to write this each time
+        parser = reqparse.RequestParser()
+        parser.add_argument('access_token', type=str, required=True)
+        args = parser.parse_args()
+
+        session = DbUserSession.get(
+            access_token_hash=hash_plaintext_sha256(args['access_token']))
+
+        if session is None:
+            return {'error': ErrorCodes.INVALID_TOKEN.value}, 401
+
+        return ({
+            "owner": session.user.username,
+            "creation_ip": session.creation_ip,
+            "creation_time": session.creation_time.timestamp(),
+            "last_access_time": session.last_access_time.timestamp(),
+            "user_agent": session.user_agent
+        },
+            200)
 
     @db_session
     def post(self):
