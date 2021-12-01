@@ -1,10 +1,15 @@
 from types import SimpleNamespace
+from functools import wraps
 import argon2
 from cryptography.fernet import Fernet
 from secrets import randbits
 from hashlib import sha256
+
+from pony.orm.core import select
 from socialserver.util.config import config
+from socialserver.db import DbUserSession
 from secrets import token_urlsafe
+from pony.orm import db_session
 
 hasher = argon2.PasswordHasher()
 fernet_inst = Fernet(config.auth.totp.encryption_key)
@@ -96,6 +101,35 @@ def verify_password_valid(plaintext, salt, hash) -> bool:
         return hasher.verify(hash, plaintext + salt)
     except argon2.exceptions.VerifyMismatchError:
         return False
+
+
+"""
+    get_user_from_session
+    Returns [user, session] if session is valid. Otherwise raises an exception.
+"""
+
+
+@db_session
+def get_user_and_session_from_token(session_token):
+    existing_session = select(
+        s for s in DbUserSession if s.session_token == session_token)
+    if existing_session is not None:
+        return [existing_session.user, existing_session]
+    raise Exception("Invalid session token")
+
+
+"""
+    get_ip_from_request
+    returns the ip address of the requester, handles reverse proxy (if proxy configured correctly!)
+"""
+
+
+def get_ip_from_request(request):
+    ip = request.headers.get('X-Forwarded-For')
+    if ip is None:
+        ip = request.remote_addr
+    return ip
+
 
 # TODO: fix this stuff
 
