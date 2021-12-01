@@ -5,7 +5,7 @@ from flask_restful import Resource, Api
 from werkzeug.utils import redirect
 from socialserver.util.config import config
 # api resources
-from socialserver.api.user import UserSession
+from socialserver.api.usersession import UserSession
 
 application = Flask(__name__)
 api = Api(application)
