@@ -58,5 +58,6 @@ def mk_user_interactive():
         password_salt=salt,
         account_attributes=acc_attribs
     )
+
     commit()
     print(f"Created a new user with an id of {new_user.id}")
