@@ -3,7 +3,7 @@ import re
 from socialserver.db import DbUser
 from flask_restful import Resource, reqparse
 from socialserver.constants import BIO_MAX_LEN, DISPLAY_NAME_MAX_LEN, MAX_PASSWORD_LEN, MIN_PASSWORD_LEN, USERNAME_MAX_LEN, ErrorCodes, REGEX_USERNAME_VALID
-from socialserver.util.auth import generate_salt, get_username_from_token, hash_password
+from socialserver.util.auth import generate_salt, get_username_from_token, hash_password, verify_password_valid
 from pony.orm import db_session
 
 
@@ -107,3 +107,23 @@ class User(Resource):
         )
 
         return {}, 201
+
+    @db_session
+    def delete(self):
+
+        parser = reqparse.RequestParser()
+        parser.add_argument('access_token', type=str, required=True)
+        parser.add_argument('password', type=str, required=True)
+        args = parser.parse_args()
+
+        requesting_user = get_username_from_token(args['access_token'])
+        if requesting_user is None:
+            return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
+
+        if not verify_password_valid(args['password'],
+                                     requesting_user.password_salt,
+                                     requesting_user.password_hash):
+            return {"error": ErrorCodes.INCORRECT_PASSWORD.value}, 401
+
+        requesting_user.delete()
+        return {}, 200

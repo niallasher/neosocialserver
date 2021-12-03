@@ -6,7 +6,7 @@ from werkzeug.utils import redirect
 from socialserver.util.config import config
 # api resources
 from socialserver.api.usersession import UserSession, UserSessionList
-from socialserver.api.user import UserInfo
+from socialserver.api.user import User, UserInfo
 
 application = Flask(__name__)
 api = Api(application)
@@ -17,6 +17,7 @@ def landing_page():
     return render_template('server_landing.html')
 
 
+api.add_resource(User, '/api/v2/user')
 api.add_resource(UserInfo, '/api/v2/user/info')
 api.add_resource(UserSession, '/api/v2/user/session')
 api.add_resource(UserSessionList, '/api/v2/user/session/list')
