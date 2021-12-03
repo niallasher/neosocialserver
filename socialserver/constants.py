@@ -160,4 +160,4 @@ class ImageTypes(Enum):
 """
 
 # only alphanumerics and _, from 1 to 20 letters.
-REGEX_USERNAME_VALID = r"^[a-z0-9_]{1,20}$"
+REGEX_USERNAME_VALID = r"^[a-z0-9_]{1," + USERNAME_MAX_LEN + r"}$"
