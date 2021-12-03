@@ -10,6 +10,11 @@ POST_MAX_LEN = 256
 TAG_MAX_LEN = 12
 REPORT_SUPPLEMENTARY_INFO_MAX_LEN = 256
 COMMENT_MAX_LEN = 256
+# these aren't able to be enforced by the db or anything,
+# since we store an argon2 hash. this is just for enforcing
+# quality when a user is creating an account.
+MIN_PASSWORD_LEN = 8
+MAX_PASSWORD_LEN = 256
 
 """
   Maximum amounts of attribs per post
@@ -82,6 +87,9 @@ class ErrorCodes(Enum):
     TOKEN_REVOKE_FAILED = 19
     POST_INVALID = 20
     API_KEY_INVALID = 21
+    PASSWORD_NON_CONFORMING = 22
+    BIO_NON_CONFORMING = 23
+    DISPLAY_NAME_NON_CONFORMING = 24
 
 
 """
@@ -145,3 +153,11 @@ class ImageTypes(Enum):
     PROFILE_PICTURE_LARGE = "prof-pic-l"
     HEADER = "header"
     ORIGINAL = "orig"
+
+
+"""
+  Regex expressions for validating data.
+"""
+
+# only alphanumerics and _, from 1 to 20 letters.
+REGEX_USERNAME_VALID = r"^[a-z0-9_]{1,20}$"
