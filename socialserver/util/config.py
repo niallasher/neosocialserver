@@ -70,7 +70,7 @@ RESERVED_KEYS = [".save"]
 """
 
 
-def verify_config_against_schema(namespace, schema) -> None:
+def verify_config_against_schema(namespace: SimpleNamespace, schema: dict) -> None:
 
     ns_dict = dump_namespace_to_dict(namespace)
 
@@ -142,7 +142,7 @@ def verify_config_against_schema(namespace, schema) -> None:
 """
 
 
-def persist_config_namespace(namespace) -> None:
+def persist_config_namespace(namespace: SimpleNamespace) -> None:
     # shallow copy the namespace
     ns = copy(namespace)
     # strip the save key from the new one
@@ -165,7 +165,7 @@ def persist_config_namespace(namespace) -> None:
 """
 
 
-def load_json_to_namespace(data) -> SimpleNamespace:
+def load_json_to_namespace(data: str) -> SimpleNamespace:
     return json.loads(data, object_hook=lambda d: SimpleNamespace(**d))
 
 
@@ -177,7 +177,7 @@ def load_json_to_namespace(data) -> SimpleNamespace:
 """
 
 
-def dump_namespace_to_dict(namespace) -> dict:
+def dump_namespace_to_dict(namespace: SimpleNamespace) -> dict:
     nsc = copy(namespace)
     ns = vars(nsc)
     for x in ns:
