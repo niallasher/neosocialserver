@@ -46,7 +46,7 @@ def generate_key() -> SimpleNamespace(key=str, hash=str):
 """
 
 
-def verify_plaintext_against_hash_sha256(plaintext, hash) -> bool:
+def verify_plaintext_against_hash_sha256(plaintext: str, hash: str) -> bool:
     return sha256(plaintext.encode()).hexdigest() == hash
 
 
@@ -84,7 +84,7 @@ def generate_salt() -> str:
 """
 
 
-def hash_password(plaintext, salt) -> str:
+def hash_password(plaintext: str, salt: str) -> str:
     assembled_password = plaintext + salt
     return hasher.hash(assembled_password)
 
@@ -96,7 +96,7 @@ def hash_password(plaintext, salt) -> str:
 """
 
 
-def verify_password_valid(plaintext, salt, hash) -> bool:
+def verify_password_valid(plaintext: str, salt: str, hash: str) -> bool:
     try:
         return hasher.verify(hash, plaintext + salt)
     except argon2.exceptions.VerifyMismatchError:
@@ -109,26 +109,27 @@ def verify_password_valid(plaintext, salt, hash) -> bool:
 """
 
 
-def hash_plaintext_sha256(plaintext):
+def hash_plaintext_sha256(plaintext: str) -> str:
     return sha256(plaintext.encode()).hexdigest()
 
 
 """
-    get_user_from_session
-    Returns [user, session] if session is valid. Otherwise raises an exception.
+    get_username_from_token
+    returns a username if a session token is valid, otherwise none
 """
 
 
 @db_session
-def get_username_from_token(session_token):
+def get_username_from_token(session_token: str) -> str or None:
     print(
         hash_plaintext_sha256(session_token)
     )
     existing_session = DbUserSession.get(
         access_token_hash=hash_plaintext_sha256(session_token))
     if existing_session is not None:
-        return existing_session.user
-    raise Exception("Invalid session token")
+        return existing_session.user.username
+    else:
+        return None
 
 
 """
@@ -137,7 +138,7 @@ def get_username_from_token(session_token):
 """
 
 
-def get_ip_from_request(request):
+def get_ip_from_request(request: str) -> str:
     ip = request.headers.get('X-Forwarded-For')
     if ip is None:
         ip = request.remote_addr
