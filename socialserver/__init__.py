@@ -3,6 +3,7 @@ from flask.helpers import make_response
 from flask.templating import render_template
 from flask_restful import Resource, Api
 from werkzeug.utils import redirect
+from socialserver.api.post import Post
 from socialserver.util.config import config
 # api resources
 from socialserver.api.usersession import UserSession, UserSessionList
@@ -21,3 +22,5 @@ api.add_resource(User, '/api/v2/user')
 api.add_resource(UserInfo, '/api/v2/user/info')
 api.add_resource(UserSession, '/api/v2/user/session')
 api.add_resource(UserSessionList, '/api/v2/user/session/list')
+
+api.add_resource(Post, '/api/v2/post/get_single')
