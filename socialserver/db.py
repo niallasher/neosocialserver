@@ -61,6 +61,14 @@ class DbUser(db.Entity):
     def has_config_permissions(self):
         return AccountAttributes.INSTANCE_ADMIN.value in self.account_attributes
 
+    @property
+    def has_profile_picture(self):
+        return self.profile_pic is not None
+
+    @property
+    def has_header_picture(self):
+        return self.header_pic is not None
+
 
 class DbUserSession(db.Entity):
     # data collection is for security purposes.
