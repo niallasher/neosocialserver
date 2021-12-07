@@ -40,7 +40,9 @@ if not path.exists(IMAGE_DIR):
 """
 
 
-def save_images_to_disk(images, access_id):
+# TODO: not sure how to dest represent a dict with pythons type
+# annotations. Need to fix this.
+def save_images_to_disk(images: dict(), access_id: str) -> None:
 
     def save_with_pixel_ratio(image, filename, pixel_ratio):
         image.save(f"{IMAGE_DIR}/{access_id}/{filename}_{pixel_ratio}x.jpg",
@@ -66,7 +68,7 @@ def save_images_to_disk(images, access_id):
 """
 
 
-def create_random_image_identifier():
+def create_random_image_identifier() -> str:
     return token_urlsafe(32)
 
 
@@ -77,7 +79,7 @@ def create_random_image_identifier():
 """
 
 
-def mult_size_tuple(size, multiplier):
+def mult_size_tuple(size: tuple(int, int), multiplier: int) -> tuple(int, int):
     return (size[0]*multiplier, size[1]*multiplier)
 
 
@@ -89,7 +91,7 @@ def mult_size_tuple(size, multiplier):
 """
 
 
-def fit_image_to_size(image, size):
+def fit_image_to_size(image: PIL.Image, size: tuple(int, int)) -> PIL.Image:
     img = copy(image)
     img.thumbnail(size, PIL.Image.ANTIALIAS)
     return img
@@ -104,7 +106,7 @@ def fit_image_to_size(image, size):
 """
 
 
-def resize_image_aspect_aware(image, size):
+def resize_image_aspect_aware(image: PIL.Image, size: tuple(int, int)) -> PIL.Image:
     #  TODO: this really need to make sure the image isn't
     #  smaller than the requested size already, since we don't
     #  want to make the size LARGER!
@@ -138,7 +140,7 @@ def resize_image_aspect_aware(image, size):
 """
 
 
-def calculate_largest_fit(image, max_size):
+def calculate_largest_fit(image: PIL.Image, max_size: tuple(int, int)) -> tuple(int, int):
     # calculate *target* aspect ratio from max size
     divisor = gcd(max_size[0], max_size[1])
     target_aspect_ratio = (max_size[0] / divisor, max_size[1] / divisor)
@@ -156,7 +158,7 @@ def calculate_largest_fit(image, max_size):
 """
 
 
-def convert_data_url_to_image(data_url):
+def convert_data_url_to_image(data_url: str) -> PIL.Image:
     # strip the mime type declaration, and the data: prefix
     # so we can convert to binary and create an image
     data_url = re.sub(r'^data:image/.+;base64,', '', data_url)
@@ -178,7 +180,7 @@ def convert_data_url_to_image(data_url):
 """
 
 
-def save_original_image_to_disk(image):
+def save_original_image_to_disk(image: PIL.Image) -> None:
     hash = sha256(image.tobytes()).hexdigest()
     # save this in max quality i.e. very close
     # to how we recieved it (but in JPEG regardless of
@@ -199,7 +201,7 @@ def save_original_image_to_disk(image):
 
 
 @db_session
-def commit_image_to_db(identifier, userid):
+def commit_image_to_db(identifier: str, userid: int) -> None or int:
     uploader = DbUser.get(id=userid)
     if uploader == None:
         print("Could not commit to DB: user id does not exist!")
@@ -223,7 +225,7 @@ def commit_image_to_db(identifier, userid):
 """
 
 
-def handle_upload(image_package, upload_type_int, userid):
+def handle_upload(image_package: dict(), upload_type_int: int, userid: int) -> None:
     # Retrieve enum value for upload type
     upload_type = ImageUploadTypes(upload_type_int)
     # deserialize the JSON containing image dataurls
