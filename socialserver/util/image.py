@@ -171,30 +171,6 @@ def convert_data_url_to_image(data_url: str) -> PIL.Image:
 
 
 """
-    save_original_image_to_disk
-    Saves the original image as a JPEG, for later processing
-    if the user wants to use it for something else.
-    Returns the hash of the image, for inclusion in the database.
-    Note that the hash corresponds to the original image, not the
-    JPEG converted one.
-"""
-
-
-def save_original_image_to_disk(image: PIL.Image) -> None:
-    hash = sha256(image.tobytes()).hexdigest()
-    # save this in max quality i.e. very close
-    # to how we recieved it (but in JPEG regardless of
-    # recieved image format, so there is still *some*
-    # compression).
-    # NOTE: might be a good idea to make this configurable?
-    # A 100 quality JPEG thats like 10k by 10k is probably gonna
-    # be pretty massive. Better yet, make sure we have a large but
-    # fair max size for images to get compressed down to!
-    image.save(f"{IMAGE_DIR_ORIGINAL}/{hash}.jpg",
-               format="JPEG", quality=100)
-
-
-"""
     commit_image_to_db
     Commit DbImage entry to the database, and then return it's id.
 """
