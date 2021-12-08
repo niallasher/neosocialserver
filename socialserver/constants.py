@@ -66,7 +66,6 @@ class AccountAttributes(Enum):
 
 
 class ErrorCodes(Enum):
-    INCORRECT_PASSWORD = 0
     PASSWORD_DAMAGED = 1
     TOTP_REQUIRED = 2
     TOTP_INCORRECT = 3
@@ -96,6 +95,7 @@ class ErrorCodes(Enum):
     IMAGE_NOT_FOUND = 27
     POST_TOO_LONG = 28
     FEED_GET_COUNT_TOO_HIGH = 29
+    INCORRECT_PASSWORD = 30
 
 
 """
