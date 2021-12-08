@@ -23,4 +23,4 @@ api.add_resource(UserInfo, '/api/v2/user/info')
 api.add_resource(UserSession, '/api/v2/user/session')
 api.add_resource(UserSessionList, '/api/v2/user/session/list')
 
-api.add_resource(Post, '/api/v2/post/get_single')
+api.add_resource(Post, '/api/v2/post/single')
