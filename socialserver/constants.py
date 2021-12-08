@@ -91,6 +91,7 @@ class ErrorCodes(Enum):
     BIO_NON_CONFORMING = 23
     DISPLAY_NAME_NON_CONFORMING = 24
     POST_NOT_FOUND = 25
+    POST_TOO_MANY_IMAGES = 26
 
 
 """
