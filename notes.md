@@ -4,7 +4,7 @@
 
 - Max length of 12 characters.
 - Case insensitive.
-- a-z and 0-9 ONLY!
+- a-z and A-Z ONLY!
 - Prefixed with a # character.
 - Up to 10 tags per post ???
 
