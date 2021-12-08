@@ -15,6 +15,7 @@ COMMENT_MAX_LEN = 256
 # quality when a user is creating an account.
 MIN_PASSWORD_LEN = 8
 MAX_PASSWORD_LEN = 256
+MAX_FEED_GET_COUNT = 32
 
 """
   Maximum amounts of attribs per post
@@ -94,6 +95,7 @@ class ErrorCodes(Enum):
     POST_TOO_MANY_IMAGES = 26
     IMAGE_NOT_FOUND = 27
     POST_TOO_LONG = 28
+    FEED_GET_COUNT_TOO_HIGH = 29
 
 
 """
