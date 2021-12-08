@@ -92,6 +92,8 @@ class ErrorCodes(Enum):
     DISPLAY_NAME_NON_CONFORMING = 24
     POST_NOT_FOUND = 25
     POST_TOO_MANY_IMAGES = 26
+    IMAGE_NOT_FOUND = 27
+    POST_TOO_LONG = 28
 
 
 """
@@ -163,3 +165,5 @@ class ImageTypes(Enum):
 
 # only alphanumerics and _, from 1 to 20 letters.
 REGEX_USERNAME_VALID = r"^[a-z0-9_]{1," + USERNAME_MAX_LEN.__str__() + r"}$"
+# split out hashtags
+REGEX_HASHTAG = r"#[a-zA-Z]{1," + TAG_MAX_LEN.__str__() + "}g"
