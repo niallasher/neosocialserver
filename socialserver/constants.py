@@ -166,4 +166,4 @@ class ImageTypes(Enum):
 # only alphanumerics and _, from 1 to 20 letters.
 REGEX_USERNAME_VALID = r"^[a-z0-9_]{1," + USERNAME_MAX_LEN.__str__() + r"}$"
 # split out hashtags
-REGEX_HASHTAG = r"#[a-zA-Z]{1," + TAG_MAX_LEN.__str__() + "}g"
+REGEX_HASHTAG = r"#[a-zA-Z0-9]{1,12}"
