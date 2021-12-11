@@ -97,6 +97,8 @@ class ErrorCodes(Enum):
     POST_TOO_LONG = 28
     FEED_GET_COUNT_TOO_HIGH = 29
     INCORRECT_PASSWORD = 30
+    INVALID_USER_MODIFICATION_OPTION = 31
+    USER_MODIFICATION_NO_OPTIONS_GIVEN = 32
 
 
 """
@@ -170,12 +172,25 @@ class ImageTypes(Enum):
 """
 
 UserModificationOptions = [
-  "display_name",
-  "username",
-  "bio",
-  "profile_pic_reference",
-  "header_pic_reference"
+    "display_name",
+    "username",
+    "bio",
+    "profile_pic_reference",
+    "header_pic_reference"
 ]
+
+"""
+  UserAuthenticationModificationOptions
+  A list of user authentication options.
+  Just passwords until TOTP gets re-implemented.
+  (All options here will require explict re-authentication
+  from the user.)
+"""
+
+UserAuthenticationModificationOptions = [
+    "password"
+]
+
 
 """
   Regex expressions for validating data.
