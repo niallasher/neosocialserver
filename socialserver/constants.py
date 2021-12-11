@@ -1,4 +1,5 @@
 from enum import Enum
+from types import SimpleNamespace
 
 """
   Max string length for different user generated areas.
@@ -159,6 +160,40 @@ class ImageTypes(Enum):
     PROFILE_PICTURE_LARGE = "prof-pic-l"
     HEADER = "header"
     ORIGINAL = "orig"
+
+
+"""
+  UserModificationOptions
+  A list of user options and whether need authentication
+  to change. (Authentication referring to explicitly requiring
+  the password to be re-entered, not just whether the user has a
+  token. The token is ALWAYS needed, and determines the current
+  account.)
+"""
+
+# TODO: add birthday to this when it's implemented
+# TODO: add TOTP to this when it's imeplemented (or maybe it should be
+# it's own thing?)
+UserModificationOptions = {
+    "display_name": {
+        "explicit_auth_required": False
+    },
+    "username": {
+        "explicit_auth_required": False
+    },
+    "password": {
+        "explicit_auth_required": True
+    },
+    "bio": {
+        "explicit_auth_required": False
+    },
+    "profile_pic_reference": {
+        "explicit_auth_required": False
+    },
+    "header_pic_reference": {
+        "explicit_auth_required": False
+    }
+}
 
 
 """
