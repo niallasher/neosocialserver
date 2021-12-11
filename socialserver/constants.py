@@ -191,6 +191,35 @@ UserAuthenticationModificationOptions = [
     "password"
 ]
 
+"""
+  ImageSupportedMimeTypes
+  A list of image formats supported for upload,
+  in MIME type form. These have to be supported
+  by PIL, and we convert them all to jpg anyway.
+  Possible future idea: WebP serving support?
+  The client can just tell us to use it if it
+  detects support on it's platform?
+
+  ALSO: need to investigate HEIC, namely, does iOS
+  give us a HEIC image when doing an image upload?
+  if so we'll need to handle that.
+  pillow-heic is a thing i think?
+  for now, lets not support it.
+"""
+
+ImageSupportedMimeTypes = [
+    "image/bmp",
+    "image/gif",
+    # .ico WHY WOULD PEOPLE USE THIS????
+    # pil supports it so we'll keep it for now
+    "image/x-icon",
+    "image/jpg",
+    # jpeg 2000
+    "image/jp2",
+    "image/png",
+    "image/webp",
+    "image/tiff"
+]
 
 """
   Regex expressions for validating data.
