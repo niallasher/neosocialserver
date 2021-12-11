@@ -99,6 +99,7 @@ class ErrorCodes(Enum):
     INCORRECT_PASSWORD = 30
     INVALID_USER_MODIFICATION_OPTION = 31
     USER_MODIFICATION_NO_OPTIONS_GIVEN = 32
+    IMAGE_TYPE_INVALID = 33
 
 
 """
@@ -214,6 +215,7 @@ ImageSupportedMimeTypes = [
     # pil supports it so we'll keep it for now
     "image/x-icon",
     "image/jpg",
+    "image/jpeg",
     # jpeg 2000
     "image/jp2",
     "image/png",
