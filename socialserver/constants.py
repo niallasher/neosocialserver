@@ -164,37 +164,18 @@ class ImageTypes(Enum):
 
 """
   UserModificationOptions
-  A list of user options and whether need authentication
-  to change. (Authentication referring to explicitly requiring
-  the password to be re-entered, not just whether the user has a
-  token. The token is ALWAYS needed, and determines the current
-  account.)
+  A list of user options that can be modified using
+  only a token. Authentication requires active
+  re-auth to change, so it isn't included here
 """
 
-# TODO: add birthday to this when it's implemented
-# TODO: add TOTP to this when it's imeplemented (or maybe it should be
-# it's own thing?)
-UserModificationOptions = {
-    "display_name": {
-        "explicit_auth_required": False
-    },
-    "username": {
-        "explicit_auth_required": False
-    },
-    "password": {
-        "explicit_auth_required": True
-    },
-    "bio": {
-        "explicit_auth_required": False
-    },
-    "profile_pic_reference": {
-        "explicit_auth_required": False
-    },
-    "header_pic_reference": {
-        "explicit_auth_required": False
-    }
-}
-
+UserModificationOptions = [
+  "display_name",
+  "username",
+  "bio",
+  "profile_pic_reference",
+  "header_pic_reference"
+]
 
 """
   Regex expressions for validating data.
