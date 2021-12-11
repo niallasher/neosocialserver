@@ -1,7 +1,7 @@
 import datetime
 from hashlib import sha256
 import re
-from base64 import b64decode
+from base64 import urlsafe_b64decode
 from io import BytesIO
 from math import gcd
 from os import makedirs, mkdir, path
@@ -16,6 +16,7 @@ from secrets import token_urlsafe
 from json import loads
 from copy import copy
 from rich import print
+from typing import Tuple
 
 
 IMAGE_DIR = config.media.images.storage_dir
@@ -57,8 +58,14 @@ def save_images_to_disk(images: dict(), access_id: str) -> None:
             images[i][0].save(
                 f"{IMAGE_DIR}/{access_id}/{ImageTypes.ORIGINAL.value}.jpg", type="JPEG", quality=IMAGE_QUALITY)
         else:
+            print("--")
+            print(images[i])
             for j in images[i]:
+                print(j)
+                print(images[i].index(j))
                 save_with_pixel_ratio(j, i.value, images[i].index(j)+1)
+                # FIXME: incredibly hacky way of dealing with duplicates.
+                images[i][images[i].index(j)] = token_urlsafe(16)
 
 
 """
@@ -79,7 +86,7 @@ def create_random_image_identifier() -> str:
 """
 
 
-def mult_size_tuple(size: tuple(int, int), multiplier: int) -> tuple(int, int):
+def mult_size_tuple(size: Tuple[int, int], multiplier: int) -> Tuple[int, int]:
     return (size[0]*multiplier, size[1]*multiplier)
 
 
@@ -91,7 +98,7 @@ def mult_size_tuple(size: tuple(int, int), multiplier: int) -> tuple(int, int):
 """
 
 
-def fit_image_to_size(image: PIL.Image, size: tuple(int, int)) -> PIL.Image:
+def fit_image_to_size(image: PIL.Image, size: Tuple[int, int]) -> PIL.Image:
     img = copy(image)
     img.thumbnail(size, PIL.Image.ANTIALIAS)
     return img
@@ -106,7 +113,8 @@ def fit_image_to_size(image: PIL.Image, size: tuple(int, int)) -> PIL.Image:
 """
 
 
-def resize_image_aspect_aware(image: PIL.Image, size: tuple(int, int)) -> PIL.Image:
+# TODO: fix typing returns a list of images
+def resize_image_aspect_aware(image: PIL.Image, size: Tuple[int, int]) -> PIL.Image:
     #  TODO: this really need to make sure the image isn't
     #  smaller than the requested size already, since we don't
     #  want to make the size LARGER!
@@ -116,6 +124,7 @@ def resize_image_aspect_aware(image: PIL.Image, size: tuple(int, int)) -> PIL.Im
         size = calculate_largest_fit(image, size)
         return
     for pixel_ratio in range(1, MAX_PIXEL_RATIO + 1):
+        print("Processing image at at scale" + str(pixel_ratio))
         scaled_size = mult_size_tuple(size, pixel_ratio)
         # if the scaled size is larger than the original, use the original
         if scaled_size[0] > image.size[0] or scaled_size[1] > image.size[1]:
@@ -128,6 +137,8 @@ def resize_image_aspect_aware(image: PIL.Image, size: tuple(int, int)) -> PIL.Im
                 centering=(0.5, 0.5)
             )
         )
+    print(images)
+    print("")
     return images
 
 
@@ -140,7 +151,7 @@ def resize_image_aspect_aware(image: PIL.Image, size: tuple(int, int)) -> PIL.Im
 """
 
 
-def calculate_largest_fit(image: PIL.Image, max_size: tuple(int, int)) -> tuple(int, int):
+def calculate_largest_fit(image: PIL.Image, max_size: Tuple[int, int]) -> Tuple[int, int]:
     # calculate *target* aspect ratio from max size
     divisor = gcd(max_size[0], max_size[1])
     target_aspect_ratio = (max_size[0] / divisor, max_size[1] / divisor)
@@ -161,11 +172,13 @@ def calculate_largest_fit(image: PIL.Image, max_size: tuple(int, int)) -> tuple(
 def convert_data_url_to_image(data_url: str) -> PIL.Image:
     # strip the mime type declaration, and the data: prefix
     # so we can convert to binary and create an image
+    print(data_url[0:32])
     data_url = re.sub(r'^data:image/.+;base64,', '', data_url)
+    print(data_url[0:32])
     # we're storing in BytesIO so we don't have to
     # write to disk, and we can use the image directly.
     # we only want to store it once processing is done.
-    binary_data = BytesIO(b64decode(data_url))
+    binary_data = BytesIO(urlsafe_b64decode(data_url))
     image = Image.open(binary_data).convert('RGB')
     return image
 
@@ -192,12 +205,27 @@ def commit_image_to_db(identifier: str, userid: int) -> None or int:
 
 
 """
+    generate_image_of_type
+    Optimize the original copy of an already uploaded image
+    for a new type. Raises an exeption if the image cannot be converted.
+"""
+
+
+def generate_image_of_type(identifier, new_type):
+    image_exists = DbImage.get(identifier=identifier) is not None
+    if not image_exists:
+        raise Exception("image not found")
+    pass
+
+
+"""
     handle_upload
     Take a JSON string (read notes.md, #images) containing b64 images, and process it.
     Will save it, store a db entry, and return
     a SimpleNamespace with the following keys:
         - id: DbImage ID
         - uid: Image identifier
+
 """
 
 
@@ -250,7 +278,10 @@ def handle_upload(image_package: dict(), upload_type_int: int, userid: int) -> N
     if upload_type == ImageUploadTypes.HEADER:
         header = resize_image_aspect_aware(
             image, MAX_IMAGE_SIZE_HEADER)
-        images[ImageTypes.HEADER] = [header]
+        print("HEADER")
+        print(header)
+        print()
+        images[ImageTypes.HEADER] = header
 
     save_images_to_disk(images, access_id)
     entry = commit_image_to_db(access_id, userid)
