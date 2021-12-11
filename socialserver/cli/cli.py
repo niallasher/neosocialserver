@@ -1,6 +1,7 @@
 import click
 from socialserver import application
 from socialserver.cli.mkuser import mk_user_interactive
+from socialserver.cli.uploadimage import upload_image
 
 
 @click.group()
@@ -29,6 +30,13 @@ def mkuser(interactive):
         mk_user_interactive()
 
 
+@click.command()
+@click.argument('path')
+def uploadimage(path):
+    upload_image(path)
+
+
 # register commands with cli group
+cli.add_command(uploadimage)
 cli.add_command(devel_run)
 cli.add_command(mkuser)
