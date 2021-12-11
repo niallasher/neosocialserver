@@ -10,6 +10,7 @@ from socialserver.api.usersession import UserSession, UserSessionList
 from socialserver.api.user import User, UserInfo
 from socialserver.api.feed import PostFeed
 from socialserver.api.post import Post
+from socialserver.api.image import Image
 
 application = Flask(__name__)
 CORS(application)
@@ -28,3 +29,5 @@ api.add_resource(UserSessionList, '/api/v2/user/session/list')
 
 api.add_resource(Post, '/api/v2/post/single')
 api.add_resource(PostFeed, '/api/v2/feed/posts')
+
+api.add_resource(Image, '/api/v2/image/<imageid>')
