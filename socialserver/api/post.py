@@ -125,7 +125,10 @@ class Post(Resource):
             post_images.append(image.identifier)
 
         user_has_liked_post = DbPostLike.get(user=DbUser.get(username=requesting_user),
-                                             post=wanted_post)
+                                             post=wanted_post) is not None
+
+        user_owns_post = wanted_post.user == DbUser.get(
+            username=requesting_user)
 
         return {
             "post": {
@@ -141,6 +144,7 @@ class Post(Resource):
                 "username": wanted_post.user.username,
                 "verified": wanted_post.user.is_verified,
                 "profile_picture": wanted_post.user.profile_pic.identifier if wanted_post.user.has_profile_picture else None,
-                "liked_post": user_has_liked_post
+                "liked_post": user_has_liked_post,
+                "own_post": user_owns_post
             },
         }, 201
