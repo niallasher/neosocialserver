@@ -6,6 +6,7 @@ from socialserver.db import DbHashtag, DbImage, DbPost, DbPostLike, DbUser
 from pony.orm import db_session, commit
 from socialserver.constants import MAX_IMAGES_PER_POST, POST_MAX_LEN, REGEX_HASHTAG, ErrorCodes
 from socialserver.util.auth import get_username_from_token
+from json import loads
 
 
 class Post(Resource):
@@ -20,7 +21,8 @@ class Post(Resource):
         # complained quite a bit!
         parser.add_argument('text_content', type=str, required=True)
         # images optional.
-        parser.add_argument('images', type=list, required=False)
+        parser.add_argument('images', type=str,
+                            required=False, action="append")
         args = parser.parse_args()
 
         requesting_user = get_username_from_token(args['access_token'])
@@ -35,17 +37,18 @@ class Post(Resource):
         if len(text_content) >= POST_MAX_LEN:
             return {"error": ErrorCodes.POST_TOO_LONG.value}, 400
 
-        referenced_images = args['images']
         # we want to store db refs to the images,
         # instead of retriving them from id whenever
         # somebody wants the post, so we populate the images
         # array with them.
         images = []
-        if referenced_images is not None:
+        if args['images'] is not None:
+            referenced_images = args['images']
+            print(referenced_images)
             # we don't want people making giant
             # image galleries in a post. !! SHOULD ALSO
             # BE ENFORCED CLIENT SIDE FOR UX !!
-            if len(referenced_images) >= MAX_IMAGES_PER_POST:
+            if len(referenced_images) > MAX_IMAGES_PER_POST:
                 return {"error": ErrorCodes.POST_TOO_MANY_IMAGES.value}, 400
             # we replace each image with a reference to it in the database,
             # for storage
