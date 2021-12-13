@@ -1,8 +1,9 @@
+from _typeshed import IdentityFunction
 from datetime import datetime
 import re
-from socialserver.db import DbUser
+from socialserver.db import DbUser, DbImage
 from flask_restful import Resource, reqparse
-from socialserver.constants import BIO_MAX_LEN, DISPLAY_NAME_MAX_LEN, MAX_PASSWORD_LEN, MIN_PASSWORD_LEN, USERNAME_MAX_LEN, ErrorCodes, REGEX_USERNAME_VALID
+from socialserver.constants import BIO_MAX_LEN, DISPLAY_NAME_MAX_LEN, MAX_PASSWORD_LEN, MIN_PASSWORD_LEN, USERNAME_MAX_LEN, ErrorCodes, REGEX_USERNAME_VALID, UserModificationOptions
 from socialserver.util.auth import generate_salt, get_username_from_token, hash_password, verify_password_valid
 from pony.orm import db_session
 
@@ -107,6 +108,58 @@ class User(Resource):
         )
 
         return {}, 201
+
+    @db_session
+    def patch(self):
+
+        parser = reqparse.RequestParser()
+        parser.add_argument('access_token', type=str, required=True)
+        parser.add_argument('display_name', type=str, required=False)
+        parser.add_argument('username', type=str, required=False)
+        parser.add_argument('bio', type=str, required=False)
+        parser.add_argument('profile_pic_ref', type=str,  required=False)
+        parser.add_argument('header_pic_ref', type=str, required=False)
+
+        args = parser.parse_args()
+
+        username = get_username_from_token(args['access_token'])
+        user = DbUser.get(username=username)
+
+        if args['display_name'] is not None:
+            if len(args['display_name']) > DISPLAY_NAME_MAX_LEN:
+                return {"error": ErrorCodes.DISPLAY_NAME_NON_CONFORMING.value}, 400
+            user.display_name = args['display_name']
+            return {"display_name": args['display_name']}, 201
+
+        if args['username'] is not None:
+            if not bool(re.match(REGEX_USERNAME_VALID, args['username'])):
+                return {"error": ErrorCodes.USERNAME_INVALID.value}, 400
+            user.username = args['username']
+            return {"username": args['username']}
+
+        if args['bio'] is not None:
+            if len(args['bio']) > BIO_MAX_LEN:
+                return {"error": ErrorCodes.BIO_NON_CONFORMING.value}, 400
+            user.bio = args['bio']
+            # NOTE: not sure; should we return new bio? client might want to cache it.
+            # they could always just keep it from when it was entered, i don't know.
+            return {}, 201
+
+        if args['profile_pic_ref'] is not None:
+            existing_image = DbImage.get(identifier=args['profile_pic_ref'])
+            if existing_image is None:
+                return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404
+            user.profile_pic = existing_image
+            return {"profile_pic_ref": args['profile_pic_ref']}, 201
+
+        if args['header_pic_ref'] is not None:
+            existing_image = DbImage.get(identifier=args['header_pic_ref'])
+            if existing_image is None:
+                return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404
+            user.header_pic = existing_image
+            return {"header_pic_ref": args['header_pic_ref']}, 201
+
+        return {"error": ErrorCodes.USER_MODIFICATION_NO_OPTIONS_GIVEN.value}, 400
 
     @db_session
     def delete(self):
