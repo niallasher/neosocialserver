@@ -61,7 +61,7 @@ class Follow(Resource):
 
         user_to_unfollow = DbUser.get(username=args['username'])
         if user_to_unfollow is None:
-            return {ErrorCodes.USERNAME_NOT_FOUND.value}, 404
+            return {"error": ErrorCodes.USERNAME_NOT_FOUND.value}, 404
 
         existing_follow = DbFollow.get(
             user=requesting_user_db,
@@ -69,7 +69,7 @@ class Follow(Resource):
         )
 
         if existing_follow is None:
-            return {ErrorCodes.CANNOT_FIND_FOLLOW_ENTRY.value}, 404
+            return {"error": ErrorCodes.CANNOT_FIND_FOLLOW_ENTRY.value}, 404
 
         existing_follow.delete()
         return {}, 204
