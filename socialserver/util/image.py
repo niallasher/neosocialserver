@@ -47,7 +47,7 @@ def save_images_to_disk(images: dict(), access_id: str) -> None:
 
     def save_with_pixel_ratio(image, filename, pixel_ratio):
         image.save(f"{IMAGE_DIR}/{access_id}/{filename}_{pixel_ratio}x.jpg",
-                   type="JPEG", quality=IMAGE_QUALITY)
+                   type="JPEG", quality=IMAGE_QUALITY, progressive=True)
 
     mkdir(f"{IMAGE_DIR}/{access_id}")
     for i in images.keys():
