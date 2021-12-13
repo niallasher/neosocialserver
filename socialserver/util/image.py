@@ -81,7 +81,8 @@ def create_random_image_identifier() -> str:
 
 
 def mult_size_tuple(size: Tuple[int, int], multiplier: int) -> Tuple[int, int]:
-    return (size[0]*multiplier, size[1]*multiplier)
+    print(int(size[0]*multiplier), int(size[1]*multiplier))
+    return (int(size[0]*multiplier), int(size[1]*multiplier))
 
 
 """
@@ -112,6 +113,7 @@ def resize_image_aspect_aware(image: PIL.Image, size: Tuple[int, int]) -> PIL.Im
     #  TODO: this really need to make sure the image isn't
     #  smaller than the requested size already, since we don't
     #  want to make the size LARGER!
+    print(size)
     images = []
     if image.size[0] < size[0] or image.size[1] < size[1]:
         # create the largest possible image within max_image_size
@@ -121,7 +123,9 @@ def resize_image_aspect_aware(image: PIL.Image, size: Tuple[int, int]) -> PIL.Im
         scaled_size = mult_size_tuple(size, pixel_ratio)
         # if the scaled size is larger than the original, use the original
         if scaled_size[0] > image.size[0] or scaled_size[1] > image.size[1]:
-            scaled_size = size
+            # TODO: see why the hell these are coming out as floats...
+            scaled_size = (int(size[0]), int(size[1]))
+            print(scaled_size)
         images.append(
             ImageOps.fit(
                 image,
