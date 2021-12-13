@@ -11,6 +11,8 @@ from socialserver.api.user import User, UserInfo
 from socialserver.api.feed import PostFeed
 from socialserver.api.post import Post
 from socialserver.api.image import Image
+from socialserver.api.block import Block
+from socialserver.api.follow import Follow
 
 application = Flask(__name__)
 CORS(application)
@@ -31,3 +33,6 @@ api.add_resource(Post, '/api/v2/post/single')
 api.add_resource(PostFeed, '/api/v2/feed/posts')
 
 api.add_resource(Image, '/api/v2/image/<imageid>')
+
+api.add_resource(Follow, '/api/v2/follow/user')
+api.add_resource(Block, '/api/v2/block/user')
