@@ -33,7 +33,7 @@ MAX_TAGS_PER_POST = 5
 # highest pixel ratio we generate. anything higher will be given the max.
 # client should round up to the next integer, but we'll do it if they dont.
 MAX_PIXEL_RATIO = 4
-MAX_IMAGE_SIZE_POST = (1500, 1500)
+MAX_IMAGE_SIZE_POST = (3000, 3000)
 MAX_IMAGE_SIZE_POST_PREVIEW = (512, 512)
 MAX_IMAGE_SIZE_PROFILE_PICTURE = (64, 64)
 MAX_IMAGE_SIZE_PROFILE_PICTURE_LARGE = (128, 128)
