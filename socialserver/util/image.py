@@ -50,19 +50,13 @@ def save_images_to_disk(images: dict(), access_id: str) -> None:
                    type="JPEG", quality=IMAGE_QUALITY)
 
     mkdir(f"{IMAGE_DIR}/{access_id}")
-    print(images.keys())
     for i in images.keys():
-        print(i.value)
         if i == ImageTypes.ORIGINAL:
             print("saving original image.")
             images[i][0].save(
                 f"{IMAGE_DIR}/{access_id}/{ImageTypes.ORIGINAL.value}.jpg", type="JPEG", quality=IMAGE_QUALITY)
         else:
-            print("--")
-            print(images[i])
             for j in images[i]:
-                print(j)
-                print(images[i].index(j))
                 save_with_pixel_ratio(j, i.value, images[i].index(j)+1)
                 # FIXME: incredibly hacky way of dealing with duplicates.
                 images[i][images[i].index(j)] = token_urlsafe(16)
@@ -122,7 +116,6 @@ def resize_image_aspect_aware(image: PIL.Image, size: Tuple[int, int]) -> PIL.Im
     if image.size[0] < size[0] or image.size[1] < size[1]:
         # create the largest possible image within max_image_size
         size = calculate_largest_fit(image, size)
-        return
     for pixel_ratio in range(1, MAX_PIXEL_RATIO + 1):
         print("Processing image at at scale" + str(pixel_ratio))
         scaled_size = mult_size_tuple(size, pixel_ratio)
@@ -146,7 +139,7 @@ def resize_image_aspect_aware(image: PIL.Image, size: Tuple[int, int]) -> PIL.Im
     calculate largest image size to fit in the aspect ratio
     given by a size.
     used to prevent resizing an image to be larger than
-    it was originally, since that is pretty bad for optimization 
+    it was originally, since that is pretty bad for optimization
     (mind blowing, i know)
 """
 
@@ -254,34 +247,30 @@ def handle_upload(image_package: dict(), upload_type_int: int, userid: int) -> N
     arr_gallery_preview_image = resize_image_aspect_aware(
         image, MAX_IMAGE_SIZE_GALLERY_PREVIEW)
 
+    # if upload_type == ImageUploadTypes.PROFILE_PICTURE:
+    arr_profilepic = resize_image_aspect_aware(
+        image, MAX_IMAGE_SIZE_PROFILE_PICTURE)
+    arr_profilepic_lg = resize_image_aspect_aware(
+        image, MAX_IMAGE_SIZE_PROFILE_PICTURE_LARGE)
+    img_post = fit_image_to_size(
+        image, MAX_IMAGE_SIZE_POST)
+    arr_post_preview = resize_image_aspect_aware(
+        image, MAX_IMAGE_SIZE_POST_PREVIEW)
+
+    arr_header = resize_image_aspect_aware(
+        image, MAX_IMAGE_SIZE_POST)
+
     images = {
         ImageTypes.ORIGINAL: [original_image],
-        ImageTypes.GALLERY_PREVIEW: arr_gallery_preview_image
+        ImageTypes.POST: [img_post],
+        ImageTypes.POST_PREVIEW: arr_post_preview,
+        ImageTypes.HEADER: arr_header,
+        ImageTypes.GALLERY_PREVIEW: arr_gallery_preview_image,
+        ImageTypes.PROFILE_PICTURE: arr_profilepic,
+        ImageTypes.PROFILE_PICTURE_LARGE: arr_profilepic_lg,
     }
 
-    if upload_type == ImageUploadTypes.PROFILE_PICTURE:
-        arr_profilepic = resize_image_aspect_aware(
-            image, MAX_IMAGE_SIZE_PROFILE_PICTURE)
-        arr_profilepic_lg = resize_image_aspect_aware(
-            image, MAX_IMAGE_SIZE_PROFILE_PICTURE_LARGE)
-        images[ImageTypes.PROFILE_PICTURE] = arr_profilepic
-        images[ImageTypes.PROFILE_PICTURE_LARGE] = arr_profilepic_lg
-
-    if upload_type == ImageUploadTypes.POST:
-        img_post = fit_image_to_size(
-            image, MAX_IMAGE_SIZE_POST)
-        arr_post_preview = resize_image_aspect_aware(
-            image, MAX_IMAGE_SIZE_POST_PREVIEW)
-        images[ImageTypes.POST] = [img_post]
-        images[ImageTypes.POST_PREVIEW] = arr_post_preview
-
-    if upload_type == ImageUploadTypes.HEADER:
-        header = resize_image_aspect_aware(
-            image, MAX_IMAGE_SIZE_HEADER)
-        print("HEADER")
-        print(header)
-        print()
-        images[ImageTypes.HEADER] = header
+    print(images)
 
     save_images_to_disk(images, access_id)
     entry = commit_image_to_db(access_id, userid)
