@@ -9,11 +9,6 @@ from pony.orm import db_session
 from pony import orm
 
 
-# NOTE: this doesn't do filtering yet.
-# not sure whether it should, or whether
-# it should be extracted out to a common
-# set of methods, and multiple endpoints
-# should handle different filter types (I prefer this idea)
 class PostFeed(Resource):
 
     @db_session
@@ -27,6 +22,10 @@ class PostFeed(Resource):
         # otherwise I can see myself or others forgetting it, and wondering
         # why the same posts keep popping up.
         parser.add_argument('offset', type=int, required=True)
+        # a list of usernames. if supplied, only posts from those
+        # usernames will be shown
+        parser.add_argument('username', type=str,
+                            required=False, action="append")
         args = parser.parse_args()
 
         if args['count'] >= MAX_FEED_GET_COUNT:
@@ -45,8 +44,12 @@ class PostFeed(Resource):
         # 5 years from this comment)
         blocks = orm.select(b.blocking for b in DbBlock
                             if b.user == requesting_user_db)[:]
-        query = orm.select((p) for p in DbPost
-                           if p.user not in blocks and p.under_moderation is False).order_by(orm.desc(DbPost.creation_time)).limit(args.count, offset=args.offset)
+        if args['username'] is not None:
+            query = orm.select((p) for p in DbPost
+                               if p.user not in blocks and p.under_moderation is False and p.user.username in args['username'])
+        else:
+            query = orm.select((p) for p in DbPost
+                               if p.user not in blocks and p.under_moderation is False).order_by(orm.desc(DbPost.creation_time)).limit(args.count, offset=args.offset)
 
         # TODO: this shares a schema with the single post
         # thing, so they should be common. maybe a class
