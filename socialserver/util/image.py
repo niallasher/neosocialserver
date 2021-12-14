@@ -52,7 +52,6 @@ def save_images_to_disk(images: dict(), access_id: str) -> None:
     mkdir(f"{IMAGE_DIR}/{access_id}")
     for i in images.keys():
         if i == ImageTypes.ORIGINAL:
-            print("saving original image.")
             images[i][0].save(
                 f"{IMAGE_DIR}/{access_id}/{ImageTypes.ORIGINAL.value}.jpg", type="JPEG", quality=IMAGE_QUALITY)
         else:
@@ -81,7 +80,6 @@ def create_random_image_identifier() -> str:
 
 
 def mult_size_tuple(size: Tuple[int, int], multiplier: int) -> Tuple[int, int]:
-    print(int(size[0]*multiplier), int(size[1]*multiplier))
     return (int(size[0]*multiplier), int(size[1]*multiplier))
 
 
@@ -113,19 +111,16 @@ def resize_image_aspect_aware(image: PIL.Image, size: Tuple[int, int]) -> PIL.Im
     #  TODO: this really need to make sure the image isn't
     #  smaller than the requested size already, since we don't
     #  want to make the size LARGER!
-    print(size)
     images = []
     if image.size[0] < size[0] or image.size[1] < size[1]:
         # create the largest possible image within max_image_size
         size = calculate_largest_fit(image, size)
     for pixel_ratio in range(1, MAX_PIXEL_RATIO + 1):
-        print("Processing image at at scale" + str(pixel_ratio))
         scaled_size = mult_size_tuple(size, pixel_ratio)
         # if the scaled size is larger than the original, use the original
         if scaled_size[0] > image.size[0] or scaled_size[1] > image.size[1]:
             # TODO: see why the hell these are coming out as floats...
             scaled_size = (int(size[0]), int(size[1]))
-            print(scaled_size)
         images.append(
             ImageOps.fit(
                 image,
@@ -134,8 +129,6 @@ def resize_image_aspect_aware(image: PIL.Image, size: Tuple[int, int]) -> PIL.Im
                 centering=(0.5, 0.5)
             )
         )
-    print(images)
-    print("")
     return images
 
 
@@ -169,9 +162,7 @@ def calculate_largest_fit(image: PIL.Image, max_size: Tuple[int, int]) -> Tuple[
 def convert_data_url_to_image(data_url: str) -> PIL.Image:
     # strip the mime type declaration, and the data: prefix
     # so we can convert to binary and create an image
-    print(data_url[0:32])
     data_url = re.sub(r'^data:image/.+;base64,', '', data_url)
-    print(data_url[0:32])
     # we're storing in BytesIO so we don't have to
     # write to disk, and we can use the image directly.
     # we only want to store it once processing is done.
@@ -273,8 +264,6 @@ def handle_upload(image_package: dict(), upload_type_int: int, userid: int) -> N
         ImageTypes.PROFILE_PICTURE: arr_profilepic,
         ImageTypes.PROFILE_PICTURE_LARGE: arr_profilepic_lg,
     }
-
-    print(images)
 
     save_images_to_disk(images, access_id)
     entry = commit_image_to_db(access_id, userid)

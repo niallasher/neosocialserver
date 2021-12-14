@@ -121,9 +121,6 @@ def hash_plaintext_sha256(plaintext: str) -> str:
 
 @db_session
 def get_username_from_token(session_token: str) -> str or None:
-    print(
-        hash_plaintext_sha256(session_token)
-    )
     existing_session = DbUserSession.get(
         access_token_hash=hash_plaintext_sha256(session_token))
     if existing_session is not None:
@@ -153,16 +150,3 @@ def get_ip_from_request(request: str) -> str:
 
 # def fernet_decrypt_string(string) -> str:
 #     return fernet_inst.decrypt(string.encode())
-
-
-# test that hashing works ok if running from the command line
-if __name__ == "__main__":
-    print(" --= argon2 hashing =-- ")
-    plaintext = "hello world"
-    salt = generate_salt()
-    hash = hash_password(plaintext, salt)
-    print(f"plaintext: {plaintext}")
-    print(f"salt: {salt}")
-    print(f"hash: {hash}")
-    print(f"verify: {verify_password_valid(plaintext, salt, hash)}")
-    print(f"invalid verify: {verify_password_valid('lolnope', salt, hash)}")
