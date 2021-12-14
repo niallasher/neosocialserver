@@ -49,6 +49,8 @@ class PostFeed(Resource):
         blocks = orm.select(b.blocking for b in DbBlock
                             if b.user == requesting_user_db)[:]
 
+        filtered = False
+
         if args['username'] is not None:
             filtered = True
             filter_list = args['username']
@@ -79,8 +81,6 @@ class PostFeed(Resource):
             post_images = []
             for image in post.images:
                 post_images.append(image.identifier)
-
-            print(post.id)
 
             posts.append(
                 {
