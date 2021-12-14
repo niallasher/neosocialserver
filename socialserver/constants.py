@@ -106,6 +106,15 @@ class ErrorCodes(Enum):
     BLOCK_ALREADY_EXISTS = 37
     CANNOT_BLOCK_SELF = 38
     CANNOT_FIND_BLOCK_ENTRY = 39
+    # i'm not sure whether it's a good idea to limit
+    # reports per post, but I think it will help reduce spam?
+    # although, i'm not sure we want to reveal to the user that
+    # their report didn't go through since they already have;
+    # this could just encourage them to create a new account and
+    # report again? maybe this should be a config key, since it
+    # seems like a personal choice r.e. balance of transparency
+    # and preventing spam?
+    POST_ALREADY_REPORTED = 40
 
 
 """
