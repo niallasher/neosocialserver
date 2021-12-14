@@ -50,6 +50,15 @@ DEFAULT_CONFIG = {
             "encryption_key": Fernet.generate_key().decode()
         }
     },
+    "posts": {
+        # do we return an error when a user double reports a post?
+        # this is a tradeoff between transparency, and a user trying
+        # to spam reports when they realise it's ineffective.
+        # NOTE: THIS IS NOT A LIMIT ON HOW MANY TIMES A POST CAN BE REPORTED.
+        # IT'S JUST A LIMIT ON HOW MANY TIMES A POST CAN BE REPORTED BY A SINGLE
+        # USER!
+        "silent_fail_on_double_report": False
+    },
     "debug": {
         "enable_flask_debug_mode": False,
         "auto_reload_templates": False,
