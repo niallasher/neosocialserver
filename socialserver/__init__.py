@@ -4,15 +4,20 @@ from flask.templating import render_template
 from flask_restful import Resource, Api
 from flask_cors import CORS
 from werkzeug.utils import redirect
+from socialserver.api.v2.report import Report
 from socialserver.util.config import config
-# api stuff
-from socialserver.api.usersession import UserSession, UserSessionList
-from socialserver.api.user import User, UserInfo
-from socialserver.api.feed import PostFeed
-from socialserver.api.post import Post
-from socialserver.api.image import Image
-from socialserver.api.block import Block
-from socialserver.api.follow import Follow
+# API
+# Version 2 (current as of 3.x) (note: should this be renamed to apiv3?)
+# Just for major server version parity? The official client is going to use
+# a sync-ed major version to denote basic compatibility, followed by minor
+# for QoL upgrades most likely, so maybe the api should?
+from socialserver.api.v2.usersession import UserSession, UserSessionList
+from socialserver.api.v2.user import User, UserInfo
+from socialserver.api.v2.feed import PostFeed
+from socialserver.api.v2.post import Post
+from socialserver.api.v2.image import Image
+from socialserver.api.v2.block import Block
+from socialserver.api.v2.follow import Follow
 
 application = Flask(__name__)
 CORS(application)
@@ -36,3 +41,5 @@ api.add_resource(Image, '/api/v2/image/<imageid>')
 
 api.add_resource(Follow, '/api/v2/follow/user')
 api.add_resource(Block, '/api/v2/block/user')
+
+api.add_resource(Report, '/api/v2/report/post')

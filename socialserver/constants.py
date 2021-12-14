@@ -115,6 +115,14 @@ class ErrorCodes(Enum):
     # seems like a personal choice r.e. balance of transparency
     # and preventing spam?
     POST_ALREADY_REPORTED = 40
+    POST_REPORT_REASON_INVALID = 41
+    # yes, I am aware of the irony involved in the name
+    # of this error being so long :)
+    POST_REPORT_SUPPLEMENTAL_INFO_TOO_LONG = 42
+    # i feel like there is no reason to do this, so lets
+    # disallow it. might change later.
+    CANNOT_REPORT_OWN_POST = 43
+    USER_NOT_MODERATOR_OR_ADMIN = 44
 
 
 """

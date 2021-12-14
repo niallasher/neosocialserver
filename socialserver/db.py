@@ -98,6 +98,17 @@ class DbPost(db.Entity):
 
 
 class DbPostReport(db.Entity):
+    # we don't want to just delete these I don't think?
+    # better to mark them inactive, until the post is deleted.
+    # that way if it's moderated, an admin can still see the acted
+    # on report. rather than expose deletion via the API, we should
+    # just rely on database constraints to delete reports when the
+    # post they are associated with has been removed.
+    # IMPORTANT NOTE: could this result in users posting illegal things
+    # and then deleting them soon after to prevent reports being seen by a
+    # moderator? this needs investigating, but i can't think of a clean
+    # solution right now.
+    active = orm.Required(bool)
     # we want to ensure that the report has a user,
     # but we don't want to actually tie it to a user,
     # since if somebody reports illegal content, and then
