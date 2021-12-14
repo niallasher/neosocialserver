@@ -123,6 +123,7 @@ class ErrorCodes(Enum):
     # disallow it. might change later.
     CANNOT_REPORT_OWN_POST = 43
     USER_NOT_MODERATOR_OR_ADMIN = 44
+    REPORT_NOT_FOUND = 45
 
 
 """

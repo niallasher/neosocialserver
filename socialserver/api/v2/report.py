@@ -85,8 +85,20 @@ class Report(Resource):
 
         modifying_user = get_username_from_token(args['access_token'])
         if modifying_user is None:
-            return {"error": ErrorCodes.TOKEN_INVALID}, 401
+            return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
+
         modifying_user_db = DbUser.get(username=modifying_user)
+
         # only a moderator or admin should be able to influence this
         if not True in [modifying_user_db.is_moderator, modifying_user_db.is_admin]:
-            return {}, 403
+            return {"error": ErrorCodes.USER_NOT_MODERATOR_OR_ADMIN.value}, 403
+
+        existing_report = DbPostReport.get(
+            id=args['report_id']
+        )
+        if existing_report is None:
+            return {"error": ErrorCodes.REPORT_NOT_FOUND.value}, 404
+
+        existing_report.active = args['mark_active']
+
+        return {"active": args['mark_active']}, 201
