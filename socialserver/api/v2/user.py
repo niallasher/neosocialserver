@@ -1,4 +1,3 @@
-from _typeshed import IdentityFunction
 from datetime import datetime
 import re
 from socialserver.db import DbUser, DbImage

@@ -98,12 +98,21 @@ class DbPost(db.Entity):
 
 
 class DbPostReport(db.Entity):
-  # we want to ensure that the report has a user,
-  # but we don't want to remove it if the user
-  # leaves the platform, for safety & legal reasons
+    # we want to ensure that the report has a user,
+    # but we don't want to actually tie it to a user,
+    # since if somebody reports illegal content, and then
+    # deletes their account, we still want to know about
+    # the report so we can take action
     reporter = orm.Optional('DbUser', reverse="submitted_reports")
     post = orm.Required('DbPost', reverse="reports")
     creation_time = orm.Required(datetime.datetime)
+    # since we do one report per post, we want to be able to
+    # report multiple infringements at once, hence the array.
+    # NOTE: not sure we do want this? Need to figure that one
+    # out soon I guess.
+    # check out the socialserver.constants.ReportReasons enum
+    # for a list of these.
+    report_reason = orm.Required(orm.IntArray)
     supplementary_info = orm.Optional(
         str, max_len=REPORT_SUPPLEMENTARY_INFO_MAX_LEN)
 
