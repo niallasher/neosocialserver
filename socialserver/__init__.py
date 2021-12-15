@@ -43,3 +43,6 @@ api.add_resource(Follow, '/api/v2/follow/user')
 api.add_resource(Block, '/api/v2/block/user')
 
 api.add_resource(Report, '/api/v2/report/post')
+
+if config.legacy.api_v1_compat.enable:
+    print("Legacy API has not been implemented yet.")

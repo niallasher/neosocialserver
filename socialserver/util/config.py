@@ -20,6 +20,7 @@ DEFAULT_CONFIG = {
     "network": {
         "host": "0.0.0.0",
         "port": 80,
+        "enable_legacy_v1_api": True
     },
     "database": {
         "connector": "sqlite",
@@ -58,6 +59,41 @@ DEFAULT_CONFIG = {
         # IT'S JUST A LIMIT ON HOW MANY TIMES A POST CAN BE REPORTED BY A SINGLE
         # USER!
         "silent_fail_on_double_report": False
+    },
+    # TODO: this section is not yet implemented.
+    # it's here for future reference right now.
+    "legacy": {
+        # api v1 is a drop-in replacement for the
+        # classic socialshare api (it's not exactly
+        # classic, but you gotta admit that sounds cool)
+        # it will not support new features, but it will
+        # retain basic compatibility, and should allow
+        # old clients (e.g. the only real old client,
+        # socialshare.club, to remain functional).
+        "api_v1_compat": {
+            "enable": False,
+            # clients that consume api 1.x can only partially
+            # benefit from server 3 image optimizations.
+            # (they can do some pfp stuff, and *i think* headers).
+            # they are not pixel ratio aware.
+            # you can specify exactly what to serve them for posts
+            # here.
+            "image_serve_type": "post",
+            "image_serve_pixel_ratio": 1,
+            # signup for 1.x clients shouldn't really
+            # be enabled. when the dust is settled, apiv2
+            # is going to include significant changes to the
+            # signup process (namely i want to implement a admin approval system,
+            # that will not be compatible with 1.x for ux reasons)
+            # if you aren't using that system, you should be safe
+            # to enable this, but no guarantees.
+            # the old socialshare client will get a final update,
+            # adding the classic tag, deprecation notice, and support
+            # for showing a login disabled message.
+            # older versions of the old client will just recieve a generic
+            # failure.
+            "signup_enabled": False
+        }
     },
     "debug": {
         "enable_flask_debug_mode": False,
