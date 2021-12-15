@@ -1,6 +1,17 @@
 from enum import Enum
 from types import SimpleNamespace
 
+# semver spec.
+# major/minor/patch.
+# any breaking changes, or the introduction
+# of a new version of the API must bump the
+# major version numver (post API freeze when
+# 3.0.0 releases)
+# new feature introductions can be in a minor,
+# even if they change the current api, AS LONG
+# AS THEY DO NOT BREAK CLIENT COMPATIBILITY!
+SERVER_VERSION = "3.0.0"
+
 """
   Max string length for different user generated areas.
 """
