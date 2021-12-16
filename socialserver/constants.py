@@ -67,8 +67,22 @@ class AccountAttributes(Enum):
     BETA_TESTER = 5
     OG = 6  # user since socialshare pre-1.0. what a legend.
     INSTANCE_ADMIN = 7  # can control webui when it's added.
-    # might even get a tab in the mobile app for some cleanup tasks?
-    # basically could be aliases to GOD_EMPEROR, but that's a bit of a stretch.
+    CAN_INVITE_USERS = 8  # any account with this gets access to invite codes,
+    # if config.auth.registration.invite_only.restrict_invites is True.
+
+
+"""
+  RegistrationType
+  The different restrictions that can be applied
+  to registration.
+"""
+
+
+class RegistrationType(Enum):
+    REGISTRATION_DISABLED = 0
+    NO_RESTRICTION = 1
+    INVITE_ONLY = 2
+    APPROVAL_REQUIRED = 3
 
 
 """
