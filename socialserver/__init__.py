@@ -11,6 +11,7 @@ from socialserver.util.config import config
 # Just for major server version parity? The official client is going to use
 # a sync-ed major version to denote basic compatibility, followed by minor
 # for QoL upgrades most likely, so maybe the api should?
+from socialserver.api.v2.info import ServerInfo
 from socialserver.api.v2.usersession import UserSession, UserSessionList
 from socialserver.api.v2.user import User, UserInfo
 from socialserver.api.v2.feed import PostFeed
@@ -28,6 +29,8 @@ api = Api(application)
 def landing_page():
     return render_template('server_landing.html')
 
+
+api.add_resource(ServerInfo, '/api/v2/server/info')
 
 api.add_resource(User, '/api/v2/user')
 api.add_resource(UserInfo, '/api/v2/user/info')
