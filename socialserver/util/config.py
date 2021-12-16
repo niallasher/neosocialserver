@@ -20,7 +20,6 @@ DEFAULT_CONFIG = {
     "network": {
         "host": "0.0.0.0",
         "port": 80,
-        "enable_legacy_v1_api": True
     },
     "database": {
         "connector": "sqlite",
@@ -34,13 +33,26 @@ DEFAULT_CONFIG = {
         },
     },
     "auth": {
-        "invite_only": {
-            "enabled": False,
-            "master_invite_code": None,
-            "admins_can_invite": True,
-            "regen_invite_codes_for_admins": True,
-            "users_can_invite": False,
-            "invites_per_user": 5
+        "registration": {
+            "enabled": True,
+            # this will take precendence
+            # over invite_only, and only
+            # admins will be able to approve
+            # new users.
+            # TODO: implement approval required
+            "approval_required": False,
+            # TODO: reimplement invite only functionality
+            "invite_only": {
+                "enabled": False,
+                "invites_per_user": 5,
+                # if enabled, restrict_invites
+                # will only give invite codes
+                # to a user with the
+                # CAN_INVITE_USERS attribute,
+                # which can be granted by an
+                # admin.
+                "restrict_invites": False
+            }
         },
         "totp": {
             # you probably don't want to change this.
