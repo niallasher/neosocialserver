@@ -40,6 +40,9 @@ class DbUser(db.Entity):
     # deleting user should leave reports intact
     submitted_reports = orm.Set("DbPostReport", cascade_delete=False)
     associated_api_keys = orm.Set("DbApiKey", cascade_delete=True)
+    # whether the account is approved. this will be made true
+    # automatically if admin approval requirement is off.
+    account_approved = orm.Required(bool)
 
     @property
     def is_private(self):
