@@ -42,17 +42,17 @@ DEFAULT_CONFIG = {
             # TODO: implement approval required
             "approval_required": False,
             # TODO: reimplement invite only functionality
-            "invite_only": {
-                "enabled": False,
-                "invites_per_user": 5,
-                # if enabled, restrict_invites
-                # will only give invite codes
-                # to a user with the
-                # CAN_INVITE_USERS attribute,
-                # which can be granted by an
-                # admin.
-                "restrict_invites": False
-            }
+            # "invite_only": {
+            #     "enabled": False,
+            #     "invites_per_user": 5,
+            #     # if enabled, restrict_invites
+            #     # will only give invite codes
+            #     # to a user with the
+            #     # CAN_INVITE_USERS attribute,
+            #     # which can be granted by an
+            #     # admin.
+            #     "restrict_invites": False
+            # }
         },
         "totp": {
             # you probably don't want to change this.
