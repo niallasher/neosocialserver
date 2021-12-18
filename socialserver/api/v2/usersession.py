@@ -7,6 +7,7 @@ from pony.orm import db_session
 from flask import request
 from socialserver.constants import ErrorCodes
 from socialserver.util.auth import generate_key, get_ip_from_request, get_username_from_token, hash_plaintext_sha256, verify_password_valid
+from socialserver.util.config import config
 from user_agents import parse as ua_parse
 
 
@@ -53,6 +54,10 @@ class UserSession(Resource):
 
         if not verify_password_valid(args['password'], user.password_salt, user.password_hash):
             return {'error': ErrorCodes.INCORRECT_PASSWORD.value}, 401
+
+        if config.auth.registration.approval_required:
+            if not user.approved == True:
+                return {"error": ErrorCodes.ACCOUNT_NOT_APPROVED.value}, 401
 
         secret = generate_key()
 

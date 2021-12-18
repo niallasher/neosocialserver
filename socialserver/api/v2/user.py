@@ -5,6 +5,7 @@ from flask_restful import Resource, reqparse
 from socialserver.constants import BIO_MAX_LEN, DISPLAY_NAME_MAX_LEN, MAX_PASSWORD_LEN, MIN_PASSWORD_LEN, USERNAME_MAX_LEN, ErrorCodes, REGEX_USERNAME_VALID, UserModificationOptions
 from socialserver.util.auth import generate_salt, get_username_from_token, hash_password, verify_password_valid
 from pony.orm import db_session
+from socialserver.util.config import config
 
 
 class UserInfo(Resource):
@@ -103,10 +104,11 @@ class User(Resource):
             creation_time=datetime.now(),
             is_legacy_account=False,
             account_attributes=[],
-            bio=args['bio'] if args['bio'] != None else ""
+            bio=args['bio'] if args['bio'] != None else "",
+            approved=True if config.auth.registration.approval_required == False else False
         )
 
-        return {}, 201
+        return {"needs_approval": config.auth.registration.approval_required}, 201
 
     @db_session
     def patch(self):
