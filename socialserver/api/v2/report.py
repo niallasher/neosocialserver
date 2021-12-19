@@ -4,7 +4,7 @@ from flask_restful import Resource, reqparse
 from socialserver.constants import REPORT_SUPPLEMENTARY_INFO_MAX_LEN, ErrorCodes, ReportReasons
 from socialserver.db import DbPost, DbPostReport, DbUser
 from socialserver.util.auth import get_username_from_token
-from socialserver.util.oldconfig import config
+from socialserver.util.config import config
 from pony.orm import db_session
 
 
