@@ -37,7 +37,7 @@ class PostFeed(Resource):
 
         requesting_user = get_username_from_token(args['access_token'])
         if requesting_user is None:
-            return {ErrorCodes.TOKEN_INVALID}, 403
+            return {"error": ErrorCodes.TOKEN_INVALID.value}, 403
         requesting_user_db = DbUser.get(username=requesting_user)
 
         # we don't want to show users that are blocked
@@ -46,6 +46,10 @@ class PostFeed(Resource):
         # and should probably be changed.
         # (don't be surprised if this is still the same
         # 5 years from this comment)
+
+        # seems like pycharm doesn't see the pony object as iterable
+        # it is, so we're safe to do this.
+        # noinspection PyTypeChecker
         blocks = orm.select(b.blocking for b in DbBlock
                             if b.user == requesting_user_db)[:]
 
@@ -61,10 +65,13 @@ class PostFeed(Resource):
                                      for f in requesting_user_db.following)
 
         if filtered:
-            query = orm.select((p) for p in DbPost
+
+            # noinspection PyTypeChecker
+            query = orm.select(p for p in DbPost
                                if p.user not in blocks and p.under_moderation is False and p.user.username in filter_list)
         else:
-            query = orm.select((p) for p in DbPost
+            # noinspection PyTypeChecker
+            query = orm.select(p for p in DbPost
                                if p.user not in blocks and p.under_moderation is False).order_by(orm.desc(DbPost.creation_time)).limit(args.count, offset=args.offset)
 
         # TODO: this shares a schema with the single post

@@ -16,8 +16,11 @@ from socialserver.util.auth import generate_salt, hash_password
 
 
 def username_exists(username):
+    # seems like pycharm doesn't see the pony object as iterable
+    # it is, so we're safe to do this.
+    # noinspection PyTypeChecker
     user = select(u for u in DbUser if u.username == username)
-    return (user is None)
+    return user is not None
 
 
 @db_session
