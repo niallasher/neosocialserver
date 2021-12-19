@@ -12,7 +12,8 @@ def cli():
 @click.command()
 @click.option('port', '--port', '-p', default=12345, help='Port to host on. Default is 12345.')
 @click.option('bind_addr', '--bind-addr', '-b', default='0.0.0.0', help='Address to bind to. Default is 0.0.0.0.')
-@click.option('template_auto_reload', '--template-auto-reload', '-t', default=False, help='Enable template auto reloading. Default is False.')
+@click.option('template_auto_reload', '--template-auto-reload', '-t', default=False,
+              help='Enable template auto reloading. Default is False.')
 @click.option('max_file_age', '--max-file-age', '-m', default=0, help='Max file age. Default is 0.')
 def devel_run(port, bind_addr, template_auto_reload, max_file_age):
     if template_auto_reload:

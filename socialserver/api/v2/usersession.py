@@ -54,7 +54,7 @@ class UserSession(Resource):
             return {'error': ErrorCodes.INCORRECT_PASSWORD.value}, 401
 
         if config.auth.registration.approval_required:
-            if not user.approved == True:
+            if not user.approved is True:
                 return {"error": ErrorCodes.ACCOUNT_NOT_APPROVED.value}, 401
 
         secret = generate_key()

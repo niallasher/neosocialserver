@@ -5,12 +5,10 @@ from rich import print
 from copy import copy
 from cryptography.fernet import Fernet
 
-
 """
-	configutil.py
-	Utilities for managing config files, including loading, saving, and accessing as a SimpleNamespace.
+    configutil.py
+    Utilities for managing config files, including loading, saving, and accessing as a SimpleNamespace.
 """
-
 
 CONFIG_FILE_PATH = "./config.json"
 
@@ -35,7 +33,7 @@ DEFAULT_CONFIG = {
     "auth": {
         "registration": {
             "enabled": True,
-            # this will take precendence
+            # this will take precedence
             # over invite_only, and only
             # admins will be able to approve
             # new users.
@@ -119,27 +117,27 @@ DEFAULT_CONFIG = {
 RESERVED_KEYS = [".save"]
 
 """
-	verify_config_against_schema: verify the configuration file contains the same keys as schema
+    verify_config_against_schema: verify the configuration file contains the same keys as schema
 
-	Parameters:
-		namespace: SimpleNamespace, config object to check.
-		schema: dict, dict containing the required keys. can use DEFAULT_CONFIG (value types aren't checked yet)
+    Parameters:
+        namespace: SimpleNamespace, config object to check.
+        schema: dict, dict containing the required keys. can use DEFAULT_CONFIG (value types aren't checked yet)
 """
 
 
 def verify_config_against_schema(namespace: SimpleNamespace, schema: dict) -> None:
-
     ns_dict = dump_namespace_to_dict(namespace)
 
     """
-		recursive_unwrap_dict_keys: loop through a dict, adding all it's keys to a list, formatted for readability.
-		handles dicts within dicts (due to nested objects in json), by calling itself on the nested dict when encountered
-		(syntax inspired by jq)
+        recursive_unwrap_dict_keys: loop through a dict, adding all it's keys to a list, formatted for readability.
+        handles dicts within dicts (due to nested objects in json), by calling itself on the nested dict when encountered
+        (syntax inspired by jq)
 
-		Parameters:
-			dict_object: dict, dict to unwrap
-			prefix: optional, string, string to prefix key with (no need to change this manually).
-	"""
+        Parameters:
+            dict_object: dict, dict to unwrap
+            prefix: optional, string, string to prefix key with (no need to change this manually).
+    """
+
     def recursive_unwrap_dict_keys(dict_object, prefix="."):
         # TODO: see if there is some way to do this in the standard library
         keys = []
@@ -199,7 +197,7 @@ def persist_config_namespace(namespace: SimpleNamespace) -> None:
     # shallow copy the namespace
     ns = copy(namespace)
     # strip the save key from the new one
-    del(ns.save)
+    del (ns.save)
     config_dict = dump_namespace_to_dict(ns)
     with open(CONFIG_FILE_PATH, 'w') as config_file:
         config_file.write(

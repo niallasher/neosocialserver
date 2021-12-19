@@ -55,24 +55,30 @@ class PostFeed(Resource):
 
         filtered = False
 
+        filter_list = []
+
         if args['username'] is not None:
             filtered = True
             filter_list = args['username']
 
         if args['following_only']:
             filtered = True
-            filter_list = orm.select((f.user.username)
+            filter_list = orm.select(f.user.username
                                      for f in requesting_user_db.following)
 
         if filtered:
 
             # noinspection PyTypeChecker
             query = orm.select(p for p in DbPost
-                               if p.user not in blocks and p.under_moderation is False and p.user.username in filter_list)
+                               if p.user not in blocks and p.under_moderation is False and p.user.username \
+                               in filter_list)
         else:
             # noinspection PyTypeChecker
             query = orm.select(p for p in DbPost
-                               if p.user not in blocks and p.under_moderation is False).order_by(orm.desc(DbPost.creation_time)).limit(args.count, offset=args.offset)
+                               if p.user not in blocks and p.under_moderation is False).order_by(
+                                    orm.desc(DbPost.creation_time)).limit(
+                                                                        args.count, offset=args.offset
+                                                                        )
 
         # TODO: this shares a schema with the single post
         # thing, so they should be common. maybe a class

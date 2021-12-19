@@ -114,9 +114,9 @@ class Post(Resource):
         # even if they explicitly request them (getting posts in a feed
         # will filter these out automatically)
 
-        # we return POST_NOT_FOUND so we don't explicitly highlight the
+        # we return POST_NOT_FOUND, so we don't explicitly highlight the
         # fact this post is moderated, just in case.
-        if wanted_post.under_moderation == True and not (requesting_user.is_admin() or requesting_user.is_moderator()):
+        if wanted_post.under_moderation is True and not (requesting_user.is_admin() or requesting_user.is_moderator()):
             return {"error": ErrorCodes.POST_NOT_FOUND.value}, 404
 
         # if you've blocked a user, we don't want you to see their posts.
@@ -146,7 +146,8 @@ class Post(Resource):
                 "display_name": wanted_post.user.display_name,
                 "username": wanted_post.user.username,
                 "verified": wanted_post.user.is_verified,
-                "profile_picture": wanted_post.user.profile_pic.identifier if wanted_post.user.has_profile_picture else None,
+                "profile_picture": (wanted_post.user.profile_pic.identifier
+                                    if wanted_post.user.has_profile_picture else None),
                 "liked_post": user_has_liked_post,
                 "own_post": user_owns_post
             },

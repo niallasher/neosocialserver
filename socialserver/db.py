@@ -1,7 +1,8 @@
 from enum import unique
 from pony import orm
 import datetime
-from socialserver.constants import BIO_MAX_LEN, COMMENT_MAX_LEN, DISPLAY_NAME_MAX_LEN, REPORT_SUPPLEMENTARY_INFO_MAX_LEN, TAG_MAX_LEN, USERNAME_MAX_LEN, AccountAttributes
+from socialserver.constants import BIO_MAX_LEN, COMMENT_MAX_LEN, DISPLAY_NAME_MAX_LEN, \
+    REPORT_SUPPLEMENTARY_INFO_MAX_LEN, TAG_MAX_LEN, USERNAME_MAX_LEN, AccountAttributes
 from socialserver.util.config import config
 
 
@@ -145,7 +146,8 @@ class DbImage(db.Entity):
 
     @property
     def is_orphan(self):
-        return len(self.associated_posts) == 0 and len(self.associated_profile_pics) == 0 and len(self.associated_header_pics) == 0
+        return len(self.associated_posts) == 0 and len(self.associated_profile_pics) == 0 \
+               and len(self.associated_header_pics) == 0
 
 
 class DbHashtag(db.Entity):

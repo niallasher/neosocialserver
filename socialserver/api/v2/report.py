@@ -90,7 +90,7 @@ class Report(Resource):
         modifying_user_db = DbUser.get(username=modifying_user)
 
         # only a moderator or admin should be able to influence this
-        if not True in [modifying_user_db.is_moderator, modifying_user_db.is_admin]:
+        if True not in [modifying_user_db.is_moderator, modifying_user_db.is_admin]:
             return {"error": ErrorCodes.USER_NOT_MODERATOR_OR_ADMIN.value}, 403
 
         existing_report = DbPostReport.get(
