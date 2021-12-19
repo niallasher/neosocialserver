@@ -70,7 +70,7 @@ class PostFeed(Resource):
 
             # noinspection PyTypeChecker
             query = orm.select(p for p in DbPost
-                               if p.user not in blocks and p.under_moderation is False and p.user.username \
+                               if p.user not in blocks and p.under_moderation is False and p.user.username
                                in filter_list)
         else:
             # noinspection PyTypeChecker

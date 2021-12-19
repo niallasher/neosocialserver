@@ -46,8 +46,8 @@ def generate_key() -> SimpleNamespace(key=str, hash=str):
 """
 
 
-def verify_plaintext_against_hash_sha256(plaintext: str, hash: str) -> bool:
-    return sha256(plaintext.encode()).hexdigest() == hash
+def verify_plaintext_against_hash_sha256(plaintext: str, given_hash: str) -> bool:
+    return sha256(plaintext.encode()).hexdigest() == given_hash
 
 
 """
@@ -96,9 +96,9 @@ def hash_password(plaintext: str, salt: str) -> str:
 """
 
 
-def verify_password_valid(plaintext: str, salt: str, hash: str) -> bool:
+def verify_password_valid(plaintext: str, salt: str, given_hash: str) -> bool:
     try:
-        return hasher.verify(hash, plaintext + salt)
+        return hasher.verify(given_hash, plaintext + salt)
     except argon2.exceptions.VerifyMismatchError:
         return False
 

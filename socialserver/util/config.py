@@ -130,8 +130,8 @@ def verify_config_against_schema(namespace: SimpleNamespace, schema: dict) -> No
 
     """
         recursive_unwrap_dict_keys: loop through a dict, adding all it's keys to a list, formatted for readability.
-        handles dicts within dicts (due to nested objects in json), by calling itself on the nested dict when encountered
-        (syntax inspired by jq)
+        handles dicts within dicts (due to nested objects in json), by calling itself on the nested dict when 
+        encountered (syntax inspired by jq)
 
         Parameters:
             dict_object: dict, dict to unwrap
