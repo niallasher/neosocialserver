@@ -73,7 +73,7 @@ class Post(Resource):
                                 name=tag_name)
             else:
                 tag = existing_tag
-            db_tags.append((tag))
+            db_tags.append(tag)
 
         new_post = DbPost(
             under_moderation=False,
