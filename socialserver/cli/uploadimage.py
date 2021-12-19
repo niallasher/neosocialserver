@@ -48,4 +48,4 @@ def upload_image(image_path):
 
     # FIXME: shouldn't be using hardcoded UID 1 here, it's just
     # for testing
-    print(handle_upload(dumps({"original": image_b64}), upload_type.value, 1))
+    print(handle_upload(dumps({"original": image_b64}), 1))
