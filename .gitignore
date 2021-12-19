@@ -11,3 +11,4 @@ Library/
 **/.DS_Store
 # don't commit media folder, since that could contain user generated content
 **/media
+.pytest_cache
