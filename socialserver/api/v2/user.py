@@ -2,7 +2,8 @@ from datetime import datetime
 import re
 from socialserver.db import DbUser, DbImage
 from flask_restful import Resource, reqparse
-from socialserver.constants import BIO_MAX_LEN, DISPLAY_NAME_MAX_LEN, MAX_PASSWORD_LEN, MIN_PASSWORD_LEN, USERNAME_MAX_LEN, ErrorCodes, REGEX_USERNAME_VALID, UserModificationOptions
+from socialserver.constants import BIO_MAX_LEN, DISPLAY_NAME_MAX_LEN, MAX_PASSWORD_LEN, MIN_PASSWORD_LEN, ErrorCodes, \
+    REGEX_USERNAME_VALID
 from socialserver.util.auth import generate_salt, get_username_from_token, hash_password, verify_password_valid
 from pony.orm import db_session
 from socialserver.util.config import config
@@ -69,7 +70,7 @@ class User(Resource):
 
         # all this validation should be done clientside,
         # but we're replicating here in case of an error on the client
-        # or a bad actor. hence the ux doesn't have to be amazing,
+        # or a bad actor. hence, the ux doesn't have to be amazing,
         # and it doesn't really matter if we don't check everything
         # before exiting. we just report the first issue we find and
         # return.
@@ -143,7 +144,7 @@ class User(Resource):
                 return {"error": ErrorCodes.BIO_NON_CONFORMING.value}, 400
             user.bio = args['bio']
             # NOTE: not sure; should we return new bio? client might want to cache it.
-            # they could always just keep it from when it was entered, i don't know.
+            # they could always just keep it from when it was entered, I don't know.
             return {}, 201
 
         if args['profile_pic_ref'] is not None:
