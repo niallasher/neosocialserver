@@ -4,7 +4,7 @@ from base64 import urlsafe_b64encode
 import magic
 from pony.orm import db_session
 from io import BytesIO
-from socialserver.constants import ImageSupportedMimeTypes, ImageUploadTypes
+from socialserver.constants import ImageSupportedMimeTypes
 from socialserver.util.image import handle_upload
 
 
