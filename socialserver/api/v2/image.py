@@ -25,7 +25,7 @@ class Image(Resource):
 
         try:
             wanted_image_type = ImageTypes(args['wanted_type'])
-        except:
+        except ValueError:
             return {"error": ErrorCodes.IMAGE_TYPE_INVALID.value}, 400
 
         pixel_ratio = args['pixel_ratio']
