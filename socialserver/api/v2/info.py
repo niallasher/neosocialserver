@@ -5,8 +5,11 @@ from socialserver.util.config import config
 
 class ServerInfo(Resource):
 
-    # Ignore the ide. This shouldn't be a static method.
-    # It doesn't seem to work with flask-restful when it is.
+    # flask-restful doesn't seem to work with static methods.
+    # this method is no exception. if you make it static,
+    # it won't work.
+
+    # noinspection PyMethodMayBeStatic
     def get(self):
 
         return {
