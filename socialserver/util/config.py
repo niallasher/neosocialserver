@@ -1,9 +1,8 @@
 import os
 import toml
 from attrdict import AttrDict
-from rich import print
-from rich.console import Console
 from typing import Union
+from socialserver.util.output import console
 from pathlib import Path
 
 # if the user doesn't specify a server root storage dir,
@@ -99,8 +98,8 @@ def _test_config(current_config: AttrDict, schema: AttrDict) -> None:
 
     def _recursive_unwrap_dict_keys(dict_obj: Union[AttrDict, dict], prefix=""):
         keys = []
-        for key in dict_obj.keys():
-            keys.append(prefix + key)
+        for dict_key in dict_obj.keys():
+            keys.append(prefix + dict_key)
             # if type == dict we're dealing with a nested one,
             # so we'll recurse using it as the base, with an
             # updated prefix
@@ -140,7 +139,7 @@ def _test_config(current_config: AttrDict, schema: AttrDict) -> None:
 
 
 def _load_toml(toml_string: str) -> AttrDict:
-    return(AttrDict(toml.loads(toml_string)))
+    return AttrDict(toml.loads(toml_string))
 
 
 """
