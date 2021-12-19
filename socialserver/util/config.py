@@ -103,8 +103,8 @@ def _test_config(current_config: AttrDict, schema: AttrDict) -> None:
             # if type == dict we're dealing with a nested one,
             # so we'll recurse using it as the base, with an
             # updated prefix
-            if type(dict_obj.get(key)) is dict:
-                nested_keys = _recursive_unwrap_dict_keys(dict_obj.get(key), prefix=(prefix + key + "."))
+            if type(dict_obj.get(dict_key)) is dict:
+                nested_keys = _recursive_unwrap_dict_keys(dict_obj.get(dict_key), prefix=(prefix + dict_key + "."))
                 for nested_key in nested_keys:
                     keys.append(nested_key)
         return keys
