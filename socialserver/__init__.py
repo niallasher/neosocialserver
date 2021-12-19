@@ -45,5 +45,5 @@ api.add_resource(Block, '/api/v2/block/user')
 
 api.add_resource(Report, '/api/v2/report/post')
 
-if config.legacy.api_v1_compat.enable:
+if config.legacy.api_v1_interface.enable:
     print("Legacy API has not been implemented yet.")
