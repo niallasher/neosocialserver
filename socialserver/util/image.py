@@ -217,7 +217,7 @@ def generate_image_of_type(identifier):
 """
 
 
-def handle_upload(image_package: str, upload_type_int: int, userid: int) -> SimpleNamespace:
+def handle_upload(image_package: str, userid: int) -> SimpleNamespace:
     # Retrieve enum value for upload type
     # deserialize the JSON containing image data urls
     images = loads(image_package)
@@ -226,7 +226,7 @@ def handle_upload(image_package: str, upload_type_int: int, userid: int) -> Simp
     # this is a fallback, in case of a client that doesn't do
     # due diligence.
     # tldr: unlike customer service, it's usually the client who is wrong.
-    if ('cropped' not in images.keys()):
+    if 'cropped' not in images.keys():
         image = convert_data_url_to_image(images['original'])
         original_image = copy(image)
     else:
