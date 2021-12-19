@@ -1,282 +1,135 @@
-import json
-from types import SimpleNamespace
-from os import path
-from rich import print
-from copy import copy
-from cryptography.fernet import Fernet
+import os
+import toml
+from attrdict import AttrDict
+from rich.console import Console
+from rich.traceback import install as install_traceback_handler
+from pathlib import Path
+
+# TODO: this should be in __init__.py once this module is actually a thing that's used by the rest of the code
+install_traceback_handler()
+console = Console()
+
+HOME = os.getenv("HOME")
+
+FILE_ROOT = os.getenv("SOCIALSERVER_ROOT", default=f"{HOME}/socialserver")
+
+if FILE_ROOT is f"{HOME}/socialserver":
+    console.log("The SOCIALSERVER_ROOT environment variable is unset! Please set it in your environment.")
+    exit(1)
+
+if not os.path.exists(FILE_ROOT):
+    console.log("The SOCIALSERVER_ROOT folder, {FILE_ROOT} does not exist. Attempting to create it.")
+    folder_path = Path(FILE_ROOT)
+    folder_path.mkdir(parents=True)
+
+DEFAULT_CONFIG_PATH = f"{FILE_ROOT}/config.toml"
+
+CONFIG_PATH = os.getenv("SOCIALSERVER_CONFIG_FILE", default=DEFAULT_CONFIG_PATH)
+
+DEFAULT_CONFIG = f"""
+[network]
+host = "0.0.0.0"
+port = 51672
+
+[database]
+# supported connectors right now:
+# sqlite, postgres
+connector = "sqlite"
+address = "{FILE_ROOT}/socialserver.db"
+
+
+[media.images]
+# this quality will be applied to 
+# all non post images, except the saved
+# original copy.
+quality = 80
+post_quality = 90
+storage_dir = './media/images'
+
+[auth.registration]
+enabled = true
+# if enabled, any admins will be
+# able to get a list of requested
+# signups, and approve or deny them
+# before they are allowed in
+approval_required = false
+
+[posts]
+# this is an anti-spam tactic; socialserver
+# allows for each user to report a specific post
+# once. if enabled, the user will not be informed
+# that their second report on a post didn't go through,
+# hopefully preventing them from spamming reports on an
+# undeserving post.
+silent_fail_on_double_report = false
+
+[legacy.api_v1_interface]
+# the legacy api is not going to get any new features
+# and it cannot really benefit from the better efficiency
+# of the modern one. it does get somewhat better image
+# efficiency though, which is a definite plus.
+enable = false
+# api v1 doesn't have an interface for providing a pixel ratio
+# so we can't optimize images there. you can define a default here.
+# 2 is a somewhat sane default, since a lot of people are on phones
+# with high dpi screens now
+image_pixel_ratio = 2
+signup_enabled = false
+"""
 
 """
-    configutil.py
-    Utilities for managing config files, including loading, saving, and accessing as a SimpleNamespace.
-"""
-
-CONFIG_FILE_PATH = "./config.json"
-
-# default_config also serves as a schema
-# for the config keys
-DEFAULT_CONFIG = {
-    "network": {
-        "host": "0.0.0.0",
-        "port": 80,
-    },
-    "database": {
-        "connector": "sqlite",
-        "address": "./algo.db"
-    },
-    "media": {
-        "images": {
-            "quality": 80,
-            "post_quality": 90,
-            "storage_dir": './media/images'
-        },
-    },
-    "auth": {
-        "registration": {
-            "enabled": True,
-            # this will take precedence
-            # over invite_only, and only
-            # admins will be able to approve
-            # new users.
-            # TODO: implement approval required
-            "approval_required": False,
-            # TODO: reimplement invite only functionality
-            # "invite_only": {
-            #     "enabled": False,
-            #     "invites_per_user": 5,
-            #     # if enabled, restrict_invites
-            #     # will only give invite codes
-            #     # to a user with the
-            #     # CAN_INVITE_USERS attribute,
-            #     # which can be granted by an
-            #     # admin.
-            #     "restrict_invites": False
-            # }
-        },
-        "totp": {
-            # you probably don't want to change this.
-            # especially if you already have users :)
-            # it's here just to protect the secret in case of
-            # a database leak.
-            "encryption_enabed": True,
-            "encryption_key": Fernet.generate_key().decode()
-        }
-    },
-    "posts": {
-        # do we return an error when a user double reports a post?
-        # this is a tradeoff between transparency, and a user trying
-        # to spam reports when they realise it's ineffective.
-        # NOTE: THIS IS NOT A LIMIT ON HOW MANY TIMES A POST CAN BE REPORTED.
-        # IT'S JUST A LIMIT ON HOW MANY TIMES A POST CAN BE REPORTED BY A SINGLE
-        # USER!
-        "silent_fail_on_double_report": False
-    },
-    # TODO: this section is not yet implemented.
-    # it's here for future reference right now.
-    "legacy": {
-        # api v1 is a drop-in replacement for the
-        # classic socialshare api (it's not exactly
-        # classic, but you gotta admit that sounds cool)
-        # it will not support new features, but it will
-        # retain basic compatibility, and should allow
-        # old clients (e.g. the only real old client,
-        # socialshare.club, to remain functional).
-        "api_v1_compat": {
-            "enable": False,
-            # clients that consume api 1.x can only partially
-            # benefit from server 3 image optimizations.
-            # (they can do some pfp stuff, and *i think* headers).
-            # they are not pixel ratio aware.
-            # you can specify exactly what to serve them for posts
-            # here.
-            "image_serve_type": "post",
-            "image_serve_pixel_ratio": 1,
-            # signup for 1.x clients shouldn't really
-            # be enabled. when the dust is settled, apiv2
-            # is going to include significant changes to the
-            # signup process (namely i want to implement a admin approval system,
-            # that will not be compatible with 1.x for ux reasons)
-            # if you aren't using that system, you should be safe
-            # to enable this, but no guarantees.
-            # the old socialshare client will get a final update,
-            # adding the classic tag, deprecation notice, and support
-            # for showing a login disabled message.
-            # older versions of the old client will just recieve a generic
-            # failure.
-            "signup_enabled": False
-        }
-    },
-    "debug": {
-        "enable_flask_debug_mode": False,
-        "auto_reload_templates": False,
-        "zero_max_file_age": False
-    }
-}
-
-# reserved keys. i.e. keys that cannot be used in
-# a valid config
-RESERVED_KEYS = [".save"]
-
-"""
-    verify_config_against_schema: verify the configuration file contains the same keys as schema
-
-    Parameters:
-        namespace: SimpleNamespace, config object to check.
-        schema: dict, dict containing the required keys. can use DEFAULT_CONFIG (value types aren't checked yet)
+    _load_toml
+    
+    Loads a string containing a TOML file, into an AttrDict,
+    which allows for property access via dot notation.
 """
 
 
-def verify_config_against_schema(namespace: SimpleNamespace, schema: dict) -> None:
-    ns_dict = dump_namespace_to_dict(namespace)
-
-    """
-        recursive_unwrap_dict_keys: loop through a dict, adding all it's keys to a list, formatted for readability.
-        handles dicts within dicts (due to nested objects in json), by calling itself on the nested dict when 
-        encountered (syntax inspired by jq)
-
-        Parameters:
-            dict_object: dict, dict to unwrap
-            prefix: optional, string, string to prefix key with (no need to change this manually).
-    """
-
-    def recursive_unwrap_dict_keys(dict_object, prefix="."):
-        # TODO: see if there is some way to do this in the standard library
-        keys = []
-        for key in dict_object.keys():
-            keys.append(prefix + key)
-            # go through all dicts inside the dict and so on/so forth
-            if type(dict_object.get(key)) == dict:
-                exkeys = (recursive_unwrap_dict_keys(
-                    dict_object.get(key), prefix=(prefix + key + ".")))
-                for exkey in exkeys:
-                    keys.append(exkey)
-        return keys
-
-    schema_keys = recursive_unwrap_dict_keys(schema)
-    ns_dict_keys = recursive_unwrap_dict_keys(ns_dict)
-
-    missing_keys = []
-    extraneous_keys = []
-    illegal_keys = []
-
-    # check for missing keys
-    for schema_key in schema_keys:
-        if schema_key not in ns_dict_keys:
-            missing_keys.append(schema_key)
-    # check for extra keys & illegal keys with reserved names
-    for ns_dict_key in ns_dict_keys:
-        if ns_dict_key in RESERVED_KEYS:
-            illegal_keys.append(ns_dict_key)
-        elif ns_dict_key not in schema_keys:
-            extraneous_keys.append(ns_dict_key)
-
-    for key in extraneous_keys:
-        print(f"Extraneous/Unused key: {key}")
-    for key in missing_keys:
-        print(f"Required key missing: {key}")
-    for key in illegal_keys:
-        print(f"Illegal key name: {key}")
-
-    if len(illegal_keys) + len(missing_keys) >= 1:
-        print("Unresolvable issues with configuration.")
-        print("Please check it carefully.")
-        # exiting with non-0 exit code,
-        # since we can't continue running
-        # with a malformed config.
-        exit(1)
+def _load_toml(toml_string: str) -> AttrDict:
+    return AttrDict(toml.loads(toml_string))
 
 
 """
-	persist_config_namespace: save the changed namespace to the disk as json
-
-	Parameters:
-		namespace: SimpleNamespace, the namespace to be saved
+    _load_config
+    
+    Loads a given configuration file.
 """
 
 
-def persist_config_namespace(namespace: SimpleNamespace) -> None:
-    # shallow copy the namespace
-    ns = copy(namespace)
-    # strip the save key from the new one
-    del (ns.save)
-    config_dict = dump_namespace_to_dict(ns)
-    with open(CONFIG_FILE_PATH, 'w') as config_file:
-        config_file.write(
-            json.dumps(
-                config_dict,
-                indent=2
-            )
-        )
+def _load_config(filename: str) -> AttrDict:
+    console.log(f"Trying to load configuration file from {filename}...")
+    with open(filename, 'r') as config_file:
+        return _load_toml(config_file.read())
 
 
-"""
-	load_json_to_namespace: load unprocessed json to a SimpleNamespace
-
-	Parameters:
-		data: str, raw text data containing unprocessed json, to be converted
+"""d
+    _create_config
+    
+    Creates a given configuration file with given content.
 """
 
 
-def load_json_to_namespace(data: str) -> SimpleNamespace:
-    return json.loads(data, object_hook=lambda d: SimpleNamespace(**d))
+def _create_config(filename: str, content: str) -> None:
+    with open(filename, 'w') as config_file:
+        config_file.write(content)
 
 
 """
-		dump_namespace_to_dict: convert a SimpleNamespace to a dict, handling nesting
-
-	Parameters:
-		namespace: SimpleNamespace, namespace to be converted
+    _create_or_load_config
+    
+    If the configuration exists, load it. Otherwise create it and load it.
 """
 
 
-def dump_namespace_to_dict(namespace: SimpleNamespace) -> dict:
-    nsc = copy(namespace)
-    ns = vars(nsc)
-    for x in ns:
-        if type(ns.get(x)) == SimpleNamespace:
-            ns[x] = dump_namespace_to_dict(ns.get(x))
-    return ns
+def _create_or_load_config(filename: str):
+    # write the default config to the given filename
+    # if it doesn't already exist
+    if not os.path.exists(filename):
+        _create_config(filename, DEFAULT_CONFIG)
+        console.log(f"Default configuration file created at {filename}.")
+    return _load_config(filename)
 
 
-"""
-	_load_config: load CONFIG_FILE_PATH into a namespace, then return it.
-	This shouldn't be called directly, use load_or_create_config to handle missing config.
-"""
+config = _create_or_load_config(CONFIG_PATH)
 
-
-def _load_config() -> SimpleNamespace:
-    with open(CONFIG_FILE_PATH, 'r') as config_file:
-        try:
-            return load_json_to_namespace(config_file.read())
-        except:
-            print("Error reading config file.")
-            exit(1)
-
-
-"""
-	load_or_create_config: load the config if it exists, else create it
-"""
-
-
-def load_or_create_config():
-    if path.exists(CONFIG_FILE_PATH):
-        namespace = _load_config()
-        verify_config_against_schema(namespace, DEFAULT_CONFIG)
-        # insert a reference to the save function.
-        # (this won't conflict; save is in schema checkers reserved_keys array)
-        namespace.save = lambda: persist_config_namespace(namespace)
-        return namespace
-    else:
-        # load default config, and save it to disk.
-        print("Using default config...")
-        # insert ref to the save function then call it.
-        namespace = load_json_to_namespace(json.dumps(DEFAULT_CONFIG))
-        namespace.save = lambda: persist_config_namespace(namespace)
-        namespace.save()
-        return namespace
-
-
-config = load_or_create_config()
-
-if __name__ == "__main__":
-    config = load_or_create_config()
-    print(config)
+print(config)
