@@ -6,7 +6,7 @@ from socialserver.constants import BIO_MAX_LEN, DISPLAY_NAME_MAX_LEN, MAX_PASSWO
     REGEX_USERNAME_VALID
 from socialserver.util.auth import generate_salt, get_username_from_token, hash_password, verify_password_valid
 from pony.orm import db_session
-from socialserver.util.oldconfig import config
+from socialserver.util.config import config
 
 
 class UserInfo(Resource):

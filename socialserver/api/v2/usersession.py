@@ -5,7 +5,7 @@ from pony.orm import db_session
 from flask import request
 from socialserver.constants import ErrorCodes
 from socialserver.util.auth import generate_key, get_ip_from_request, hash_plaintext_sha256, verify_password_valid
-from socialserver.util.oldconfig import config
+from socialserver.util.config import config
 from user_agents import parse as ua_parse
 
 

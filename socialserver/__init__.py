@@ -3,7 +3,7 @@ from flask.templating import render_template
 from flask_restful import Api
 from flask_cors import CORS
 from socialserver.api.v2.report import Report
-from socialserver.util.oldconfig import config
+from socialserver.util.config import config
 # API
 # Version 2 (current as of 3.x) (note: should this be renamed to api v3?)
 # Just for major server version parity? The official client is going to use
