@@ -1,9 +1,6 @@
-from datetime import datetime
-import re
 from flask_restful import Resource, reqparse
-from werkzeug.wrappers import request
 from socialserver.constants import MAX_FEED_GET_COUNT, ErrorCodes
-from socialserver.db import DbFollow, DbPost, DbBlock, DbPostLike, DbUser
+from socialserver.db import DbPost, DbBlock, DbPostLike, DbUser
 from socialserver.util.auth import get_username_from_token
 from pony.orm import db_session
 from pony import orm

@@ -1,13 +1,11 @@
-from flask import Flask, request
-from flask.helpers import make_response
+from flask import Flask
 from flask.templating import render_template
-from flask_restful import Resource, Api
+from flask_restful import Api
 from flask_cors import CORS
-from werkzeug.utils import redirect
 from socialserver.api.v2.report import Report
 from socialserver.util.config import config
 # API
-# Version 2 (current as of 3.x) (note: should this be renamed to apiv3?)
+# Version 2 (current as of 3.x) (note: should this be renamed to api v3?)
 # Just for major server version parity? The official client is going to use
 # a sync-ed major version to denote basic compatibility, followed by minor
 # for QoL upgrades most likely, so maybe the api should?

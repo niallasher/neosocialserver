@@ -1,6 +1,3 @@
-from argparse import ArgumentParser
-from socialserver.util.config import config
-from socialserver import application
 from socialserver.cli.cli import cli
 
 if __name__ == "__main__":

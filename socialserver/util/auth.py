@@ -1,11 +1,9 @@
 from types import SimpleNamespace
-from functools import wraps
 import argon2
 from cryptography.fernet import Fernet
 from secrets import randbits
 from hashlib import sha256
 
-from pony.orm.core import select
 from socialserver.util.config import config
 from socialserver.db import DbUserSession
 from secrets import token_urlsafe

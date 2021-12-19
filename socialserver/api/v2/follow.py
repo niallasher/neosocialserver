@@ -1,6 +1,5 @@
 from datetime import datetime
 from flask_restful import Resource, reqparse
-from werkzeug.wrappers import request
 from socialserver.db import DbUser, DbFollow
 from socialserver.util.auth import get_username_from_token
 from socialserver.constants import ErrorCodes

@@ -1,12 +1,10 @@
 from datetime import datetime
 import re
 from flask_restful import Resource, reqparse
-from werkzeug.wrappers import request
 from socialserver.db import DbHashtag, DbImage, DbPost, DbPostLike, DbUser
 from pony.orm import db_session, commit
 from socialserver.constants import MAX_IMAGES_PER_POST, POST_MAX_LEN, REGEX_HASHTAG, ErrorCodes
 from socialserver.util.auth import get_username_from_token
-from json import loads
 
 
 class Post(Resource):
