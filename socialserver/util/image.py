@@ -43,7 +43,7 @@ if not path.exists(IMAGE_DIR):
 
 # TODO: not sure how to dest represent a dict with pythons type
 # annotations. Need to fix this.
-def save_images_to_disk(images: dict(), access_id: str) -> None:
+def save_images_to_disk(images: dict, access_id: str) -> None:
 
     def save_with_pixel_ratio(image, filename, pixel_ratio):
         image.save(f"{IMAGE_DIR}/{access_id}/{filename}_{pixel_ratio}x.jpg",
@@ -217,10 +217,10 @@ def generate_image_of_type(identifier, new_type):
 """
 
 
-def handle_upload(image_package: dict(), upload_type_int: int, userid: int) -> None:
+def handle_upload(image_package: dict, upload_type_int: int, userid: int) -> None:
     # Retrieve enum value for upload type
     upload_type = ImageUploadTypes(upload_type_int)
-    # deserialize the JSON containing image dataurls
+    # deserialize the JSON containing image data urls
     images = loads(image_package)
     # if the client didn't supply a cropped image for the purpose,
     # we'll just use the original image in it's place.

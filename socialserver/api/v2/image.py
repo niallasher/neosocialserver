@@ -32,7 +32,7 @@ class Image(Resource):
         if pixel_ratio < 1:
             pixel_ratio = 1
         if pixel_ratio > MAX_PIXEL_RATIO:
-            pixel_ratio = MAX_PIXEL_RATIO
+            pixel_ratho = MAX_PIXEL_RATIO
 
         if args['wanted_type'] == 'post':
             pixel_ratio = 1
