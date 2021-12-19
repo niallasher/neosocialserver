@@ -32,19 +32,6 @@ def upload_image(image_path):
 
     image_b64 = image_to_b64(bio, mimetype)
 
-    print("__________________")
-    print("Image Upload Types")
-    print("__________________")
-    for i in ImageUploadTypes:
-        print(f"{i.value}: {i}")
-
-    while True:
-        try:
-            wanted_input = int(input("Wanted type?:  "))
-            break
-        except TypeError:
-            pass
-
     # FIXME: shouldn't be using hardcoded UID 1 here, it's just
     # for testing
     print(handle_upload(dumps({"original": image_b64}), 1))
