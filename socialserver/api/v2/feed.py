@@ -15,7 +15,7 @@ class PostFeed(Resource):
         parser.add_argument('access_token', type=str, required=True)
         parser.add_argument('count', type=int, required=True)
         # maybe we should just assume zero if an offset isn't specified?
-        # but i think it's better to be explicit about including it, as
+        # but I think it's better to be explicit about including it, as
         # otherwise I can see myself or others forgetting it, and wondering
         # why the same posts keep popping up.
         parser.add_argument('offset', type=int, required=True)

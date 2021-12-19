@@ -17,7 +17,7 @@ class DbUser(db.Entity):
     creation_time = orm.Required(datetime.datetime)
     birthday = orm.Optional(datetime.date)
     # legacy accounts are the ones imported from socialserver 2.x during migration
-    # this doesn't mean much now, but might becomne important in the future
+    # this doesn't mean much now, but might become important in the future
     # so might as well have it.
     is_legacy_account = orm.Required(bool)
     # check out AccountAttributes enum in constants for more info
@@ -88,7 +88,7 @@ class DbUserSession(db.Entity):
 
 
 class DbPost(db.Entity):
-    # whether the post is currently in the modqueue
+    # whether the post is currently in the mod-queue
     under_moderation = orm.Required(bool)
     user = orm.Required('DbUser')
     creation_time = orm.Required(datetime.datetime)
@@ -109,20 +109,20 @@ class DbPostReport(db.Entity):
     # post they are associated with has been removed.
     # IMPORTANT NOTE: could this result in users posting illegal things
     # and then deleting them soon after to prevent reports being seen by a
-    # moderator? this needs investigating, but i can't think of a clean
+    # moderator? this needs investigating, but I can't think of a clean
     # solution right now.
     active = orm.Required(bool)
     # we want to ensure that the report has a user,
     # but we don't want to actually tie it to a user,
     # since if somebody reports illegal content, and then
     # deletes their account, we still want to know about
-    # the report so we can take action
+    # the report, so we can take action
     reporter = orm.Optional('DbUser', reverse="submitted_reports")
     post = orm.Required('DbPost', reverse="reports")
     creation_time = orm.Required(datetime.datetime)
     # since we do one report per post, we want to be able to
     # report multiple infringements at once, hence the array.
-    # NOTE: not sure we do want this? Need to figure that one
+    # NOTE: not sure if we do want this? Need to figure that one
     # out soon I guess.
     # check out the socialserver.constants.ReportReasons enum
     # for a list of these.
@@ -198,7 +198,7 @@ class DbApiKey(db.Entity):
     owner = orm.Required('DbUser')
     creation_time = orm.Required(datetime.datetime)
     # we store this with sha256, not pbkdf2 or argon2,
-    # since we want it to be super fast, as each request
+    # since we want it to be super-fast, as each request
     # will have to verify it if it's in use.
     # no point salting it since it's high entropy already,
     # and practically impossible to build a lookup table for

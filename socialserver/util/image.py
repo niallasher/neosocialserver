@@ -75,7 +75,7 @@ def create_random_image_identifier() -> str:
 
 """
     mult_size_tuple
-    returns a new size tuple, multipled from the given
+    returns a new size tuple, multiplied from the given
     one, for pixel ratio stuff
 """
 
@@ -161,7 +161,7 @@ def calculate_largest_fit(image: PIL.Image, max_size: Tuple[int, int]) -> Tuple[
 
 
 def convert_data_url_to_image(data_url: str) -> PIL.Image:
-    # strip the mime type declaration, and the data: prefix
+    # strip the mime type declaration, and the data: prefix,
     # so we can convert to binary and create an image
     data_url = re.sub(r'^data:image/.+;base64,', '', data_url)
     # we're storing in BytesIO, so we don't have to

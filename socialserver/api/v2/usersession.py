@@ -119,7 +119,7 @@ class UserSessionList(Resource):
                 # like [THIS DEVICE] to an entry in the list of sessions
                 "current": session.access_token_hash == hash_plaintext_sha256(args['access_token']),
                 # the device that created the session, this should just about always be the
-                # same device that created it anyways, unless you've been reusing access tokens(?)
+                # same device that created it anyway, unless you've been reusing access tokens(?)
                 # or have used a backup program or smth to copy ur data
                 "device_info": {
                     # user_agent.os is an array containing the OS first,

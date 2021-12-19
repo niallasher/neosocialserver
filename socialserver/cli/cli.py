@@ -24,20 +24,20 @@ def devel_run(port, bind_addr, template_auto_reload, max_file_age):
 
 @click.command()
 @click.option('interactive', '--interactive', '-i', default=True, help='Enable interactive mode.')
-def mkuser(interactive):
+def mk_user(interactive):
     if not interactive:
-        print("Sorry, non-interactive mode is not avaliable yet.")
+        print("Sorry, non-interactive mode is not available yet.")
     else:
         mk_user_interactive()
 
 
 @click.command()
 @click.argument('path')
-def uploadimage(path):
+def cli_upload_image(path):
     upload_image(path)
 
 
 # register commands with cli group
-cli.add_command(uploadimage)
+cli.add_command(cli_upload_image)
 cli.add_command(devel_run)
-cli.add_command(mkuser)
+cli.add_command(mk_user)

@@ -36,7 +36,7 @@ class Post(Resource):
             return {"error": ErrorCodes.POST_TOO_LONG.value}, 400
 
         # we want to store db refs to the images,
-        # instead of retriving them from id whenever
+        # instead of retrieving them from id whenever
         # somebody wants the post, so we populate the images
         # array with them.
         images = []
@@ -59,7 +59,7 @@ class Post(Resource):
         # checking for hashtags in the post content
         # hashtags can be 1 to 12 chars long and only alphanumeric.
         hashregex = re.compile(REGEX_HASHTAG)
-        # the regex is actually case insensitive,
+        # the regex is actually case-insensitive,
         # but we store them in the database lowercase
         # and converting them here means we don't have
         # to loop over the created list.

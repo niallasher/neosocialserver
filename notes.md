@@ -3,7 +3,7 @@
 ## Tags
 
 - Max length of 12 characters.
-- Case insensitive.
+- Case-insensitive.
 - a-z and A-Z ONLY!
 - Prefixed with a # character.
 - Up to 10 tags per post ???
@@ -17,14 +17,14 @@
 ## Usernames
 
 - Max length of 20 characters (was going to be 15, but one socialshare user had to have a 16 char username)
-- Case insensitive.
+- Case-insensitive.
 - Globally unique.
 - a-z, 0-9 and \_ ONLY!
 
 ## Display Names
 
 - Max length of 32 characters. If yours is longer, it will be truncated. Sorry socialshare users.
-- Saved; if you type one thats never been done it just gets added to the DB. Otherwise you get to join the users of that tag! FUN!
+- Saved; if you type one that's never been done it just gets added to the DB. Otherwise, you get to join the users of that tag! FUN!
 - Whatever you want I guess (will regret this later?)
 
 # Bios
@@ -39,7 +39,7 @@
 
 # Images
 
-- Max count per post: 4
+- Max image count per post: 4
 - When sending a cropped image, we should send the original too. The client should send a json string in the payload, like the following:
 
 ```
@@ -49,4 +49,4 @@
   }
 ```
 
-If no cropped image is present, then cropped can be ommited, and the server will understand.
+If no cropped image is present, then cropped can be omitted, and the server will understand.

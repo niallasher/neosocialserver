@@ -40,7 +40,7 @@ MAX_TAGS_PER_POST = 5
 """
 
 # highest pixel ratio we generate. anything higher will be given the max.
-# client should round up to the next integer, but we'll do it if they dont.
+# client should round up to the next integer, but we'll do it if they don't.
 MAX_PIXEL_RATIO = 4
 MAX_IMAGE_SIZE_POST = (3000, 3000)
 MAX_IMAGE_SIZE_POST_PREVIEW = (512, 512)
@@ -129,9 +129,9 @@ class ErrorCodes(Enum):
     BLOCK_ALREADY_EXISTS = 37
     CANNOT_BLOCK_SELF = 38
     CANNOT_FIND_BLOCK_ENTRY = 39
-    # i'm not sure whether it's a good idea to limit
+    # I'm not sure whether it's a good idea to limit
     # reports per post, but I think it will help reduce spam?
-    # although, i'm not sure we want to reveal to the user that
+    # although, I am not sure if we want to reveal to the user that
     # their report didn't go through since they already have;
     # this could just encourage them to create a new account and
     # report again? maybe this should be a config key, since it
@@ -142,8 +142,8 @@ class ErrorCodes(Enum):
     # yes, I am aware of the irony involved in the name
     # of this error being so long :)
     POST_REPORT_SUPPLEMENTAL_INFO_TOO_LONG = 42
-    # i feel like there is no reason to do this, so lets
-    # disallow it. might change later.
+    # I feel like there is no reason to do this, so we might
+    # as well disallow it. might change later.
     CANNOT_REPORT_OWN_POST = 43
     USER_NOT_MODERATOR_OR_ADMIN = 44
     REPORT_NOT_FOUND = 45
@@ -184,7 +184,7 @@ class ApiKeyPermissions(Enum):
   ImageUploadTypes
   A list of image upload types. Used to define
   what the size of the image should be.
-  Note these are seperate from ImageTypes, since
+  Note these are separate from ImageTypes, since
   they can define multiple images (e.g. profile picture, and profile picture large). While ImageTypes
   represent a single one.
 """
@@ -199,7 +199,7 @@ class ImageUploadTypes(Enum):
 """
   ImageTypes
   A list of imageset save types and their respective filenames,
-  for imageutil.save_images_to_disk
+  for socialserver.util.image.save_images_to_disk
 """
 
 
