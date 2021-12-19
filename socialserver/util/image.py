@@ -41,7 +41,7 @@ if not path.exists(IMAGE_DIR):
 """
 
 
-# TODO: not sure how to dest represent a dict with pythons type
+# TODO: not sure how to best represent a dict with pythons type
 # annotations. Need to fix this.
 def save_images_to_disk(images: dict, access_id: str) -> None:
 
@@ -62,7 +62,7 @@ def save_images_to_disk(images: dict, access_id: str) -> None:
 
 
 """
-    create_random_image_identier
+    create_random_image_identifier
     return a random identifier to be associated with an image,
     for retrieval purposes
 """
@@ -80,7 +80,7 @@ def create_random_image_identifier() -> str:
 
 
 def mult_size_tuple(size: Tuple[int, int], multiplier: int) -> Tuple[int, int]:
-    return (int(size[0]*multiplier), int(size[1]*multiplier))
+    return tuple((int(size[0]*multiplier), int(size[1]*multiplier)))
 
 
 """
@@ -148,7 +148,7 @@ def calculate_largest_fit(image: PIL.Image, max_size: Tuple[int, int]) -> Tuple[
     # create the largest possible image within the original image size, and the aspect ratio
     new_width = image.size[0] - (image.size[0] % target_aspect_ratio[0])
     new_height = new_width * (target_aspect_ratio[0] / target_aspect_ratio[1])
-    return (new_width, new_height)
+    return tuple((new_width, new_height))
 
 
 """
@@ -163,7 +163,7 @@ def convert_data_url_to_image(data_url: str) -> PIL.Image:
     # strip the mime type declaration, and the data: prefix
     # so we can convert to binary and create an image
     data_url = re.sub(r'^data:image/.+;base64,', '', data_url)
-    # we're storing in BytesIO so we don't have to
+    # we're storing in BytesIO, so we don't have to
     # write to disk, and we can use the image directly.
     # we only want to store it once processing is done.
     binary_data = BytesIO(urlsafe_b64decode(data_url))
@@ -195,7 +195,7 @@ def commit_image_to_db(identifier: str, userid: int) -> None or int:
 """
     generate_image_of_type
     Optimize the original copy of an already uploaded image
-    for a new type. Raises an exeption if the image cannot be converted.
+    for a new type. Raises an exception if the image cannot be converted.
 """
 
 
@@ -222,7 +222,7 @@ def handle_upload(image_package: str, upload_type_int: int, userid: int) -> Simp
     # deserialize the JSON containing image data urls
     images = loads(image_package)
     # if the client didn't supply a cropped image for the purpose,
-    # we'll just use the original image in it's place.
+    # we'll just use the original image in its place.
     # this is a fallback, in case of a client that doesn't do
     # due diligence.
     # tldr: unlike customer service, it's usually the client who is wrong.
