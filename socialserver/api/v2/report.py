@@ -50,7 +50,7 @@ class Report(Resource):
 
         # append turns the args into an array, that is appended
         # to with each duplicate, hence it being a list
-        post_report_reasons: List(int) = args['report_reason']
+        post_report_reasons: List[int] = args['report_reason']
         # chuck out any invalid report reasons.
         # we should only see these if people are messing with the api
         # and sending weird values, or some out of date client has an
