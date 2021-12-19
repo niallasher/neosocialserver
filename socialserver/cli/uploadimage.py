@@ -41,9 +41,8 @@ def upload_image(image_path):
     while True:
         try:
             wanted_input = int(input("Wanted type?:  "))
-            upload_type = ImageUploadTypes(wanted_input)
             break
-        except:
+        except TypeError:
             pass
 
     # FIXME: shouldn't be using hardcoded UID 1 here, it's just
