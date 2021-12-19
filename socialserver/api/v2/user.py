@@ -106,7 +106,7 @@ class User(Resource):
             is_legacy_account=False,
             account_attributes=[],
             bio=args['bio'] if args['bio'] is not None else "",
-            approved=True if config.auth.registration.approval_required == False else False
+            account_approved=True if config.auth.registration.approval_required is False else False
         )
 
         return {"needs_approval": config.auth.registration.approval_required}, 201
