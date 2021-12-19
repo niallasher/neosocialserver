@@ -171,10 +171,6 @@ def verify_config_against_schema(namespace: SimpleNamespace, schema: dict) -> No
         elif ns_dict_key not in schema_keys:
             extraneous_keys.append(ns_dict_key)
 
-    config_perfect = True if (len(extraneous_keys)
-                              + len(missing_keys)
-                              + len(illegal_keys)) == 0 else False
-
     for key in extraneous_keys:
         print(f"Extraneous/Unused key: {key}")
     for key in missing_keys:

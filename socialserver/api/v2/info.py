@@ -9,8 +9,6 @@ class ServerInfo(Resource):
     # It doesn't seem to work with flask-restful when it is.
     def get(self):
 
-        reg_type = 0
-
         return {
             "version": SERVER_VERSION,
         },

@@ -199,7 +199,7 @@ def commit_image_to_db(identifier: str, userid: int) -> None or int:
 """
 
 
-def generate_image_of_type(identifier, new_type):
+def generate_image_of_type(identifier):
     image_exists = DbImage.get(identifier=identifier) is not None
     if not image_exists:
         raise Exception("image not found")
@@ -219,7 +219,6 @@ def generate_image_of_type(identifier, new_type):
 
 def handle_upload(image_package: dict, upload_type_int: int, userid: int) -> None:
     # Retrieve enum value for upload type
-    upload_type = ImageUploadTypes(upload_type_int)
     # deserialize the JSON containing image data urls
     images = loads(image_package)
     # if the client didn't supply a cropped image for the purpose,
@@ -233,7 +232,6 @@ def handle_upload(image_package: dict, upload_type_int: int, userid: int) -> Non
     else:
         image = convert_data_url_to_image(images['cropped'])
         original_image = convert_data_url_to_image(images['original'])
-    upload_type = ImageUploadTypes(upload_type_int)
     access_id = create_random_image_identifier()
 
     # all resized images get 4 different pixel ratios, returned in an array from
