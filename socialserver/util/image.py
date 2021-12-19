@@ -217,7 +217,7 @@ def generate_image_of_type(identifier):
 """
 
 
-def handle_upload(image_package: dict, upload_type_int: int, userid: int) -> None:
+def handle_upload(image_package: str, upload_type_int: int, userid: int) -> SimpleNamespace:
     # Retrieve enum value for upload type
     # deserialize the JSON containing image data urls
     images = loads(image_package)
