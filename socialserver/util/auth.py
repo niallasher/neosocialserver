@@ -3,7 +3,6 @@ import argon2
 from secrets import randbits
 from hashlib import sha256
 
-from socialserver.util.config import config
 from socialserver.db import DbUserSession
 from secrets import token_urlsafe
 from pony.orm import db_session
