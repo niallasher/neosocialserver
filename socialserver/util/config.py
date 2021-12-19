@@ -1,8 +1,10 @@
 import os
 import toml
 from attrdict import AttrDict
+from rich import print
 from rich.console import Console
 from rich.traceback import install as install_traceback_handler
+from typing import Union
 from pathlib import Path
 
 # TODO: this should be in __init__.py once this module is actually a thing that's used by the rest of the code
@@ -86,6 +88,55 @@ signup_enabled = false
 """
 
 """
+    _test_config
+    
+    Tests a loaded dict against an example configuration dict. 
+    (To test against the default schema, parse it, then use the
+    resultant dict as the second argument)
+    
+    Will exit program with an error code of 1 if keys are missing.
+"""
+
+
+def _test_config(current_config: AttrDict, schema: AttrDict) -> None:
+    # Data isn't validated, just structure, so feel free to use a loaded
+    # copy of DEFAULT_CONFIG as your schema.
+
+    def _recursive_unwrap_dict_keys(dict_obj: Union[AttrDict, dict], prefix=""):
+        keys = []
+        for key in dict_obj.keys():
+            keys.append(prefix + key)
+            # if type == dict we're dealing with a nested one,
+            # so we'll recurse using it as the base, with an
+            # updated prefix
+            if type(dict_obj.get(key)) is dict:
+                nested_keys = _recursive_unwrap_dict_keys(dict_obj.get(key), prefix=(prefix + key + "."))
+                for nested_key in nested_keys:
+                    keys.append(nested_key)
+        return keys
+
+    current_config_keys = _recursive_unwrap_dict_keys(current_config)
+    schema_config_keys = _recursive_unwrap_dict_keys(schema)
+
+    # check for any keys that are in the schema,
+    # but *not* in current_config_keys. exit if
+    # any are missing, since dying now is preferable
+    # to a crash when the user touches functionality
+    # that checks for a key. in the future, it might be
+    # nice to have default values instead?
+
+    missing_keys = []
+
+    for key in schema_config_keys:
+        if key not in current_config_keys:
+            console.log(f"[bold red]Missing key in configuration file:[/bold red][italic] {key}")
+            missing_keys.append(key)
+
+    if len(missing_keys) >= 1:
+        console.log(":dizzy_face: The config file is missing keys! Cannot continue.", emoji=True)
+
+
+"""
     _load_toml
     
     Loads a string containing a TOML file, into an AttrDict,
@@ -100,17 +151,21 @@ def _load_toml(toml_string: str) -> AttrDict:
 """
     _load_config
     
-    Loads a given configuration file.
+    Loads a given configuration file, testing it in the process.
 """
 
 
 def _load_config(filename: str) -> AttrDict:
     console.log(f"Trying to load configuration file from {filename}...")
     with open(filename, 'r') as config_file:
+        config_data = config_file.read()
+        config_dict = _load_toml(config_data)
+        _test_config(config_dict, _load_toml(DEFAULT_CONFIG))
+        console.log("Configuration file OK!")
         return _load_toml(config_file.read())
 
 
-"""d
+"""
     _create_config
     
     Creates a given configuration file with given content.
