@@ -145,7 +145,7 @@ def _test_config(current_config: AttrDict, schema: AttrDict) -> None:
 
 
 def _load_toml(toml_string: str) -> AttrDict:
-    return AttrDict(toml.loads(toml_string))
+    return(AttrDict(toml.loads(toml_string)))
 
 
 """
@@ -158,11 +158,14 @@ def _load_toml(toml_string: str) -> AttrDict:
 def _load_config(filename: str) -> AttrDict:
     console.log(f"Trying to load configuration file from {filename}...")
     with open(filename, 'r') as config_file:
+
         config_data = config_file.read()
         config_dict = _load_toml(config_data)
+
         _test_config(config_dict, _load_toml(DEFAULT_CONFIG))
         console.log("Configuration file OK!")
-        return _load_toml(config_file.read())
+
+        return config_dict
 
 
 """
