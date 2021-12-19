@@ -1,6 +1,5 @@
 from types import SimpleNamespace
 import argon2
-from cryptography.fernet import Fernet
 from secrets import randbits
 from hashlib import sha256
 
@@ -10,7 +9,6 @@ from secrets import token_urlsafe
 from pony.orm import db_session
 
 hasher = argon2.PasswordHasher()
-fernet_inst = Fernet(config.auth.totp.encryption_key)
 
 """
     generate_key
@@ -138,13 +136,3 @@ def get_ip_from_request(request) -> str:
     if ip is None:
         ip = request.remote_addr
     return ip
-
-
-# TODO: fix this stuff
-
-# def fernet_encrypt_string(string) -> str:
-#     return fernet_inst.encrypt(string.encode()).decode()
-
-
-# def fernet_decrypt_string(string) -> str:
-#     return fernet_inst.decrypt(string.encode())
