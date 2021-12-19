@@ -30,7 +30,7 @@ fernet_inst = Fernet(config.auth.totp.encryption_key)
 
 
 def generate_key() -> SimpleNamespace(key=str, hash=str):
-    # 32 random bytes. sufficently secure, not too big payload-wise
+    # 32 random bytes. sufficiently secure, not too big payload-wise
     # if we send it with each request
     key = token_urlsafe(32)
     return SimpleNamespace(
@@ -53,7 +53,7 @@ def verify_plaintext_against_hash_sha256(plaintext: str, hash: str) -> bool:
 """
     legacy_generate_salt
     generate a 2.x format salt. this should never be needed,
-    but in case of unforseen circumstances, it's here
+    but in case of unforeseen circumstances, it's here
 """
 
 
@@ -135,7 +135,7 @@ def get_username_from_token(session_token: str) -> str or None:
 """
 
 
-def get_ip_from_request(request: str) -> str:
+def get_ip_from_request(request) -> str:
     ip = request.headers.get('X-Forwarded-For')
     if ip is None:
         ip = request.remote_addr
