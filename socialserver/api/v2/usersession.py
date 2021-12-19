@@ -81,7 +81,7 @@ class UserSession(Resource):
 
         session = DbUserSession.get(
             access_token_hash=hash_plaintext_sha256(args['access_token']))
-        if session == None:
+        if session is not None:
             return {'error': ErrorCodes.TOKEN_INVALID.value}, 401
 
         session.delete()

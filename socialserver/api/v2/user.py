@@ -82,7 +82,7 @@ class User(Resource):
         if existing_user is not None:
             return {"error": ErrorCodes.USERNAME_TAKEN.value}, 400
 
-        if args['bio'] != None and len(args['bio']) >= BIO_MAX_LEN:
+        if args['bio'] is not None and len(args['bio']) >= BIO_MAX_LEN:
             return {"error": ErrorCodes.BIO_NON_CONFORMING.value}, 400
 
         if len(args['display_name']) >= DISPLAY_NAME_MAX_LEN:
@@ -104,7 +104,7 @@ class User(Resource):
             creation_time=datetime.now(),
             is_legacy_account=False,
             account_attributes=[],
-            bio=args['bio'] if args['bio'] != None else "",
+            bio=args['bio'] if args['bio'] is not None else "",
             approved=True if config.auth.registration.approval_required == False else False
         )
 

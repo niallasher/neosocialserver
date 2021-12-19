@@ -180,7 +180,7 @@ def convert_data_url_to_image(data_url: str) -> PIL.Image:
 @db_session
 def commit_image_to_db(identifier: str, userid: int) -> None or int:
     uploader = DbUser.get(id=userid)
-    if uploader == None:
+    if uploader is None:
         print("Could not commit to DB: user id does not exist!")
     else:
         entry = DbImage(
