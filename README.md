@@ -1,4 +1,4 @@
-# socialserver neo
+# 📷 socialserver neo
 
 socialserver-neo is a rewrite of [socialserver 2.x](https://www.github.com/niallasher/socialserver). Its main goal is to
 actually almost maybe somewhat competent in comparison to its predecessor.
