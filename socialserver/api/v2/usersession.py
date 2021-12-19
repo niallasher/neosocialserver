@@ -1,12 +1,10 @@
 from datetime import datetime
-
-import user_agents
-from socialserver.db import db, DbUser, DbUserSession
-from flask_restful import Resource, Api, reqparse
+from socialserver.db import DbUser, DbUserSession
+from flask_restful import Resource, reqparse
 from pony.orm import db_session
 from flask import request
 from socialserver.constants import ErrorCodes
-from socialserver.util.auth import generate_key, get_ip_from_request, get_username_from_token, hash_plaintext_sha256, verify_password_valid
+from socialserver.util.auth import generate_key, get_ip_from_request, hash_plaintext_sha256, verify_password_valid
 from socialserver.util.config import config
 from user_agents import parse as ua_parse
 
@@ -81,7 +79,7 @@ class UserSession(Resource):
 
         session = DbUserSession.get(
             access_token_hash=hash_plaintext_sha256(args['access_token']))
-        if session is not None:
+        if session is None:
             return {'error': ErrorCodes.TOKEN_INVALID.value}, 401
 
         session.delete()
