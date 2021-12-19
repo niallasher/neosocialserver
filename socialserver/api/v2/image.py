@@ -2,7 +2,7 @@ from flask.helpers import send_file
 from os import path
 from socialserver.constants import MAX_PIXEL_RATIO, ErrorCodes, ImageTypes
 from socialserver.db import DbImage
-from socialserver.util.config import config
+from socialserver.util.oldconfig import config
 from flask_restful import Resource, reqparse
 from pony.orm import db_session
 
