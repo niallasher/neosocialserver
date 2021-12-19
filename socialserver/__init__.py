@@ -2,6 +2,9 @@ from flask import Flask
 from flask.templating import render_template
 from flask_restful import Api
 from flask_cors import CORS
+# this should be the first socialserver import here.
+# it sets up traceback pretty printing when it's imported!
+from socialserver.util.output import console
 from socialserver.util.config import config
 # API Version 2
 from socialserver.api.v2.report import Report
@@ -42,4 +45,4 @@ api.add_resource(Block, '/api/v2/block/user')
 api.add_resource(Report, '/api/v2/report/post')
 
 if config.legacy.api_v1_interface.enable:
-    print("Legacy API has not been implemented yet.")
+    console.log("[red]Warning:[/red] The v1 legacy interface hasn't been implemented yet!")

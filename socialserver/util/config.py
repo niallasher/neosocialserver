@@ -3,13 +3,8 @@ import toml
 from attrdict import AttrDict
 from rich import print
 from rich.console import Console
-from rich.traceback import install as install_traceback_handler
 from typing import Union
 from pathlib import Path
-
-# TODO: this should be in __init__.py once this module is actually a thing that's used by the rest of the code
-install_traceback_handler()
-console = Console()
 
 # if the user doesn't specify a server root storage dir,
 # we're going to store everything in $HOME/socialserver.
