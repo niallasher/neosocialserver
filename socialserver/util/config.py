@@ -9,18 +9,26 @@ from pathlib import Path
 install_traceback_handler()
 console = Console()
 
-HOME = os.getenv("HOME")
+# if the user doesn't specify a server root storage dir,
+# we're going to store everything in $HOME/socialserver.
 
-FILE_ROOT = os.getenv("SOCIALSERVER_ROOT", default=f"{HOME}/socialserver")
+# TODO: need to see how this will work with containers and the like. (do they even have $HOME defined?)
 
-if FILE_ROOT is f"{HOME}/socialserver":
-    console.log("The SOCIALSERVER_ROOT environment variable is unset! Please set it in your environment.")
-    exit(1)
+HOME_DIR = os.getenv("HOME")
+
+socialserver_root = os.getenv("SOCIALSERVER_ROOT", default=None)
+
+if socialserver_root is None:
+    console.log(f"$SOCIALSERVER_ROOT was not defined. Defaulting to {HOME_DIR}/socialserver!")
+    FILE_ROOT = f"{HOME_DIR}/socialserver"
+else:
+    console.log(f"Using root directory {socialserver_root}!")
+    FILE_ROOT = socialserver_root
 
 if not os.path.exists(FILE_ROOT):
-    console.log("The SOCIALSERVER_ROOT folder, {FILE_ROOT} does not exist. Attempting to create it.")
     folder_path = Path(FILE_ROOT)
     folder_path.mkdir(parents=True)
+    console.log(f"The root folder, {FILE_ROOT}, was created.")
 
 DEFAULT_CONFIG_PATH = f"{FILE_ROOT}/config.toml"
 
@@ -130,6 +138,7 @@ def _create_or_load_config(filename: str):
     return _load_config(filename)
 
 
-config = _create_or_load_config(CONFIG_PATH)
+# if you want to use the configuration in another file,
+# just import config from here.
 
-print(config)
+config = _create_or_load_config(CONFIG_PATH)
