@@ -1,7 +1,7 @@
 from socialserver.tests.util import test_db, server_address, test_db_with_user
 import requests
 from pony.orm import db_session
-from socialserver.constants import ErrorCodes, BIO_MAX_LEN
+from socialserver.constants import ErrorCodes, BIO_MAX_LEN, DISPLAY_NAME_MAX_LEN
 from secrets import token_urlsafe
 
 
@@ -108,6 +108,15 @@ def test_delete_user_invalid_password(test_db_with_user, server_address, monkeyp
     assert del_req.json()['error'] == ErrorCodes.INCORRECT_PASSWORD.value
 
 
+def test_delete_user_missing_input(test_db_with_user, server_address, monkeypatch):
+    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
+    monkeypatch.setattr("socialserver.util.auth.db", test_db_with_user.get('db'))
+    print(test_db_with_user.get('access_token'))
+    del_req = requests.delete(f"{server_address}/api/v2/user",
+                              json={})
+    assert del_req.status_code == 400
+
+
 def test_delete_user_invalid_token(test_db_with_user, server_address, monkeypatch):
     monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
     monkeypatch.setattr("socialserver.util.auth.db", test_db_with_user.get('db'))
@@ -162,7 +171,6 @@ def test_update_username_already_exists(test_db_with_user, server_address, monke
                       "password": "password",
                   })
 
-    print(test_db_with_user.get('access_token'))
     del_req = requests.patch(f"{server_address}/api/v2/user",
                              json={
                                  "access_token": test_db_with_user.get('access_token'),
@@ -171,3 +179,96 @@ def test_update_username_already_exists(test_db_with_user, server_address, monke
     print(del_req.json())
     assert del_req.status_code == 400
     assert del_req.json()['error'] == ErrorCodes.USERNAME_TAKEN.value
+
+
+def test_update_username_missing_input(test_db_with_user, server_address, monkeypatch):
+    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
+    monkeypatch.setattr("socialserver.util.auth.db", test_db_with_user.get('db'))
+
+    patch_req = requests.patch(f"{server_address}/api/v2/user", json={})
+    print(patch_req.json())
+    assert patch_req.status_code == 400
+
+
+def test_update_bio(test_db_with_user, server_address, monkeypatch):
+    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
+    monkeypatch.setattr("socialserver.util.auth.db", test_db_with_user.get('db'))
+
+    bio_req = requests.patch(f"{server_address}/api/v2/user",
+                             json={
+                                 "access_token": test_db_with_user.get('access_token'),
+                                 "bio": "this is the new bio content 😀"
+                             })
+    assert bio_req.status_code == 201
+
+
+def test_update_bio_missing_input(test_db_with_user, server_address, monkeypatch):
+    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
+    monkeypatch.setattr("socialserver.util.auth.db", test_db_with_user.get('db'))
+
+    bio_req = requests.patch(f"{server_address}/api/v2/user", json={})
+    assert bio_req.status_code == 400
+
+
+def test_update_bio_too_long(test_db_with_user, server_address, monkeypatch):
+    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
+    monkeypatch.setattr("socialserver.util.auth.db", test_db_with_user.get('db'))
+
+    bio_req = requests.patch(f"{server_address}/api/v2/user",
+                             json={
+                                 "access_token": test_db_with_user.get('access_token'),
+                                 "bio": token_urlsafe(BIO_MAX_LEN + 1)
+                             })
+
+    assert bio_req.status_code == 400
+    assert bio_req.json()['error'] == ErrorCodes.BIO_NON_CONFORMING.value
+
+def test_update_display_name(test_db_with_user, server_address, monkeypatch):
+    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
+    monkeypatch.setattr("socialserver.util.auth.db", test_db_with_user.get('db'))
+
+    bio_req = requests.patch(f"{server_address}/api/v2/user",
+                             json={
+                                 "access_token": test_db_with_user.get('access_token'),
+                                 "display_name": "new name"
+                             })
+
+    assert bio_req.status_code == 201
+    assert bio_req.json()['display_name'] == 'new name'
+
+def test_update_display_name_missing_input(test_db_with_user, server_address, monkeypatch):
+    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
+    monkeypatch.setattr("socialserver.util.auth.db", test_db_with_user.get('db'))
+
+    bio_req = requests.patch(f"{server_address}/api/v2/user",
+                             json={})
+
+    assert bio_req.status_code == 400
+
+
+def test_update_display_name_too_long(test_db_with_user, server_address, monkeypatch):
+    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
+    monkeypatch.setattr("socialserver.util.auth.db", test_db_with_user.get('db'))
+
+    bio_req = requests.patch(f"{server_address}/api/v2/user",
+                             json={
+                                 "access_token": test_db_with_user.get('access_token'),
+                                 "display_name": token_urlsafe(DISPLAY_NAME_MAX_LEN + 1)
+                             })
+
+    assert bio_req.status_code == 400
+    assert bio_req.json()['error'] == ErrorCodes.DISPLAY_NAME_NON_CONFORMING.value
+
+def test_update_no_mod_params(test_db_with_user, server_address, monkeypatch):
+    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
+    monkeypatch.setattr("socialserver.util.auth.db", test_db_with_user.get('db'))
+
+    bio_req = requests.patch(f"{server_address}/api/v2/user",
+                             json={
+                                 "access_token": test_db_with_user.get('access_token')
+                             })
+
+    assert bio_req.status_code == 400
+    assert bio_req.json()['error'] == ErrorCodes.USER_MODIFICATION_NO_OPTIONS_GIVEN.value
+
+# TODO: pictures. api2 doesn't even have support for these yet, so it shouldn't be an issue
