@@ -3,6 +3,7 @@ import datetime
 from socialserver.constants import BIO_MAX_LEN, COMMENT_MAX_LEN, DISPLAY_NAME_MAX_LEN, \
     REPORT_SUPPLEMENTARY_INFO_MAX_LEN, TAG_MAX_LEN, USERNAME_MAX_LEN, AccountAttributes
 from socialserver.util.config import config
+from os import getenv
 
 
 db = orm.Database()
@@ -207,13 +208,24 @@ class DbApiKey(db.Entity):
 
 
 def _bind_db():
-    if config.database.connector == 'sqlite':
-        db.bind('sqlite', config.database.address, create_db=True)
-    elif config.database.connector == 'postgres':
-        # TODO: add postgres support back in
-        db.bind('postgres', config.database.address)
+
+    test_mode = getenv("SOCIALSERVER_TEST_MODE")
+
+    # if we're testing the program, we want the database
+    # to be in memory; any changes will get flushed when
+    # the program exits, since we don't want any persistent
+    # changes from the test suite.
+    if test_mode:
+        db.bind('sqlite', ':memory:')
     else:
-        raise ValueError("Invalid connector specified in config file.")
+        if config.database.connector == 'sqlite':
+            db.bind('sqlite', config.database.address, create_db=True)
+        elif config.database.connector == 'postgres':
+            # TODO: add postgres support back in
+            # FIXME: this isn't even the right syntax for this I don't think. fix this soon.
+            db.bind('postgres', config.database.address)
+        else:
+            raise ValueError("Invalid connector specified in config file.")
 
 
 _bind_db()
