@@ -1,6 +1,6 @@
 import pytest
 from os import getenv
-from socialserver import db
+import socialserver.db as db
 
 """
     mem_db
@@ -9,11 +9,8 @@ from socialserver import db
 
 
 @pytest.fixture
-def mem_db():
+def mem_db(monkeypatch):
     mem_db = db.create_memory_db()
-    # monkey patch socialserver.db, inserting mem_db
-    # so that the server will use it in api calls.
-    db.db = mem_db
     return mem_db
 
 

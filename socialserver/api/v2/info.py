@@ -13,4 +13,4 @@ class ServerInfo(Resource):
 
         return {
             "version": SERVER_VERSION,
-        },
+        }, 201

@@ -53,6 +53,9 @@ class UserInfo(Resource):
 
 class User(Resource):
 
+    def __init__(self):
+        db.create_tables()
+
     @db_session
     def post(self):
 
