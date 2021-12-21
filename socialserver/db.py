@@ -201,6 +201,11 @@ def _define_entities(db_object):
 
 
 def _bind_to_config_specified_db(db_object):
+    # TODO: improve database support. list of pony supported databases:
+    # https://docs.ponyorm.org/database.html#binding-the-database-object-to-a-specific-database
+    # I think only sqlite, postgres, and mariadb will be supported, since Cockroach is commercial,
+    # and I don't want to touch Oracle Database with a 10 foot pole for fear of Larry Ellison showing
+    # up in my room at midnight and demanding money
     if config.database.connector == 'sqlite':
         db_object.bind('sqlite', config.database.address, create_db=True)
     elif config.database.connector == 'postgres':
@@ -214,4 +219,4 @@ def _bind_to_config_specified_db(db_object):
 
 db = orm.Database()
 _define_entities(db)
-_bind_to_config_specified_db()
+_bind_to_config_specified_db(db)
