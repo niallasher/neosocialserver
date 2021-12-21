@@ -174,9 +174,14 @@ class User(Resource):
         parser.add_argument('password', type=str, required=True)
         args = parser.parse_args()
 
-        requesting_user = get_username_from_token(args['access_token'])
-        if requesting_user is None:
+        print(db.select("select * from User"))
+        print(db.select("select * from UserSession"))
+
+        requesting_username = get_username_from_token(args['access_token'])
+        if requesting_username is None:
             return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
+
+        requesting_user = db.User.get(username=requesting_username)
 
         if not verify_password_valid(args['password'],
                                      requesting_user.password_salt,
