@@ -1,6 +1,6 @@
 from datetime import datetime
 from getpass import getpass
-from socialserver.db import DbUser
+from socialserver.db import db
 from socialserver.cli.inputhelpers import get_input_string, get_input_bool
 from pony.orm import select, commit, db_session
 from socialserver.constants import AccountAttributes
@@ -19,7 +19,7 @@ def username_exists(username):
     # seems like pycharm doesn't see the pony object as iterable
     # it is, so we're safe to do this.
     # noinspection PyTypeChecker
-    user = select(u for u in DbUser if u.username == username)
+    user = select(u for u in db.User if u.username == username).first()
     return user is not None
 
 
@@ -52,14 +52,15 @@ def mk_user_interactive():
     salt = generate_salt()
     pwh = hash_password(pw, salt)
 
-    new_user = DbUser(
+    new_user = db.User(
         username=username,
         display_name=display_name,
         creation_time=datetime.now(),
         is_legacy_account=False,
         password_hash=pwh,
         password_salt=salt,
-        account_attributes=acc_attribs
+        account_attributes=acc_attribs,
+        account_approved=True
     )
 
     commit()
