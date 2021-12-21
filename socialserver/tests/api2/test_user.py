@@ -271,4 +271,44 @@ def test_update_no_mod_params(test_db_with_user, server_address, monkeypatch):
     assert bio_req.status_code == 400
     assert bio_req.json()['error'] == ErrorCodes.USER_MODIFICATION_NO_OPTIONS_GIVEN.value
 
+
+def test_get_user_info(test_db_with_user, server_address, monkeypatch):
+    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
+    monkeypatch.setattr("socialserver.util.auth.db", test_db_with_user.get('db'))
+
+    info_req = requests.get(f"{server_address}/api/v2/user/info",
+                            json={
+                                "access_token": test_db_with_user.get('access_token'),
+                                "username": test_db_with_user.get('username')
+                            })
+
+    assert info_req.status_code == 200
+    assert info_req.json()['username'] == 'test'
+    assert info_req.json()['display_name'] == 'test'
+
+
+def test_get_user_info_invalid_username(test_db_with_user, server_address, monkeypatch):
+    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
+    monkeypatch.setattr("socialserver.util.auth.db", test_db_with_user.get('db'))
+
+    info_req = requests.get(f"{server_address}/api/v2/user/info",
+                            json={
+                                "access_token": test_db_with_user.get('access_token'),
+                                "username": "missing_username"
+                            })
+
+    assert info_req.status_code == 404
+    assert info_req.json()['error'] == ErrorCodes.USERNAME_NOT_FOUND.value
+
+
+def test_get_user_info_missing_data(test_db_with_user, server_address, monkeypatch):
+    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
+    monkeypatch.setattr("socialserver.util.auth.db", test_db_with_user.get('db'))
+
+    info_req = requests.get(f"{server_address}/api/v2/user/info",
+                            json={})
+
+    assert info_req.status_code == 400
+
+
 # TODO: pictures. api2 doesn't even have support for these yet, so it shouldn't be an issue
