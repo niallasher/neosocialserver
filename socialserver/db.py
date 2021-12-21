@@ -3,6 +3,7 @@ import datetime
 from socialserver.constants import BIO_MAX_LEN, COMMENT_MAX_LEN, DISPLAY_NAME_MAX_LEN, \
     REPORT_SUPPLEMENTARY_INFO_MAX_LEN, TAG_MAX_LEN, USERNAME_MAX_LEN, AccountAttributes
 from socialserver.util.config import config
+from socialserver.util.output import console
 
 
 def _define_entities(db_object):
@@ -190,6 +191,23 @@ def _define_entities(db_object):
         # and practically impossible to build a lookup table for
         key_hash = orm.Required(str)
         permissions = orm.Required(orm.IntArray)  # constants.ApiKeyPermissions
+
+
+"""
+    create_memory_db
+    
+    Create a database object bound to an in-memory sqlite database.
+    For testing, since data is purged upon app exit.
+"""
+
+
+def create_memory_db():
+    console.log("Creating in memory database instance.")
+    mem_db = orm.Database()
+    _define_entities(mem_db)
+    mem_db.bind('sqlite', ':memory:')
+    mem_db.generate_mapping(create_tables=True)
+    return mem_db
 
 
 """

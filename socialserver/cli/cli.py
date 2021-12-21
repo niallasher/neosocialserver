@@ -2,6 +2,9 @@ import click
 from socialserver import application
 from socialserver.cli.mkuser import mk_user_interactive
 from socialserver.cli.uploadimage import upload_image
+from socialserver.cli.test import run_tests
+import pytest
+from os import environ
 
 
 @click.group()
@@ -37,7 +40,13 @@ def cli_upload_image(path):
     upload_image(path)
 
 
+@click.command()
+def test():
+    run_tests()
+
+
 # register commands with cli group
 cli.add_command(cli_upload_image)
 cli.add_command(devel_run)
 cli.add_command(mk_user)
+cli.add_command(test)
