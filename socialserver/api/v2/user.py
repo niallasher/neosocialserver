@@ -139,6 +139,8 @@ class User(Resource):
         if args['username'] is not None:
             if not bool(re.match(REGEX_USERNAME_VALID, args['username'])):
                 return {"error": ErrorCodes.USERNAME_INVALID.value}, 400
+            if db.User.get(username=args['username']) is not None:
+                return {"error": ErrorCodes.USERNAME_TAKEN.value}, 400
             user.username = args['username']
             return {"username": args['username']}
 
