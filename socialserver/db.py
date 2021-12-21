@@ -5,7 +5,7 @@ from socialserver.constants import BIO_MAX_LEN, COMMENT_MAX_LEN, DISPLAY_NAME_MA
 from socialserver.util.config import config
 
 
-def define_entities(db_object):
+def _define_entities(db_object):
     class User(db_object.Entity):
         sessions = orm.Set("UserSession")
         display_name = orm.Required(str, max_len=DISPLAY_NAME_MAX_LEN)
@@ -193,13 +193,14 @@ def define_entities(db_object):
 
 
 """
-    _bind_db
+    _bind_to_config_specified_db
     
     Binds to the database specified in the configuration file.
+    Any connector logic should be put here.
 """
 
 
-def _bind_db(db_object):
+def _bind_to_config_specified_db(db_object):
     if config.database.connector == 'sqlite':
         db_object.bind('sqlite', config.database.address, create_db=True)
     elif config.database.connector == 'postgres':
@@ -208,10 +209,9 @@ def _bind_db(db_object):
         db_object.bind('postgres', config.database.address)
     else:
         raise ValueError("Invalid connector specified in config file.")
-    # TODO: if we're doing migrations they should be here I think???
     db_object.generate_mapping(create_tables=True)
 
 
 db = orm.Database()
-define_entities(db)
-_bind_db(db)
+_define_entities(db)
+_bind_to_config_specified_db()
