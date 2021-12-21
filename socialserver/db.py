@@ -6,6 +6,12 @@ from socialserver.util.config import config
 from socialserver.util.output import console
 
 
+# these are used when define_entities
+# is called on a database, but pycharm
+# isn't aware of that, so we're asking
+# it very politely to shut up about
+# unused local classes.
+# noinspection PyUnusedLocal
 def define_entities(db_object):
     class User(db_object.Entity):
         sessions = orm.Set("UserSession")
