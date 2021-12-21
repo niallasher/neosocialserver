@@ -1,3 +1,53 @@
+# Unit Test Coverage
+## Api2
+
+- [ ] User
+    - [x] Creation
+    - [x] Deletion
+    - [ ] Modification
+        - [x] Username
+        - [x] Display Name
+        - [x] Bio
+        - [ ] Header Image
+        - [ ] Profile Picture
+    - [x] Get Info
+- [ ] User Session
+  - [x] Creation
+  - [x] Deletion
+  - [ ] Get Info
+- [ ] Block
+    - [ ]  Create
+    - [ ]  Remove
+    - [ ] Check blocked user not in post feed
+- [ ] Post
+    - [ ] Plaintext post
+    - [ ] With image
+    - [ ] With images
+    - [ ] Delete post
+    - [ ] Attempt to delete other persons post
+- [ ] Follow
+    - [ ] Follow User
+    - [ ] Unfollow User
+    - [ ] Attempt to follow self
+- [ ] Report
+    - [ ] Report post
+    - [ ] Attempt to double report post
+        - Need to mess with the config for this, since it
+        depends on whether silent_fail_on_double_report is True
+    - [ ] Attempt to double report with silent fail on
+        - Same as previous
+- [ ] Image
+    - [ ] Get Image
+
+## Database Schema
+
+- [ ] User
+    - [ ] Create valid
+    - [ ] Create missing data
+    - [ ] Create invalid data
+    - [ ] Remove
+- List TBD later
+
 # Notes
 
 ## Tags
