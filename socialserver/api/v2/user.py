@@ -1,12 +1,14 @@
 from datetime import datetime
 import re
-from socialserver.db import db
+from socialserver.db import db as prod_db
 from flask_restful import Resource, reqparse
 from socialserver.constants import BIO_MAX_LEN, DISPLAY_NAME_MAX_LEN, MAX_PASSWORD_LEN, MIN_PASSWORD_LEN, ErrorCodes, \
     REGEX_USERNAME_VALID
 from socialserver.util.auth import generate_salt, get_username_from_token, hash_password, verify_password_valid
 from pony.orm import db_session
 from socialserver.util.config import config
+
+db = prod_db
 
 
 class UserInfo(Resource):
@@ -39,22 +41,19 @@ class UserInfo(Resource):
             header = wanted_user.header_pic.identifier
 
         return {
-            "username": wanted_user.username,
-            "display_name": wanted_user.display_name,
-            "birthday": wanted_user.birthday,
-            "account_attributes": wanted_user.account_attributes,
-            "bio":  wanted_user.bio,
-            "follower_count": wanted_user.followers.count(),
-            "following_count": wanted_user.following.count(),
-            "profile_picture": pfp,
-            "header": header
-        }, 200
+                   "username": wanted_user.username,
+                   "display_name": wanted_user.display_name,
+                   "birthday": wanted_user.birthday,
+                   "account_attributes": wanted_user.account_attributes,
+                   "bio": wanted_user.bio,
+                   "follower_count": wanted_user.followers.count(),
+                   "following_count": wanted_user.following.count(),
+                   "profile_picture": pfp,
+                   "header": header
+               }, 200
 
 
 class User(Resource):
-
-    def __init__(self):
-        db.create_tables()
 
     @db_session
     def post(self):
@@ -83,6 +82,7 @@ class User(Resource):
             return {"error": ErrorCodes.USERNAME_INVALID.value}, 400
 
         existing_user = db.User.get(username=args['username'])
+        print(existing_user)
         if existing_user is not None:
             return {"error": ErrorCodes.USERNAME_TAKEN.value}, 400
 
@@ -122,7 +122,7 @@ class User(Resource):
         parser.add_argument('display_name', type=str, required=False)
         parser.add_argument('username', type=str, required=False)
         parser.add_argument('bio', type=str, required=False)
-        parser.add_argument('profile_pic_ref', type=str,  required=False)
+        parser.add_argument('profile_pic_ref', type=str, required=False)
         parser.add_argument('header_pic_ref', type=str, required=False)
 
         args = parser.parse_args()

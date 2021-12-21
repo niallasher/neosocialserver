@@ -1,4 +1,4 @@
-from socialserver.tests.fixtures import server_address
+from socialserver.tests.util import server_address
 from socialserver.constants import SERVER_VERSION
 from socialserver import constants
 import requests

@@ -1,3 +1,5 @@
+import os.path
+
 from pony import orm
 import datetime
 from socialserver.constants import BIO_MAX_LEN, COMMENT_MAX_LEN, DISPLAY_NAME_MAX_LEN, \
@@ -6,7 +8,7 @@ from socialserver.util.config import config
 from socialserver.util.output import console
 
 
-def _define_entities(db_object):
+def define_entities(db_object):
     class User(db_object.Entity):
         sessions = orm.Set("UserSession")
         display_name = orm.Required(str, max_len=DISPLAY_NAME_MAX_LEN)
@@ -201,12 +203,16 @@ def _define_entities(db_object):
 """
 
 
-def create_memory_db():
+def create_test_db():
     console.log("Creating in memory database instance.")
     mem_db = orm.Database()
-    _define_entities(mem_db)
-    mem_db.bind('sqlite', ':memory:')
-    mem_db.generate_mapping(create_tables=True)
+    define_entities(mem_db)
+    mem_db.bind('sqlite', '/tmp/test.db', create_db=True)
+    if mem_db.schema is None:
+        mem_db.generate_mapping(create_tables=True)
+    if mem_db is not None:
+        mem_db.drop_all_tables(with_all_data=True)
+        mem_db.create_tables()
     return mem_db
 
 
@@ -236,5 +242,5 @@ def _bind_to_config_specified_db(db_object):
 
 
 db = orm.Database()
-_define_entities(db)
+define_entities(db)
 _bind_to_config_specified_db(db)
