@@ -38,29 +38,11 @@ def server_address():
 
 
 """
-    create_test_user_api2
-
-    creates a test user using api2
-"""
-
-
-def create_test_user_api2(addr, username="test", password="test", display_name="test"):
-    requests.post(addr, json={
-        "username": username,
-        "display_name": display_name,
-        "password": password
-    })
-    return SimpleNamespace(
-        username = username,
-        display_name = display_name,
-        password = password
-    )
-
-"""
     test_db_with_user
     
     creates a testdb with a user and a session
 """
+
 
 @db_session
 @pytest.fixture
