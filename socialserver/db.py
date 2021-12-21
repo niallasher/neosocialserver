@@ -196,7 +196,6 @@ def define_entities(db_object):
 
 
 """
-    create_memory_db
     
     Create a database object bound to an in-memory sqlite database.
     For testing, since data is purged upon app exit.
