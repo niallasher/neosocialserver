@@ -1,4 +1,4 @@
-from socialserver.tests.util import test_db, server_address
+from socialserver.tests.util import test_db, server_address, create_test_user_api2, test_db_with_user
 from datetime import datetime
 import requests
 from socialserver.db import create_test_db, define_entities
@@ -81,3 +81,15 @@ def test_create_user_username_too_long(test_db, server_address, monkeypatch):
                                 })
     assert invalid_req.status_code == 400
     assert invalid_req.json()['error'] == ErrorCodes.USERNAME_INVALID.value
+
+def test_delete_user(test_db_with_user, server_address, monkeypatch):
+    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
+    monkeypatch.setattr("socialserver.util.auth.db", test_db_with_user.get('db'))
+    print(test_db_with_user.get('access_token'))
+    del_req = requests.delete(f"{server_address}/api/v2/user",
+                              json={
+                                  "access_token": test_db_with_user.get('access_token'),
+                                  "password": test_db_with_user.get('password')
+                              })
+    print(del_req.json())
+    assert del_req.status_code == 200
