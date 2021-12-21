@@ -1,6 +1,6 @@
 from datetime import datetime
 import re
-from socialserver.db import DbUser, DbImage
+from socialserver.db import db
 from flask_restful import Resource, reqparse
 from socialserver.constants import BIO_MAX_LEN, DISPLAY_NAME_MAX_LEN, MAX_PASSWORD_LEN, MIN_PASSWORD_LEN, ErrorCodes, \
     REGEX_USERNAME_VALID
@@ -25,7 +25,7 @@ class UserInfo(Resource):
         if requesting_user is None:
             return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
 
-        wanted_user = DbUser.get(username=args['username'])
+        wanted_user = db.User.get(username=args['username'])
         if wanted_user is None:
             return {"error": ErrorCodes.USERNAME_NOT_FOUND.value}, 404
 
@@ -79,7 +79,7 @@ class User(Resource):
         if not bool(re.match(REGEX_USERNAME_VALID, args['username'])):
             return {"error": ErrorCodes.USERNAME_INVALID.value}, 400
 
-        existing_user = DbUser.get(username=args['username'])
+        existing_user = db.User.get(username=args['username'])
         if existing_user is not None:
             return {"error": ErrorCodes.USERNAME_TAKEN.value}, 400
 
@@ -97,7 +97,7 @@ class User(Resource):
         salt = generate_salt()
         password = hash_password(args['password'], salt)
 
-        DbUser(
+        db.User(
             display_name=args['display_name'],
             username=args['username'],
             password_hash=password,
@@ -125,7 +125,7 @@ class User(Resource):
         args = parser.parse_args()
 
         username = get_username_from_token(args['access_token'])
-        user = DbUser.get(username=username)
+        user = db.User.get(username=username)
 
         if args['display_name'] is not None:
             if len(args['display_name']) > DISPLAY_NAME_MAX_LEN:
@@ -148,14 +148,14 @@ class User(Resource):
             return {}, 201
 
         if args['profile_pic_ref'] is not None:
-            existing_image = DbImage.get(identifier=args['profile_pic_ref'])
+            existing_image = db.Image.get(identifier=args['profile_pic_ref'])
             if existing_image is None:
                 return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404
             user.profile_pic = existing_image
             return {"profile_pic_ref": args['profile_pic_ref']}, 201
 
         if args['header_pic_ref'] is not None:
-            existing_image = DbImage.get(identifier=args['header_pic_ref'])
+            existing_image = db.Image.get(identifier=args['header_pic_ref'])
             if existing_image is None:
                 return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404
             user.header_pic = existing_image

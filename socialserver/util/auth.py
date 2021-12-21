@@ -3,7 +3,7 @@ import argon2
 from secrets import randbits
 from hashlib import sha256
 
-from socialserver.db import DbUserSession
+from socialserver.db import db
 from secrets import token_urlsafe
 from pony.orm import db_session
 
@@ -116,7 +116,7 @@ def hash_plaintext_sha256(plaintext: str) -> str:
 
 @db_session
 def get_username_from_token(session_token: str) -> str or None:
-    existing_session = DbUserSession.get(
+    existing_session = db.UserSession.get(
         access_token_hash=hash_plaintext_sha256(session_token))
     if existing_session is not None:
         return existing_session.user.username

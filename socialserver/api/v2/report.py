@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List
 from flask_restful import Resource, reqparse
 from socialserver.constants import REPORT_SUPPLEMENTARY_INFO_MAX_LEN, ErrorCodes, ReportReasons
-from socialserver.db import DbPost, DbPostReport, DbUser
+from socialserver.db import db
 from socialserver.util.auth import get_username_from_token
 from socialserver.util.config import config
 from pony.orm import db_session
@@ -27,13 +27,13 @@ class Report(Resource):
         reporting_user: str = get_username_from_token(args['access_token'])
         if reporting_user is None:
             return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
-        reporting_user_db = DbUser.get(username=reporting_user)
+        reporting_user_db = db.User.get(username=reporting_user)
 
-        post_to_be_reported = DbPost.get(id=args['post_id'])
+        post_to_be_reported = db.Post.get(id=args['post_id'])
         if post_to_be_reported is None:
             return {"error": ErrorCodes.POST_NOT_FOUND.value}, 404
 
-        existing_report = DbPostReport.get(
+        existing_report = db.PostReport.get(
             reporter=reporting_user_db,
             post=post_to_be_reported
         )
@@ -62,7 +62,7 @@ class Report(Resource):
             if len(args['supplemental_info']) > REPORT_SUPPLEMENTARY_INFO_MAX_LEN:
                 return {"error": ErrorCodes.POST_REPORT_SUPPLEMENTAL_INFO_TOO_LONG.value}, 400
 
-        DbPostReport(
+        db.PostReport(
             active=True,
             reporter=reporting_user_db,
             post=post_to_be_reported,
@@ -86,13 +86,13 @@ class Report(Resource):
         if modifying_user is None:
             return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
 
-        modifying_user_db = DbUser.get(username=modifying_user)
+        modifying_user_db = db.User.get(username=modifying_user)
 
         # only a moderator or admin should be able to influence this
         if True not in [modifying_user_db.is_moderator, modifying_user_db.is_admin]:
             return {"error": ErrorCodes.USER_NOT_MODERATOR_OR_ADMIN.value}, 403
 
-        existing_report = DbPostReport.get(
+        existing_report = db.PostReport.get(
             id=args['report_id']
         )
         if existing_report is None:

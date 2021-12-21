@@ -1,6 +1,6 @@
 from flask_restful import Resource, reqparse
 from socialserver.constants import MAX_FEED_GET_COUNT, ErrorCodes
-from socialserver.db import DbPost, DbBlock, DbPostLike, DbUser
+from socialserver.db import db
 from socialserver.util.auth import get_username_from_token
 from pony.orm import db_session
 from pony import orm
@@ -35,7 +35,7 @@ class PostFeed(Resource):
         requesting_user = get_username_from_token(args['access_token'])
         if requesting_user is None:
             return {"error": ErrorCodes.TOKEN_INVALID.value}, 403
-        requesting_user_db = DbUser.get(username=requesting_user)
+        requesting_user_db = db.User.get(username=requesting_user)
 
         # we don't want to show users that are blocked
         # in the feed ofc.
@@ -47,7 +47,7 @@ class PostFeed(Resource):
         # seems like pycharm doesn't see the pony object as iterable
         # it is, so we're safe to do this.
         # noinspection PyTypeChecker
-        blocks = orm.select(b.blocking for b in DbBlock
+        blocks = orm.select(b.blocking for b in db.Block
                             if b.user == requesting_user_db)[:]
 
         filtered = False
@@ -66,16 +66,16 @@ class PostFeed(Resource):
         if filtered:
 
             # noinspection PyTypeChecker
-            query = orm.select(p for p in DbPost
+            query = orm.select(p for p in db.Post
                                if p.user not in blocks and p.under_moderation is False and p.user.username
                                in filter_list)
         else:
             # noinspection PyTypeChecker
-            query = orm.select(p for p in DbPost
+            query = orm.select(p for p in db.Post
                                if p.user not in blocks and p.under_moderation is False).order_by(
-                                    orm.desc(DbPost.creation_time)).limit(
-                                                                        args.count, offset=args.offset
-                                                                        )
+                orm.desc(db.Post.creation_time)).limit(
+                args.count, offset=args.offset
+            )
 
         # TODO: this shares a schema with the single post
         # thing, so they should be common. maybe a class
@@ -83,8 +83,8 @@ class PostFeed(Resource):
         posts = []
         for post in query:
 
-            user_has_liked_post = DbPostLike.get(user=requesting_user_db,
-                                                 post=post) is not None
+            user_has_liked_post = db.PostLike.get(user=requesting_user_db,
+                                                  post=post) is not None
 
             user_owns_post = post.user == requesting_user_db
 

@@ -9,7 +9,7 @@ import PIL
 from PIL import Image, ImageOps
 from pony.orm import commit, db_session
 from socialserver.util.config import config
-from socialserver.db import DbImage, DbUser
+from socialserver.db import db
 from socialserver.constants import ImageTypes,  MAX_PIXEL_RATIO, MAX_IMAGE_SIZE_GALLERY_PREVIEW, \
     MAX_IMAGE_SIZE_POST_PREVIEW, MAX_IMAGE_SIZE_POST, MAX_IMAGE_SIZE_PROFILE_PICTURE, \
     MAX_IMAGE_SIZE_PROFILE_PICTURE_LARGE
@@ -174,20 +174,20 @@ def convert_data_url_to_image(data_url: str) -> PIL.Image:
 
 """
     commit_image_to_db
-    Commit DbImage entry to the database, and then return it's id.
+    Commit db.Image entry to the database, and then return it's id.
 """
 
 
 @db_session
 def commit_image_to_db(identifier: str, userid: int) -> None or int:
-    uploader = DbUser.get(id=userid)
+    uploader = db.User.get(id=userid)
     if uploader is None:
         print("Could not commit to DB: user id does not exist!")
     else:
-        entry = DbImage(
+        entry = db.Image(
             creation_time=datetime.datetime.now(),
             identifier=identifier,
-            uploader=DbUser.get(id=userid)
+            uploader=db.User.get(id=userid)
         )
         commit()
         return entry.id
@@ -201,7 +201,7 @@ def commit_image_to_db(identifier: str, userid: int) -> None or int:
 
 
 def generate_image_of_type(identifier):
-    image_exists = DbImage.get(identifier=identifier) is not None
+    image_exists = db.Image.get(identifier=identifier) is not None
     if not image_exists:
         raise Exception("image not found")
     pass
@@ -212,7 +212,7 @@ def generate_image_of_type(identifier):
     Take a JSON string (read notes.md, #images) containing b64 images, and process it.
     Will save it, store a db entry, and return
     a SimpleNamespace with the following keys:
-        - id: DbImage ID
+        - id: db.Image ID
         - uid: Image identifier
 
 """

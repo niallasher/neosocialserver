@@ -1,7 +1,7 @@
 from flask.helpers import send_file
 from os import path
 from socialserver.constants import MAX_PIXEL_RATIO, ErrorCodes, ImageTypes
-from socialserver.db import DbImage
+from socialserver.db import db
 from socialserver.util.config import config
 from flask_restful import Resource, reqparse
 from pony.orm import db_session
@@ -19,7 +19,7 @@ class Image(Resource):
         parser.add_argument('pixel_ratio', type=int, required=True)
         args = parser.parse_args()
 
-        image = DbImage.get(identifier=kwargs.get('imageid'))
+        image = db.Image.get(identifier=kwargs.get('imageid'))
         if image is None:
             return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404
 

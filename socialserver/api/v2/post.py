@@ -1,7 +1,7 @@
 from datetime import datetime
 import re
 from flask_restful import Resource, reqparse
-from socialserver.db import DbHashtag, DbImage, DbPost, DbPostLike, DbUser
+from socialserver.db import db
 from pony.orm import db_session, commit
 from socialserver.constants import MAX_IMAGES_PER_POST, POST_MAX_LEN, REGEX_HASHTAG, ErrorCodes
 from socialserver.util.auth import get_username_from_token
@@ -51,7 +51,7 @@ class Post(Resource):
             # we replace each image with a reference to it in the database,
             # for storage
             for image_identifier in referenced_images:
-                image = DbImage.get(identifier=image_identifier)
+                image = db.Image.get(identifier=image_identifier)
                 if image is None:
                     return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404
                 images.append(image)
@@ -67,17 +67,17 @@ class Post(Resource):
 
         db_tags = []
         for tag_name in tags:
-            existing_tag = DbHashtag.get(name=tag_name)
+            existing_tag = db.Hashtag.get(name=tag_name)
             if existing_tag is None:
-                tag = DbHashtag(creation_time=datetime.now(),
-                                name=tag_name)
+                tag = db.Hashtag(creation_time=datetime.now(),
+                                 name=tag_name)
             else:
                 tag = existing_tag
             db_tags.append(tag)
 
-        new_post = DbPost(
+        new_post = db.Post(
             under_moderation=False,
-            user=DbUser.get(username=requesting_user),
+            user=db.User.get(username=requesting_user),
             creation_time=datetime.now(),
             text=text_content,
             images=images,
@@ -92,7 +92,7 @@ class Post(Resource):
 
         return {"post_id": new_post.id}
 
-    @ db_session
+    @db_session
     def get(self):
 
         parser = reqparse.RequestParser()
@@ -104,7 +104,7 @@ class Post(Resource):
         if requesting_user is None:
             return {"error", ErrorCodes.TOKEN_INVALID.value}, 401
 
-        wanted_post = DbPost.get(id=args['post_id'])
+        wanted_post = db.Post.get(id=args['post_id'])
         if wanted_post is None:
             return {"error": ErrorCodes.POST_NOT_FOUND.value}, 404
 
@@ -118,35 +118,35 @@ class Post(Resource):
             return {"error": ErrorCodes.POST_NOT_FOUND.value}, 404
 
         # if you've blocked a user, we don't want you to see their posts.
-        if wanted_post.user in DbUser.get(username=requesting_user).blocked_users:
+        if wanted_post.user in db.User.get(username=requesting_user).blocked_users:
             return {"error", ErrorCodes.USER_BLOCKED.value}, 400
 
         post_images = []
         for image in wanted_post.images:
             post_images.append(image.identifier)
 
-        user_has_liked_post = DbPostLike.get(user=DbUser.get(username=requesting_user),
-                                             post=wanted_post) is not None
+        user_has_liked_post = db.PostLike.get(user=db.User.get(username=requesting_user),
+                                              post=wanted_post) is not None
 
-        user_owns_post = wanted_post.user == DbUser.get(
+        user_owns_post = wanted_post.user == db.User.get(
             username=requesting_user)
 
         return {
-            "post": {
-                "id": wanted_post.id,
-                "content": wanted_post.text,
-                "creation_date": wanted_post.creation_time.timestamp(),
-                "like_count": len(wanted_post.likes),
-                "comment_count": len(wanted_post.comments),
-                "images": post_images
-            },
-            "user": {
-                "display_name": wanted_post.user.display_name,
-                "username": wanted_post.user.username,
-                "verified": wanted_post.user.is_verified,
-                "profile_picture": (wanted_post.user.profile_pic.identifier
-                                    if wanted_post.user.has_profile_picture else None),
-                "liked_post": user_has_liked_post,
-                "own_post": user_owns_post
-            },
-        }, 201
+                   "post": {
+                       "id": wanted_post.id,
+                       "content": wanted_post.text,
+                       "creation_date": wanted_post.creation_time.timestamp(),
+                       "like_count": len(wanted_post.likes),
+                       "comment_count": len(wanted_post.comments),
+                       "images": post_images
+                   },
+                   "user": {
+                       "display_name": wanted_post.user.display_name,
+                       "username": wanted_post.user.username,
+                       "verified": wanted_post.user.is_verified,
+                       "profile_picture": (wanted_post.user.profile_pic.identifier
+                                           if wanted_post.user.has_profile_picture else None),
+                       "liked_post": user_has_liked_post,
+                       "own_post": user_owns_post
+                   },
+               }, 201

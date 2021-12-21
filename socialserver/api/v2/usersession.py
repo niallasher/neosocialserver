@@ -1,5 +1,5 @@
 from datetime import datetime
-from socialserver.db import DbUser, DbUserSession
+from socialserver.db import db
 from flask_restful import Resource, reqparse
 from pony.orm import db_session
 from flask import request
@@ -20,7 +20,7 @@ class UserSession(Resource):
         parser.add_argument('access_token', type=str, required=True)
         args = parser.parse_args()
 
-        session = DbUserSession.get(
+        session = db.UserSession.get(
             access_token_hash=hash_plaintext_sha256(args['access_token']))
 
         if session is None:
@@ -46,7 +46,7 @@ class UserSession(Resource):
         parser.add_argument('password', type=str, required=True)
         args = parser.parse_args()
 
-        user = DbUser.get(username=args['username'])
+        user = db.User.get(username=args['username'])
         if user is None:
             return {'error': ErrorCodes.USERNAME_NOT_FOUND.value}, 404
 
@@ -59,7 +59,7 @@ class UserSession(Resource):
 
         secret = generate_key()
 
-        DbUserSession(
+        db.UserSession(
             user=user,
             access_token_hash=secret.hash,
             creation_ip=get_ip_from_request(request),
@@ -77,7 +77,7 @@ class UserSession(Resource):
         parser.add_argument('access_token', type=str, required=True)
         args = parser.parse_args()
 
-        session = DbUserSession.get(
+        session = db.UserSession.get(
             access_token_hash=hash_plaintext_sha256(args['access_token']))
         if session is None:
             return {'error': ErrorCodes.TOKEN_INVALID.value}, 401
@@ -98,7 +98,7 @@ class UserSessionList(Resource):
         parser.add_argument('access_token', type=str, required=True)
         args = parser.parse_args()
 
-        session = DbUserSession.get(
+        session = db.UserSession.get(
             access_token_hash=hash_plaintext_sha256(args['access_token'])
         )
 
