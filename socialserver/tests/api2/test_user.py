@@ -1,3 +1,6 @@
+# pycharm isn't detecting fixture usage, so we're
+# disabling PyUnresolvedReferences for the import.
+# noinspection PyUnresolvedReferences
 from socialserver.tests.util import test_db, server_address, test_db_with_user
 import requests
 from pony.orm import db_session
@@ -223,6 +226,7 @@ def test_update_bio_too_long(test_db_with_user, server_address, monkeypatch):
     assert bio_req.status_code == 400
     assert bio_req.json()['error'] == ErrorCodes.BIO_NON_CONFORMING.value
 
+
 def test_update_display_name(test_db_with_user, server_address, monkeypatch):
     monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
     monkeypatch.setattr("socialserver.util.auth.db", test_db_with_user.get('db'))
@@ -235,6 +239,7 @@ def test_update_display_name(test_db_with_user, server_address, monkeypatch):
 
     assert bio_req.status_code == 201
     assert bio_req.json()['display_name'] == 'new name'
+
 
 def test_update_display_name_missing_input(test_db_with_user, server_address, monkeypatch):
     monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
@@ -258,6 +263,7 @@ def test_update_display_name_too_long(test_db_with_user, server_address, monkeyp
 
     assert bio_req.status_code == 400
     assert bio_req.json()['error'] == ErrorCodes.DISPLAY_NAME_NON_CONFORMING.value
+
 
 def test_update_no_mod_params(test_db_with_user, server_address, monkeypatch):
     monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))

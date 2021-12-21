@@ -1,8 +1,8 @@
+# pycharm isn't detecting fixture usage, so we're
+# disabling PyUnresolvedReferences for the import.
+# noinspection PyUnresolvedReferences
 from socialserver.tests.util import server_address
-from socialserver.constants import SERVER_VERSION
-from socialserver import constants
 import requests
-from unittest.mock import patch
 
 
 def test_info(server_address, monkeypatch):

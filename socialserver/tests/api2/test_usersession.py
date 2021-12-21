@@ -1,3 +1,6 @@
+# pycharm isn't detecting fixture usage, so we're
+# disabling PyUnresolvedReferences for the import.
+# noinspection PyUnresolvedReferences
 from socialserver.tests.util import test_db_with_user, server_address
 from socialserver.constants import ErrorCodes
 import requests

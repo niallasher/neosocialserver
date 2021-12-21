@@ -3,9 +3,7 @@ from os import getenv
 from datetime import datetime
 from pony.orm import db_session, commit
 import socialserver.db as db
-from socialserver.util.auth import generate_key, generate_salt, hash_password, verify_password_valid
-from types import SimpleNamespace
-import requests
+from socialserver.util.auth import generate_key, generate_salt, hash_password
 
 UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 " \
      "Mobile/15A372 Safari/604.1 "

@@ -3,8 +3,6 @@ from socialserver import application
 from socialserver.cli.mkuser import mk_user_interactive
 from socialserver.cli.uploadimage import upload_image
 from socialserver.cli.test import run_tests
-import pytest
-from os import environ
 
 
 @click.group()

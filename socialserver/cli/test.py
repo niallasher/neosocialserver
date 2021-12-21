@@ -3,8 +3,6 @@ import pytest
 from socialserver.util.output import console
 from threading import Thread
 from werkzeug.serving import make_server
-from multiprocessing import Process
-from os import environ
 
 
 class TestingServer(Thread):
