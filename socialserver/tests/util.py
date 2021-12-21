@@ -3,7 +3,7 @@ from os import getenv
 from datetime import datetime
 from pony.orm import db_session, commit
 import socialserver.db as db
-from socialserver.util.auth import generate_key, generate_salt, hash_password
+from socialserver.util.auth import generate_key, generate_salt, hash_password, verify_password_valid
 from types import SimpleNamespace
 import requests
 
@@ -48,14 +48,14 @@ def server_address():
 @pytest.fixture
 def test_db_with_user():
     test_db = db.create_test_db()
-    salt = generate_salt()
     password = "password"
-    password_hash = hash_password(password, salt)
+    password_salt = generate_salt()
+    password_hash = hash_password(password, password_salt)
     test_db.User(
         username="test",
         display_name="test",
         password_hash=password_hash,
-        password_salt=salt,
+        password_salt=password_salt,
         creation_time=datetime.now(),
         account_attributes=[0],
         bio="",
