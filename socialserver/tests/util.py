@@ -1,4 +1,5 @@
 import pytest
+import requests
 from os import getenv
 from datetime import datetime
 from pony.orm import db_session, commit
@@ -78,3 +79,27 @@ def test_db_with_user():
         "password": "password",
         "access_token": secret.key
     }
+
+
+"""
+    create_user_with_request
+    
+    fires a request to server_address, to create a new user
+"""
+
+
+@db_session
+def create_user_with_request(serveraddress, username="username", password="password", display_name="name"):
+    r = requests.post(f"{serveraddress}/api/v2/user",
+                      json={
+                          "display_name": display_name,
+                          "username": username,
+                          "password": password
+                      })
+    # we want to fail if this didn't work, since tests
+    # will fail in strange ways if the account they
+    # expect isn't made
+    print(r.json())
+    print(r.status_code)
+    assert r.status_code == 201
+    return r.json()
