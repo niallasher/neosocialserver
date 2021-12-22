@@ -12,3 +12,5 @@ Library/
 # don't commit media folder, since that could contain user generated content
 **/media
 .pytest_cache
+# pyinstaller output folder
+/dist
