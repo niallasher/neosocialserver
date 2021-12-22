@@ -1,7 +1,7 @@
 
 <div align="center">
-    <img src="logo.png" style="width:64px;margin-top:12px;"/>
-    <h1>socialserver-neo</h1>
+    <img src="logo.png" style="width:64px;margin-top:12px;margin-bottom:5px;"/>
+    <h1 style="margin-top:0;margin-bottom:5px;">socialserver-neo</h1>
 </div>
 
 The server side of an open source social media platform. This is a rewrite of a previous implementation, that adds
