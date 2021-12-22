@@ -128,6 +128,7 @@ def _test_config(current_config: AttrDict, schema: AttrDict) -> None:
 
     if len(missing_keys) >= 1:
         console.log(":dizzy_face: The config file is missing keys! Cannot continue.", emoji=True)
+        exit(1)
 
 
 """
