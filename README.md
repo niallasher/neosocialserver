@@ -18,6 +18,9 @@ Documentation has not been written yet.
 - If no file exists, the server will make it. If the file is missing keys the server will exit with a non-zero error 
   code.
 
+### Running the test suite
+To invoke the test suite, run  ```python3 -m socialserver test```.
+
 ### Notes
 
 - Nothing here is complete
