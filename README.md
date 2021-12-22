@@ -8,13 +8,16 @@ The server side of an open source social media platform. This is a rewrite of a 
 a new API, and many more features, including actually being stable (eventually), actually working properly (eventually),
 being easy to deploy and work with (eventually), and being far more maintainable.
 
-Documentation has not been written yet, and it's in the very early stages. Nothing can be considered stable ey.
+Documentation has not been written yet (I'll start on it once interfaces have stabilised a bit), and it's in the very
+early stages of development.
 
+---
 ### Quickstart
 
 - Clone repository
 - cat requirements.txt | pip install (recommend using a virtual environment for this, there's a few dependencies)
-- set ```SOCIALSERVER_ROOT``` environment variable to where you want things to get stored. Defaults to $HOME/socialserver
+- set ```SOCIALSERVER_ROOT``` environment variable to where you want things to get stored. Defaults to 
+$HOME/socialserver
 - ```python3 -m socialserver devel-run``` for development, ```gunicorn socialserver``` for production
 - If you want to change settings, default config is at ```$SOCIALSERVER_ROOT/config.toml```. It can be over-ridden with
   ```$SOCIALSERVER_CONFIG_FILE``` to change the location that is checked.
@@ -35,6 +38,30 @@ and going straight to /api/v3 so I can have parity between the server major vers
   wizard by running ```python3 -m socialserver mk-user```, to create an admin user. This will change in the future.
 - There is currently no real API documentation. If for whatever reason you want to mess with this in it's current state,
   you'll have to figure this out yourself, or email me.
+
+### What currently works?
+
+#### Via /api/v2
+- Creating a user
+- Modifying user (incl avatar and header image, with already uploaded images)
+- Making a post (with already uploaded images)
+- Deleting a post
+- Reporting a post
+- Following a user
+- Unfollowing a user
+- Blocking a user :(
+- Unblocking a user
+- Post feed
+- Post feed from users you follow
+- Post feed from specific set of usernames
+#### Via local utilities
+- Creating a user with custom attributes (e.g. OG server user, administrator, moderator )
+- Uploading an image and getting it's identifier for use with the api
+### What doesn't currently work?
+
+Everything else
+
+---
 
 ### Can I see the old server code?
 
@@ -61,5 +88,6 @@ It's bad
     - Literally just copied and pasted at points, so that improvements to one don't go down to the others
 - Instead of error values being an Enum, they're magic values that you just kinda have to remember
     - Obviously "A08" means "invalid action field on TOTP post call". What sort of idiot wouldn't know that?
-    - (direct excerpt from socialserver/src/errors.txt. You're expected to read it whenever you need to remember an error.)
+    - (direct excerpt from socialserver/src/errors.txt. You're expected to read it whenever you need to remember an
+  error.)
     - I knew better ways of doing this, even at the time. I have no excuse.
