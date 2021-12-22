@@ -1,9 +1,8 @@
 
 <div align="center">
-    <img src="logo.png" style="width:128px;margin-top:12px;"/>
+    <img src="logo.png" style="width:64px;margin-top:12px;"/>
+    <h1>socialserver-neo</h1>
 </div>
-
-# socialserver-neo
 
 The server side of an open source social media platform. This is a rewrite of a previous implementation, that adds
 a new API, and many more features, including actually being stable (eventually), actually working properly (eventually),
