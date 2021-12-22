@@ -3,8 +3,8 @@
 # noinspection PyUnresolvedReferences
 from socialserver.tests.util import test_db_with_user, server_address, create_user_with_request
 from socialserver.constants import ErrorCodes
-from pony.orm import db_session
 import requests
+
 
 def test_block_user(test_db_with_user, server_address, monkeypatch):
     monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
