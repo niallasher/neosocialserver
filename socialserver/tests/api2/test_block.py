@@ -6,7 +6,6 @@ from socialserver.constants import ErrorCodes
 from pony.orm import db_session
 import requests
 
-@db_session
 def test_block_user(test_db_with_user, server_address, monkeypatch):
     monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
     monkeypatch.setattr("socialserver.api.v2.block.db", test_db_with_user.get('db'))
