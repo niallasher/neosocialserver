@@ -55,3 +55,37 @@ def test_create_session_missing_data(test_db_with_user, server_address, monkeypa
                                  json={})
 
     assert creation_req.status_code == 400
+
+
+def test_get_user_session_info(test_db_with_user, server_address, monkeypatch):
+    monkeypatch.setattr("socialserver.api.v2.usersession.db", test_db_with_user.get('db'))
+    monkeypatch.setattr("socialserver.util.auth.db", test_db_with_user.get('db'))
+
+    info_req = requests.get(f"{server_address}/api/v2/user/session",
+                            json={
+                                "access_token": test_db_with_user.get('access_token')
+                            })
+
+    assert info_req.status_code == 200
+    assert info_req.json()['owner'] == test_db_with_user.get('username')
+
+
+def test_get_user_session_info_invalid(test_db_with_user, server_address, monkeypatch):
+    monkeypatch.setattr("socialserver.api.v2.usersession.db", test_db_with_user.get('db'))
+    monkeypatch.setattr("socialserver.util.auth.db", test_db_with_user.get('db'))
+
+    info_req = requests.get(f"{server_address}/api/v2/user/session",
+                            json={
+                                "access_token": "invalid_access_token"
+                            })
+
+    assert info_req.status_code == 401
+    assert info_req.json()['error'] == ErrorCodes.TOKEN_INVALID.value
+
+
+def test_get_user_session_missing_info(test_db_with_user, server_address, monkeypatch):
+    monkeypatch.setattr("socialserver.api.v2.usersession.db", test_db_with_user.get('db'))
+    monkeypatch.setattr("socialserver.util.auth.db", test_db_with_user.get('db'))
+
+    info_req = requests.get(f"{server_address}/api/v2/user/session", json={})
+    assert info_req.status_code == 400
