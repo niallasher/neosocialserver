@@ -90,7 +90,7 @@ class Post(Resource):
         # the new post right at the end)
         commit()
 
-        return {"post_id": new_post.id}
+        return {"post_id": new_post.id}, 200
 
     @db_session
     def get(self):
