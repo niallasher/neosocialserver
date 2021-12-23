@@ -11,10 +11,10 @@
         - [ ] Header Image
         - [ ] Profile Picture
     - [x] Get Info
-- [ ] User Session
+- [x] User Session
   - [x] Creation
   - [x] Deletion
-  - [ ] Get Info
+  - [x] Get Info
 - [ ] Block
     - [ ]  Create
     - [ ]  Remove
