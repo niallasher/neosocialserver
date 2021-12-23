@@ -105,6 +105,25 @@ def create_user_with_request(serveraddress, username="username", password="passw
 
 
 """
+    create_user_session_with_request
+    
+    takes username & password, and creates a user session
+    returns the token.
+"""
+
+
+def create_user_session_with_request(serveraddress, username, password):
+    r = requests.post(f"{serveraddress}/api/v2/user/session",
+                      json={
+                          "username": username,
+                          "password": password
+                      })
+
+    # fail immediately if it didn't work
+    assert r.status_code == 201
+
+
+"""
     create_post_with_request
     
     creates a simple post using requests, to test feeds and the like.
@@ -115,7 +134,7 @@ def create_user_with_request(serveraddress, username="username", password="passw
 def create_post_with_request(serveraddress, auth_token, text_content="Test Post"):
     r = requests.post(f"{serveraddress}/api/v2/post",
                       json={
-                          "access_token": auth_token
+                          "access_token": auth_token,
                           "text_content": text_content
                       })
     return r.json()['post_id']
