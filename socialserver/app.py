@@ -11,6 +11,7 @@ from socialserver.api.v2.report import Report
 from socialserver.api.v2.info import ServerInfo
 from socialserver.api.v2.usersession import UserSession, UserSessionList
 from socialserver.api.v2.user import User, UserInfo
+from socialserver.api.v2.username_available import UsernameAvailable
 from socialserver.api.v2.feed import PostFeed
 from socialserver.api.v2.post import Post
 from socialserver.api.v2.image import Image
@@ -33,6 +34,7 @@ def create_app():
     api.add_resource(UserInfo, '/api/v2/user/info')
     api.add_resource(UserSession, '/api/v2/user/session')
     api.add_resource(UserSessionList, '/api/v2/user/session/list')
+    api.add_resource(UsernameAvailable, '/api/v2/user/name_avaliable')
 
     api.add_resource(Post, '/api/v2/post/single')
     api.add_resource(PostFeed, '/api/v2/feed/posts')
