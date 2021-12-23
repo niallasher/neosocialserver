@@ -25,7 +25,7 @@ class Post(Resource):
 
         requesting_user = get_username_from_token(args['access_token'])
         if requesting_user is None:
-            return {"error", ErrorCodes.TOKEN_INVALID.value}, 401
+            return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
 
         # make sure the post is conforming to length requirements.
         # we don't limit the characters used as of now. might look
