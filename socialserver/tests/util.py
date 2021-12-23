@@ -88,7 +88,6 @@ def test_db_with_user():
 """
 
 
-@db_session
 def create_user_with_request(serveraddress, username="username", password="password", display_name="name"):
     r = requests.post(f"{serveraddress}/api/v2/user",
                       json={
@@ -103,3 +102,20 @@ def create_user_with_request(serveraddress, username="username", password="passw
     print(r.status_code)
     assert r.status_code == 201
     return r.json()
+
+
+"""
+    create_post_with_request
+    
+    creates a simple post using requests, to test feeds and the like.
+    requires user auth token. doesn't support images
+"""
+
+
+def create_post_with_request(serveraddress, auth_token, text_content="Test Post"):
+    r = requests.post(f"{serveraddress}/api/v2/post",
+                      json={
+                          "access_token": auth_token
+                          "text_content": text_content
+                      })
+    return r.json()['post_id']
