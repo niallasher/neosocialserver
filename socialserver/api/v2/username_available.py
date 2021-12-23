@@ -18,4 +18,4 @@ class UsernameAvailable(Resource):
 
         existing_user = db.User.get(username=args['username'])
 
-        return {existing_user is None}, 200
+        return existing_user is None, 200
