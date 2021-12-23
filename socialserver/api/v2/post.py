@@ -102,7 +102,7 @@ class Post(Resource):
 
         requesting_user = get_username_from_token(args['access_token'])
         if requesting_user is None:
-            return {"error", ErrorCodes.TOKEN_INVALID.value}, 401
+            return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
 
         wanted_post = db.Post.get(id=args['post_id'])
         if wanted_post is None:
@@ -119,7 +119,7 @@ class Post(Resource):
 
         # if you've blocked a user, we don't want you to see their posts.
         if wanted_post.user in db.User.get(username=requesting_user).blocked_users:
-            return {"error", ErrorCodes.USER_BLOCKED.value}, 400
+            return {"error": ErrorCodes.USER_BLOCKED.value}, 400
 
         post_images = []
         for image in wanted_post.images:
