@@ -1,10 +1,10 @@
 # pycharm isn't detecting fixture usage, so we're
 # disabling PyUnresolvedReferences for the import.
 # noinspection PyUnresolvedReferences
-from socialserver.util.test import test_db, server_address, test_db, monkeypatch_api_db
+from socialserver.util.test import test_db, server_address
 import requests
 from pony.orm import db_session
-from socialserver.constants import ErrorCodes, BIO_MAX_LEN, DISPLAY_NAME_MAX_LEN
+from socialserver.constants import ErrorCodes, BIO_MAX_LEN, DISPLAY_NAME_MAX_LEN, MAX_PASSWORD_LEN, MIN_PASSWORD_LEN
 from secrets import token_urlsafe
 
 
@@ -74,6 +74,28 @@ def test_create_user_username_too_long(test_db, server_address, monkeypatch):
                                 })
     assert invalid_req.status_code == 400
     assert invalid_req.json()['error'] == ErrorCodes.USERNAME_INVALID.value
+
+
+def test_create_user_password_too_short(test_db, server_address):
+    r = requests.post(f"{server_address}/api/v2/user",
+                      json={
+                          "display_name": "Test User",
+                          "username": "testuser",
+                          "password": "a"
+                      })
+    assert r.status_code == 400
+    assert r.json()['error'] == ErrorCodes.PASSWORD_NON_CONFORMING.value
+
+
+def test_create_user_password_too_long(test_db, server_address):
+    r = requests.post(f"{server_address}/api/v2/user",
+                      json={
+                          "display_name": "Test User",
+                          "username": "testuser",
+                          "password": token_urlsafe(MAX_PASSWORD_LEN + 1)
+                      })
+    assert r.status_code == 400
+    assert r.json()['error'] == ErrorCodes.PASSWORD_NON_CONFORMING.value
 
 
 def test_delete_user(test_db, server_address, monkeypatch):
