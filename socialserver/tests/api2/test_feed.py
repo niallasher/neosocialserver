@@ -17,6 +17,18 @@ def test_get_all_feed_no_posts(test_db, server_address):
     assert len(r.json()['posts']) == 0
 
 
+def test_get_all_feed_get_count_too_high(test_db, server_address):
+    r = requests.get(f'{server_address}/api/v2/feed/posts',
+                     json={
+                         "access_token": test_db.access_token,
+                         "count": MAX_FEED_GET_COUNT + 1,
+                         "offset": 0
+                     })
+
+    assert r.status_code == 400
+    assert r.json()['error'] == ErrorCodes.FEED_GET_COUNT_TOO_HIGH.value
+
+
 def test_get_all_feed_less_than_count_posts(test_db, server_address):
     # range excludes last number, so this is actually 14.
     for i in range(1, 15):

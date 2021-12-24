@@ -63,7 +63,6 @@ class PostFeed(Resource):
                                      for f in requesting_user_db.following)[::]
 
         if filtered:
-
             # noinspection PyTypeChecker
             query = orm.select(p for p in db.Post
                                if p.user not in blocks and p.under_moderation is False and p.user.username
