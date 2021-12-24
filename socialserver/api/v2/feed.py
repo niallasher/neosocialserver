@@ -32,7 +32,7 @@ class PostFeed(Resource):
         if args['count'] >= MAX_FEED_GET_COUNT:
             return {"error": ErrorCodes.FEED_GET_COUNT_TOO_HIGH.value}, 400
 
-        requesting_user = get_username_from_token(args['access_token'])
+        requesting_user = get_username_from_token(args['access_token'], db)
         if requesting_user is None:
             return {"error": ErrorCodes.TOKEN_INVALID.value}, 403
         requesting_user_db = db.User.get(username=requesting_user)

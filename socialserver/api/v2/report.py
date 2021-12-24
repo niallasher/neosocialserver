@@ -24,7 +24,7 @@ class Report(Resource):
         parser.add_argument("supplemental_info", type=str, required=False)
         args = parser.parse_args()
 
-        reporting_user: str = get_username_from_token(args['access_token'])
+        reporting_user: str = get_username_from_token(args['access_token'], db)
         if reporting_user is None:
             return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
         reporting_user_db = db.User.get(username=reporting_user)
@@ -82,7 +82,7 @@ class Report(Resource):
         parser.add_argument("mark_active", type=bool, required=True)
         args = parser.parse_args()
 
-        modifying_user = get_username_from_token(args['access_token'])
+        modifying_user = get_username_from_token(args['access_token'], db)
         if modifying_user is None:
             return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
 

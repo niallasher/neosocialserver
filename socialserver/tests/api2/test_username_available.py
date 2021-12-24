@@ -11,7 +11,7 @@ def test_username_available_name_taken(test_db_with_user, server_address, monkey
                      })
 
     assert r.status_code == 200
-    assert r.json() == False
+    assert r.json() is False
 
 
 def test_username_available_name_not_taken(test_db, server_address, monkeypatch):
@@ -22,7 +22,7 @@ def test_username_available_name_not_taken(test_db, server_address, monkeypatch)
                      })
 
     assert r.status_code == 200
-    assert r.json() == True
+    assert r.json() is True
 
 
 def test_username_available_missing_data(test_db, server_address, monkeypatch):

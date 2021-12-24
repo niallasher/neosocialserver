@@ -23,7 +23,7 @@ class UserInfo(Resource):
 
         # in the future, we might not require sign-in for read only access
         # to some parts, but for now we do.
-        requesting_user = get_username_from_token(args['access_token'])
+        requesting_user = get_username_from_token(args['access_token'], db)
         if requesting_user is None:
             return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
 
@@ -127,7 +127,7 @@ class User(Resource):
 
         args = parser.parse_args()
 
-        username = get_username_from_token(args['access_token'])
+        username = get_username_from_token(args['access_token'], db)
         user = db.User.get(username=username)
 
         if args['display_name'] is not None:
@@ -179,7 +179,7 @@ class User(Resource):
         print(db.select("select * from User"))
         print(db.select("select * from UserSession"))
 
-        requesting_username = get_username_from_token(args['access_token'])
+        requesting_username = get_username_from_token(args['access_token'], db)
         if requesting_username is None:
             return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
 

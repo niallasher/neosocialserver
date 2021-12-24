@@ -23,7 +23,7 @@ class Post(Resource):
                             required=False, action="append")
         args = parser.parse_args()
 
-        requesting_user = get_username_from_token(args['access_token'])
+        requesting_user = get_username_from_token(args['access_token'], db)
         if requesting_user is None:
             return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
 
@@ -100,7 +100,7 @@ class Post(Resource):
         parser.add_argument('post_id', type=int, required=True)
         args = parser.parse_args()
 
-        requesting_user = get_username_from_token(args['access_token'])
+        requesting_user = get_username_from_token(args['access_token'], db)
         if requesting_user is None:
             return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
 

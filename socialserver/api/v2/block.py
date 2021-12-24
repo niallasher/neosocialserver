@@ -17,7 +17,7 @@ class Block(Resource):
         parser.add_argument("username", type=str, required=True)
         args = parser.parse_args()
 
-        requesting_user = get_username_from_token(args['access_token'])
+        requesting_user = get_username_from_token(args['access_token'], db)
         if requesting_user is None:
             return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
 
@@ -52,7 +52,7 @@ class Block(Resource):
         parser.add_argument("username", type=str, required=True)
         args = parser.parse_args()
 
-        requesting_user = get_username_from_token(args['access_token'])
+        requesting_user = get_username_from_token(args['access_token'], db)
         if requesting_user is None:
             return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
 
