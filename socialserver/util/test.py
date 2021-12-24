@@ -2,10 +2,7 @@ import pony.orm
 import pytest
 import requests
 from os import getenv
-from datetime import datetime
-from pony.orm import db_session, commit
 from socialserver.db import create_test_db
-from socialserver.util.auth import generate_key, generate_salt, hash_password
 from attrdict import AttrDict
 
 UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 " \
@@ -13,7 +10,7 @@ UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.3
 
 """
     test_db
-    pytest fixture that creates an in-memory database with a premade user account
+    pytest fixture that creates an in-memory database with a pre-made user account
     and session.
 """
 
