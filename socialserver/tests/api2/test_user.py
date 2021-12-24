@@ -1,7 +1,7 @@
 # pycharm isn't detecting fixture usage, so we're
 # disabling PyUnresolvedReferences for the import.
 # noinspection PyUnresolvedReferences
-from socialserver.tests.util import test_db, server_address, test_db_with_user, monkeypatch_api_db
+from socialserver.util.test import test_db, server_address, test_db_with_user, monkeypatch_api_db
 import requests
 from pony.orm import db_session
 from socialserver.constants import ErrorCodes, BIO_MAX_LEN, DISPLAY_NAME_MAX_LEN

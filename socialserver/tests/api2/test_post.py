@@ -1,5 +1,5 @@
 # noinspection PyUnresolvedReferences
-from socialserver.tests.util import test_db_with_user, server_address, create_post_with_request
+from socialserver.util.test import test_db_with_user, server_address, create_post_with_request
 from socialserver.constants import ErrorCodes
 import requests
 
