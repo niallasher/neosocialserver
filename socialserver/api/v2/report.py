@@ -33,6 +33,10 @@ class Report(Resource):
         if post_to_be_reported is None:
             return {"error": ErrorCodes.POST_NOT_FOUND.value}, 404
 
+        post_belongs_to_user = post_to_be_reported in reporting_user_db.posts
+        if post_belongs_to_user:
+            return {"error": ErrorCodes.CANNOT_REPORT_OWN_POST.value}, 400
+
         existing_report = db.PostReport.get(
             reporter=reporting_user_db,
             post=post_to_be_reported
@@ -45,7 +49,7 @@ class Report(Resource):
             if config.posts.silent_fail_on_double_report:
                 return {}, 201
             else:
-                return {"error": ErrorCodes.POST_ALREADY_REPORTED}, 400
+                return {"error": ErrorCodes.POST_ALREADY_REPORTED.value}, 400
 
         # append turns the args into an array, that is appended
         # to with each duplicate, hence it being a list
