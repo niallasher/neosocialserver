@@ -1,3 +1,5 @@
+import os
+
 from socialserver.util.output import console
 from socialserver import application
 from werkzeug.serving import make_server
@@ -32,6 +34,10 @@ def pytest_sessionstart():
 
 def pytest_sessionfinish():
     application_thread.kill()
+    os.remove('/tmp/socialserver_testing/config.toml')
+    os.remove('/tmp/socialserver_testing/socialserver.db')
+    os.removedirs('/tmp/socialserver_testing')
+    os.remove('/tmp/test.db')
 
 
 application_thread = TestingServer(application)
