@@ -113,4 +113,11 @@ class PostFeed(Resource):
                 }
             )
 
-        return posts, 201
+        return {
+                   "meta": {
+                       # if we have less posts left than the user
+                       # asked for, we must have reached the end!
+                       "reached_end": len(query) < args['count']
+                   },
+                   "posts": posts
+               }, 201
