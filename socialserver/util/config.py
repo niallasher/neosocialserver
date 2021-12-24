@@ -54,7 +54,7 @@ address = "{FILE_ROOT}/socialserver.db"
 # original copy.
 quality = 80
 post_quality = 90
-storage_dir = './media/images'
+storage_dir = "{FILE_ROOT}/media/images"
 
 [auth.registration]
 enabled = true
