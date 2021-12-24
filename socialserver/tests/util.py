@@ -132,9 +132,10 @@ def create_user_session_with_request(serveraddress, username, password):
 
 
 def create_post_with_request(serveraddress, auth_token, text_content="Test Post"):
-    r = requests.post(f"{serveraddress}/api/v2/post",
+    r = requests.post(f"{serveraddress}/api/v2/post/single",
                       json={
                           "access_token": auth_token,
                           "text_content": text_content
                       })
+    assert r.status_code == 200
     return r.json()['post_id']
