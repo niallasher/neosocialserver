@@ -1,4 +1,4 @@
-from os import environ, rmdir, remove
+from os import rmdir, remove, path
 from socialserver.util.output import console
 from socialserver import application
 from werkzeug.serving import make_server
@@ -33,13 +33,14 @@ def pytest_sessionstart():
 
 def pytest_sessionfinish():
     application_thread.kill()
-    remove('/tmp/socialserver_testing/config.toml')
-    # we should probably use this for testing in the future,
-    # but right now it relies on SOCIALSERVER_ROOT being set before
-    # execution.
-    remove('/tmp/socialserver_testing/socialserver.db')
-    rmdir('/tmp/socialserver_testing')
     remove('/tmp/test.db')
+    if path.exists('/tmp/socialserver_testing'):
+        remove('/tmp/socialserver_testing/config.toml')
+        # we should probably use this for testing in the future,
+        # but right now it relies on SOCIALSERVER_ROOT being set before
+        # execution.
+        remove('/tmp/socialserver_testing/socialserver.db')
+        rmdir('/tmp/socialserver_testing')
 
 
 application_thread = TestingServer(application)
