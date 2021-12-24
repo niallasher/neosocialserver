@@ -123,10 +123,6 @@ def create_user_session_with_request(serveraddress, username, password):
                       })
 
     # fail immediately if it didn't work
-    print("--= SESSION RETVAL =--")
-    print(r.status_code)
-    print(r.json())
-    print("--= END SESSION RETVAL =--")
     assert r.status_code == 200
     return r.json()['access_token']
 
@@ -147,3 +143,19 @@ def create_post_with_request(serveraddress, auth_token, text_content="Test Post"
                       })
     assert r.status_code == 200
     return r.json()['post_id']
+
+
+"""
+    follow_user_with_request
+    
+    follows a user account using the local api
+"""
+
+
+def follow_user_with_request(serveraddress: str, auth_token: str, username: str):
+    r = requests.post(f"{serveraddress}/api/v2/follow/user",
+                      json={
+                          "access_token": auth_token,
+                          "username": username
+                      })
+    assert r.status_code == 201
