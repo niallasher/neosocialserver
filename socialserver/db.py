@@ -207,7 +207,6 @@ def define_entities(db_object):
 
 
 def create_test_db():
-    console.log("Creating in memory database instance.")
     mem_db = orm.Database()
     define_entities(mem_db)
     mem_db.bind('sqlite', '/tmp/test.db', create_db=True)
