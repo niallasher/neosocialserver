@@ -5,6 +5,13 @@ from socialserver.constants import ErrorCodes, MAX_FEED_GET_COUNT
 import requests
 
 
+def test_get_feed_missing_args(test_db, server_address):
+    r = requests.get(f"{server_address}/api/v2/feed/posts",
+                     json={})
+
+    assert r.status_code == 400
+
+
 def test_get_all_feed_no_posts(test_db, server_address):
     r = requests.get(f'{server_address}/api/v2/feed/posts',
                      json={
