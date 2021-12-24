@@ -25,7 +25,6 @@ def create_app():
     api = Api(application)
 
     if config.misc.enable_landing_page:
-
         @application.get('/')
         def landing_page():
             return render_template('server_landing.html')
