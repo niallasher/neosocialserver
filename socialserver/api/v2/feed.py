@@ -71,14 +71,14 @@ class PostFeed(Resource):
                                in filter_list).order_by(
                 orm.desc(db.Post.creation_time)).limit(
                 args.count, offset=args.offset
-            )
+            )[::]
         else:
             # noinspection PyTypeChecker
             query = orm.select(p for p in db.Post
                                if p.user not in blocks and p.under_moderation is False).order_by(
                 orm.desc(db.Post.creation_time)).limit(
                 args.count, offset=args.offset
-            )
+            )[::]
 
         # TODO: this shares a schema with the single post
         # thing, so they should be common. maybe a class
@@ -120,7 +120,7 @@ class PostFeed(Resource):
                    "meta": {
                        # if we have less posts left than the user
                        # asked for, we must have reached the end!
-                       "reached_end": len(query) < args['count']
+                       "reached_end": len(posts) < args['count']
                    },
                    "posts": posts
                }, 201
