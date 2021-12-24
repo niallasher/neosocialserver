@@ -33,6 +33,18 @@ def test_db(monkeypatch):
 
 @pytest.fixture
 def server_address():
+    return get_server_address()
+
+
+"""
+    get_server_address
+    
+    returns an server address for the testing server,
+    respecting the set environment variables
+"""
+
+
+def get_server_address():
     addr = getenv("SOCIALSERVER_TEST_SERVER_ADDRESS", default=None)
     port = getenv("SOCIALSERVER_TEST_SERVER_PORT", default=None)
 
@@ -46,42 +58,19 @@ def server_address():
 """
 
 
-@db_session
 @pytest.fixture
 def test_db_with_user():
     test_db = create_test_db()
     monkeypatch_api_db(pytest.MonkeyPatch(), test_db)
-    password = "password"
-    password_salt = generate_salt()
-    password_hash = hash_password(password, password_salt)
-    test_db.User(
-        username="test",
-        display_name="test",
-        password_hash=password_hash,
-        password_salt=password_salt,
-        creation_time=datetime.now(),
-        account_attributes=[0],
-        bio="",
-        account_approved=True,
-        is_legacy_account=False
-    )
-    # we're saving here, so we can create a session using this user
-    commit()
-    secret = generate_key()
-    test_db.UserSession(
-        access_token_hash=secret.hash,
-        user=test_db.User.get(username="test"),
-        creation_ip="127.0.0.1",
-        creation_time=datetime.now(),
-        last_access_time=datetime.now(),
-        user_agent=UA
-    )
-    commit()
+    addr = get_server_address()
+    create_user_with_request(addr, username="test", password="password", display_name="test")
+    access_token = create_user_session_with_request(addr, username="test", password="password")
     return AttrDict({
         "db": test_db,
         "username": "test",
         "password": "password",
-        "access_token": secret.key
+        "display_name": "test",
+        "access_token": access_token
     })
 
 
@@ -146,7 +135,12 @@ def create_user_session_with_request(serveraddress, username, password):
                       })
 
     # fail immediately if it didn't work
-    assert r.status_code == 201
+    print("--= SESSION RETVAL =--")
+    print(r.status_code)
+    print(r.json())
+    print("--= END SESSION RETVAL =--")
+    assert r.status_code == 200
+    return r.json()['access_token']
 
 
 """

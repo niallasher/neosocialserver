@@ -1,8 +1,7 @@
-from socialserver import application
-import pytest
 from socialserver.util.output import console
-from threading import Thread
+from socialserver import application
 from werkzeug.serving import make_server
+from threading import Thread
 
 
 class TestingServer(Thread):
@@ -24,7 +23,15 @@ class TestingServer(Thread):
         self.server.shutdown()
 
 
-def run_tests():
-    pytest.main(["socialserver"])
-    console.log("Tests complete.")
-    exit()
+def pytest_sessionstart(session):
+    # start a copy of the flask server in a background
+    # thread, so we can test against it.
+    application_thread.start()
+    pass
+
+
+def pytest_sessionfinish():
+    application_thread.kill()
+
+
+application_thread = TestingServer(application)

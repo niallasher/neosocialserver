@@ -87,6 +87,7 @@ def test_delete_user(test_db_with_user, server_address, monkeypatch):
     assert del_req.status_code == 200
 
 
+@db_session
 def test_delete_user_invalid_password(test_db_with_user, server_address, monkeypatch):
     del_req = requests.delete(f"{server_address}/api/v2/user",
                               json={

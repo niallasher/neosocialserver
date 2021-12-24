@@ -3,9 +3,11 @@
 # noinspection PyUnresolvedReferences
 from socialserver.tests.util import test_db_with_user, server_address, create_user_with_request
 from socialserver.constants import ErrorCodes
+from pony.orm import db_session
 import requests
 
 
+@db_session
 def test_block_user(test_db_with_user, server_address, monkeypatch):
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
@@ -19,6 +21,7 @@ def test_block_user(test_db_with_user, server_address, monkeypatch):
     assert block_req.status_code == 201
 
 
+@db_session
 def test_block_user_invalid_token(test_db_with_user, server_address, monkeypatch):
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
@@ -33,6 +36,7 @@ def test_block_user_invalid_token(test_db_with_user, server_address, monkeypatch
     assert block_req.json()['error'] == ErrorCodes.TOKEN_INVALID.value
 
 
+@db_session
 def test_try_block_already_tried_user(test_db_with_user, server_address, monkeypatch):
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
@@ -53,6 +57,7 @@ def test_try_block_already_tried_user(test_db_with_user, server_address, monkeyp
     assert block_req.json()['error'] == ErrorCodes.BLOCK_ALREADY_EXISTS.value
 
 
+@db_session
 def test_block_user_missing_info(test_db_with_user, server_address, monkeypatch):
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
@@ -63,6 +68,7 @@ def test_block_user_missing_info(test_db_with_user, server_address, monkeypatch)
     assert block_req.status_code == 400
 
 
+@db_session
 def test_remove_block(test_db_with_user, server_address, monkeypatch):
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
@@ -82,6 +88,7 @@ def test_remove_block(test_db_with_user, server_address, monkeypatch):
     assert block_del_req.status_code == 204
 
 
+@db_session
 def test_remove_block_not_exists(test_db_with_user, server_address, monkeypatch):
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
@@ -96,6 +103,7 @@ def test_remove_block_not_exists(test_db_with_user, server_address, monkeypatch)
     assert block_del_req.json()['error'] == ErrorCodes.CANNOT_FIND_BLOCK_ENTRY.value
 
 
+@db_session
 def test_remove_block_missing_info(test_db_with_user, server_address, monkeypatch):
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
@@ -106,6 +114,7 @@ def test_remove_block_missing_info(test_db_with_user, server_address, monkeypatc
     assert block_del_req.status_code == 400
 
 
+@db_session
 def test_remove_block_invalid_token(test_db_with_user, server_address, monkeypatch):
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
