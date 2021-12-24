@@ -51,7 +51,6 @@ class PostFeed(Resource):
                             if b.user == requesting_user_db)[:]
 
         filtered = False
-
         filter_list = []
 
         if args['username'] is not None:
@@ -60,8 +59,8 @@ class PostFeed(Resource):
 
         if args['following_only']:
             filtered = True
-            filter_list = orm.select(f.user.username
-                                     for f in requesting_user_db.following)
+            filter_list = orm.select(f.following.username
+                                     for f in requesting_user_db.following)[::]
 
         if filtered:
 
