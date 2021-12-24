@@ -5,9 +5,6 @@ import requests
 
 
 def test_create_single_post(test_db_with_user, server_address, monkeypatch):
-    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
-    monkeypatch.setattr("socialserver.api.v2.post.db", test_db_with_user.get('db'))
-
     r = requests.post(f"{server_address}/api/v2/post/single",
                       json={
                           "access_token": test_db_with_user.get('access_token'),
@@ -20,9 +17,6 @@ def test_create_single_post(test_db_with_user, server_address, monkeypatch):
 
 
 def test_create_single_post_missing_args(test_db_with_user, server_address, monkeypatch):
-    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
-    monkeypatch.setattr("socialserver.api.v2.post.db", test_db_with_user.get('db'))
-
     r = requests.post(f"{server_address}/api/v2/post/single",
                       json={})
 
@@ -30,9 +24,6 @@ def test_create_single_post_missing_args(test_db_with_user, server_address, monk
 
 
 def test_create_single_post_invalid_access_token(test_db_with_user, server_address, monkeypatch):
-    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
-    monkeypatch.setattr("socialserver.api.v2.post.db", test_db_with_user.get('db'))
-
     r = requests.post(f"{server_address}/api/v2/post/single",
                       json={
                           "access_token": "invalid_access_token",
@@ -44,9 +35,6 @@ def test_create_single_post_invalid_access_token(test_db_with_user, server_addre
 
 
 def test_get_single_post(test_db_with_user, server_address, monkeypatch):
-    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
-    monkeypatch.setattr("socialserver.api.v2.post.db", test_db_with_user.get('db'))
-
     new_post_id = create_post_with_request(server_address,
                                            test_db_with_user.get('access_token'))
 
@@ -62,9 +50,6 @@ def test_get_single_post(test_db_with_user, server_address, monkeypatch):
 
 
 def test_get_single_post_not_exist(test_db_with_user, server_address, monkeypatch):
-    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
-    monkeypatch.setattr("socialserver.api.v2.post.db", test_db_with_user.get('db'))
-
     r = requests.get(f"{server_address}/api/v2/post/single",
                      json={
                          "access_token": test_db_with_user.get("access_token"),
@@ -77,9 +62,6 @@ def test_get_single_post_not_exist(test_db_with_user, server_address, monkeypatc
 
 
 def test_get_single_post_invalid_access_token(test_db_with_user, server_address, monkeypatch):
-    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
-    monkeypatch.setattr("socialserver.api.v2.post.db", test_db_with_user.get('db'))
-
     new_post_id = create_post_with_request(server_address,
                                            test_db_with_user.get('access_token'))
 
@@ -94,9 +76,6 @@ def test_get_single_post_invalid_access_token(test_db_with_user, server_address,
 
 
 def test_get_single_post_missing_args(test_db_with_user, server_address, monkeypatch):
-    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
-    monkeypatch.setattr("socialserver.api.v2.post.db", test_db_with_user.get('db'))
-
     create_post_with_request(server_address,
                              test_db_with_user.get('access_token'))
 

@@ -1,9 +1,10 @@
+import pony.orm
 import pytest
 import requests
 from os import getenv
 from datetime import datetime
 from pony.orm import db_session, commit
-import socialserver.db as db
+from socialserver.db import create_test_db
 from socialserver.util.auth import generate_key, generate_salt, hash_password
 
 UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 " \
@@ -17,7 +18,8 @@ UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.3
 
 @pytest.fixture
 def test_db(monkeypatch):
-    test_db = db.create_test_db()
+    test_db = create_test_db()
+    monkeypatch_api_db(pytest.MonkeyPatch(), test_db)
     return test_db
 
 
@@ -46,7 +48,8 @@ def server_address():
 @db_session
 @pytest.fixture
 def test_db_with_user():
-    test_db = db.create_test_db()
+    test_db = create_test_db()
+    monkeypatch_api_db(pytest.MonkeyPatch(), test_db)
     password = "password"
     password_salt = generate_salt()
     password_hash = hash_password(password, password_salt)
@@ -79,6 +82,28 @@ def test_db_with_user():
         "password": "password",
         "access_token": secret.key
     }
+
+
+"""
+    monkey_patch_api_db
+    
+    uses monkey-patching to replace the db object across
+    all api endpoints with the given one, so that tests
+    can have a blank database to work with.
+"""
+
+
+def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -> None:
+    monkeypatch.setattr("socialserver.api.v2.block.db", db)
+    monkeypatch.setattr("socialserver.api.v2.feed.db", db)
+    monkeypatch.setattr("socialserver.api.v2.follow.db", db)
+    monkeypatch.setattr("socialserver.api.v2.image.db", db)
+    monkeypatch.setattr("socialserver.api.v2.post.db", db)
+    monkeypatch.setattr("socialserver.api.v2.report.db", db)
+    monkeypatch.setattr("socialserver.api.v2.user.db", db)
+    monkeypatch.setattr("socialserver.api.v2.user_session.db", db)
+    monkeypatch.setattr("socialserver.api.v2.username_available.db", db)
+    return None
 
 
 """

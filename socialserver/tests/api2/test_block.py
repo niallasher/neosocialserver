@@ -7,9 +7,6 @@ import requests
 
 
 def test_block_user(test_db_with_user, server_address, monkeypatch):
-    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
-    monkeypatch.setattr("socialserver.api.v2.block.db", test_db_with_user.get('db'))
-
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
 
@@ -23,9 +20,6 @@ def test_block_user(test_db_with_user, server_address, monkeypatch):
 
 
 def test_block_user_invalid_token(test_db_with_user, server_address, monkeypatch):
-    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
-    monkeypatch.setattr("socialserver.api.v2.block.db", test_db_with_user.get('db'))
-
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
 
@@ -40,9 +34,6 @@ def test_block_user_invalid_token(test_db_with_user, server_address, monkeypatch
 
 
 def test_try_block_already_tried_user(test_db_with_user, server_address, monkeypatch):
-    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
-    monkeypatch.setattr("socialserver.api.v2.block.db", test_db_with_user.get('db'))
-
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
 
@@ -63,9 +54,6 @@ def test_try_block_already_tried_user(test_db_with_user, server_address, monkeyp
 
 
 def test_block_user_missing_info(test_db_with_user, server_address, monkeypatch):
-    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
-    monkeypatch.setattr("socialserver.api.v2.block.db", test_db_with_user.get('db'))
-
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
 
@@ -76,9 +64,6 @@ def test_block_user_missing_info(test_db_with_user, server_address, monkeypatch)
 
 
 def test_remove_block(test_db_with_user, server_address, monkeypatch):
-    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
-    monkeypatch.setattr("socialserver.api.v2.block.db", test_db_with_user.get('db'))
-
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
 
@@ -98,9 +83,6 @@ def test_remove_block(test_db_with_user, server_address, monkeypatch):
 
 
 def test_remove_block_not_exists(test_db_with_user, server_address, monkeypatch):
-    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
-    monkeypatch.setattr("socialserver.api.v2.block.db", test_db_with_user.get('db'))
-
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
 
@@ -115,9 +97,6 @@ def test_remove_block_not_exists(test_db_with_user, server_address, monkeypatch)
 
 
 def test_remove_block_missing_info(test_db_with_user, server_address, monkeypatch):
-    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
-    monkeypatch.setattr("socialserver.api.v2.block.db", test_db_with_user.get('db'))
-
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
 
@@ -128,9 +107,6 @@ def test_remove_block_missing_info(test_db_with_user, server_address, monkeypatc
 
 
 def test_remove_block_invalid_token(test_db_with_user, server_address, monkeypatch):
-    monkeypatch.setattr("socialserver.api.v2.user.db", test_db_with_user.get('db'))
-    monkeypatch.setattr("socialserver.api.v2.block.db", test_db_with_user.get('db'))
-
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
 
