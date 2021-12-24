@@ -6,7 +6,7 @@ import requests
 def test_username_available_name_taken(test_db_with_user, server_address, monkeypatch):
     r = requests.get(f"{server_address}/api/v2/user/name_available",
                      json={
-                         "username": test_db_with_user.get('username')
+                         "username": test_db_with_user.username
                      })
 
     assert r.status_code == 200

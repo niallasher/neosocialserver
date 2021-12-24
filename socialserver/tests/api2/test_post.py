@@ -7,7 +7,7 @@ import requests
 def test_create_single_post(test_db_with_user, server_address, monkeypatch):
     r = requests.post(f"{server_address}/api/v2/post/single",
                       json={
-                          "access_token": test_db_with_user.get('access_token'),
+                          "access_token": test_db_with_user.access_token,
                           "text_content": "Test Post"
                       })
 
@@ -36,7 +36,7 @@ def test_create_single_post_invalid_access_token(test_db_with_user, server_addre
 
 def test_get_single_post(test_db_with_user, server_address, monkeypatch):
     new_post_id = create_post_with_request(server_address,
-                                           test_db_with_user.get('access_token'))
+                                           test_db_with_user.access_token)
 
     r = requests.get(f"{server_address}/api/v2/post/single",
                      json={
@@ -46,7 +46,7 @@ def test_get_single_post(test_db_with_user, server_address, monkeypatch):
 
     assert r.status_code == 201
     assert r.json()['post']['id'] == new_post_id
-    assert r.json()['user']['username'] == test_db_with_user.get('username')
+    assert r.json()['user']['username'] == test_db_with_user.username
 
 
 def test_get_single_post_not_exist(test_db_with_user, server_address, monkeypatch):
@@ -63,7 +63,7 @@ def test_get_single_post_not_exist(test_db_with_user, server_address, monkeypatc
 
 def test_get_single_post_invalid_access_token(test_db_with_user, server_address, monkeypatch):
     new_post_id = create_post_with_request(server_address,
-                                           test_db_with_user.get('access_token'))
+                                           test_db_with_user.access_token)
 
     r = requests.get(f"{server_address}/api/v2/post/single",
                      json={
@@ -77,7 +77,7 @@ def test_get_single_post_invalid_access_token(test_db_with_user, server_address,
 
 def test_get_single_post_missing_args(test_db_with_user, server_address, monkeypatch):
     create_post_with_request(server_address,
-                             test_db_with_user.get('access_token'))
+                             test_db_with_user.access_token)
 
     r = requests.get(f"{server_address}/api/v2/post/single",
                      json={})

@@ -6,6 +6,7 @@ from datetime import datetime
 from pony.orm import db_session, commit
 from socialserver.db import create_test_db
 from socialserver.util.auth import generate_key, generate_salt, hash_password
+from attrdict import AttrDict
 
 UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 " \
      "Mobile/15A372 Safari/604.1 "
@@ -76,12 +77,12 @@ def test_db_with_user():
         user_agent=UA
     )
     commit()
-    return {
+    return AttrDict({
         "db": test_db,
         "username": "test",
         "password": "password",
         "access_token": secret.key
-    }
+    })
 
 
 """

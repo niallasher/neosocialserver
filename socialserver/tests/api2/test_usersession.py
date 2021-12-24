@@ -9,8 +9,8 @@ import requests
 def test_create_session(test_db_with_user, server_address, monkeypatch):
     creation_req = requests.post(f"{server_address}/api/v2/user/session",
                                  json={
-                                     "username": test_db_with_user.get('username'),
-                                     "password": test_db_with_user.get('password')
+                                     "username": test_db_with_user.username,
+                                     "password": test_db_with_user.password
                                  })
 
     assert creation_req.status_code == 200
@@ -19,7 +19,7 @@ def test_create_session(test_db_with_user, server_address, monkeypatch):
 def test_create_session_invalid_password(test_db_with_user, server_address, monkeypatch):
     creation_req = requests.post(f"{server_address}/api/v2/user/session",
                                  json={
-                                     "username": test_db_with_user.get('username'),
+                                     "username": test_db_with_user.username,
                                      "password": "invalid_password"
                                  })
 
@@ -31,7 +31,7 @@ def test_create_session_invalid_username(test_db_with_user, server_address, monk
     creation_req = requests.post(f"{server_address}/api/v2/user/session",
                                  json={
                                      "username": "userdoesntexist",
-                                     "password": test_db_with_user.get('password')
+                                     "password": test_db_with_user.password
                                  })
 
     assert creation_req.status_code == 404
@@ -48,11 +48,11 @@ def test_create_session_missing_data(test_db_with_user, server_address, monkeypa
 def test_get_user_session_info(test_db_with_user, server_address, monkeypatch):
     info_req = requests.get(f"{server_address}/api/v2/user/session",
                             json={
-                                "access_token": test_db_with_user.get('access_token')
+                                "access_token": test_db_with_user.access_token
                             })
 
     assert info_req.status_code == 200
-    assert info_req.json()['owner'] == test_db_with_user.get('username')
+    assert info_req.json()['owner'] == test_db_with_user.username
 
 
 def test_get_user_session_info_invalid(test_db_with_user, server_address, monkeypatch):
