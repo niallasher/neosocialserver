@@ -9,7 +9,7 @@ from socialserver.util.config import config
 # API Version 2
 from socialserver.api.v2.report import Report
 from socialserver.api.v2.info import ServerInfo
-from socialserver.api.v2.usersession import UserSession, UserSessionList
+from socialserver.api.v2.user_session import UserSession, UserSessionList
 from socialserver.api.v2.user import User, UserInfo
 from socialserver.api.v2.username_available import UsernameAvailable
 from socialserver.api.v2.feed import PostFeed
