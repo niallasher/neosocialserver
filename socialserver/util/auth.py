@@ -2,9 +2,7 @@ from types import SimpleNamespace
 import argon2
 from secrets import randbits
 from hashlib import sha256
-
 from secrets import token_urlsafe
-from pony.orm import db_session
 
 hasher = argon2.PasswordHasher()
 
