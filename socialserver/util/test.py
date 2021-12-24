@@ -13,7 +13,8 @@ UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.3
 
 """
     test_db
-    pytest fixture that creates an in-memory database with nothing in it
+    pytest fixture that creates an in-memory database with a premade user account
+    and session.
 """
 
 
@@ -21,7 +22,20 @@ UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.3
 def test_db(monkeypatch):
     test_db = create_test_db()
     monkeypatch_api_db(pytest.MonkeyPatch(), test_db)
-    return test_db
+    create_user_with_request(get_server_address(),
+                             username="test",
+                             password="password",
+                             display_name="test")
+    access_token = create_user_session_with_request(get_server_address(),
+                                                    username="test",
+                                                    password="password")
+    return AttrDict({
+        "db": test_db,
+        "username": "test",
+        "password": "password",
+        "display_name": "test",
+        "access_token": access_token
+    })
 
 
 """
@@ -49,29 +63,6 @@ def get_server_address():
     port = getenv("SOCIALSERVER_TEST_SERVER_PORT", default=None)
 
     return f"http://{'127.0.0.1' if addr is None else addr}:{'9801' if port is None else port}"
-
-
-"""
-    test_db_with_user
-    
-    creates a testdb with a user and a session
-"""
-
-
-@pytest.fixture
-def test_db_with_user():
-    test_db = create_test_db()
-    monkeypatch_api_db(pytest.MonkeyPatch(), test_db)
-    addr = get_server_address()
-    create_user_with_request(addr, username="test", password="password", display_name="test")
-    access_token = create_user_session_with_request(addr, username="test", password="password")
-    return AttrDict({
-        "db": test_db,
-        "username": "test",
-        "password": "password",
-        "display_name": "test",
-        "access_token": access_token
-    })
 
 
 """

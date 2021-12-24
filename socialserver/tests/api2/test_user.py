@@ -1,7 +1,7 @@
 # pycharm isn't detecting fixture usage, so we're
 # disabling PyUnresolvedReferences for the import.
 # noinspection PyUnresolvedReferences
-from socialserver.util.test import test_db, server_address, test_db_with_user, monkeypatch_api_db
+from socialserver.util.test import test_db, server_address, test_db, monkeypatch_api_db
 import requests
 from pony.orm import db_session
 from socialserver.constants import ErrorCodes, BIO_MAX_LEN, DISPLAY_NAME_MAX_LEN
@@ -12,19 +12,18 @@ def test_create_user(test_db, server_address, monkeypatch):
     user_creation_request = requests.post(f"{server_address}/api/v2/user",
                                           json={
                                               "display_name": "Test User",
-                                              "username": "test",
+                                              "username": "testuser",
                                               "password": "password",
                                           })
     print(user_creation_request.json())
     assert user_creation_request.status_code.__int__() == 201
-    test_db.drop_all_tables(with_all_data=True)
 
 
 def test_create_user_with_bio(test_db, server_address, monkeypatch):
     user_creation_request = requests.post(f"{server_address}/api/v2/user",
                                           json={
                                               "display_name": "Test User",
-                                              "username": "test",
+                                              "username": "testuser",
                                               "password": "password",
                                               "bio": "something goes here"
                                           })
@@ -35,7 +34,7 @@ def test_create_user_bio_too_long(test_db, server_address, monkeypatch):
     user_creation_request = requests.post(f"{server_address}/api/v2/user",
                                           json={
                                               "display_name": "Test User",
-                                              "username": "test",
+                                              "username": "testuser",
                                               "password": "password",
                                               "bio": token_urlsafe(BIO_MAX_LEN + 1)
                                           })
@@ -48,13 +47,13 @@ def test_attempt_create_duplicate_user(test_db, server_address, monkeypatch):
     requests.post(f"{server_address}/api/v2/user",
                   json={
                       "display_name": "Test User",
-                      "username": "test",
+                      "username": "testuser",
                       "password": "password",
                   })
     user_creation_request = requests.post(f"{server_address}/api/v2/user",
                                           json={
                                               "display_name": "Test User",
-                                              "username": "test",
+                                              "username": "testuser",
                                               "password": "password",
                                           })
     print(user_creation_request.json())
@@ -77,21 +76,21 @@ def test_create_user_username_too_long(test_db, server_address, monkeypatch):
     assert invalid_req.json()['error'] == ErrorCodes.USERNAME_INVALID.value
 
 
-def test_delete_user(test_db_with_user, server_address, monkeypatch):
+def test_delete_user(test_db, server_address, monkeypatch):
     del_req = requests.delete(f"{server_address}/api/v2/user",
                               json={
-                                  "access_token": test_db_with_user.access_token,
-                                  "password": test_db_with_user.password
+                                  "access_token": test_db.access_token,
+                                  "password": test_db.password
                               })
     print(del_req.json())
     assert del_req.status_code == 200
 
 
 @db_session
-def test_delete_user_invalid_password(test_db_with_user, server_address, monkeypatch):
+def test_delete_user_invalid_password(test_db, server_address, monkeypatch):
     del_req = requests.delete(f"{server_address}/api/v2/user",
                               json={
-                                  "access_token": test_db_with_user.access_token,
+                                  "access_token": test_db.access_token,
                                   "password": "defo_not_the_right_password"
                               })
     print(del_req.json())
@@ -99,27 +98,27 @@ def test_delete_user_invalid_password(test_db_with_user, server_address, monkeyp
     assert del_req.json()['error'] == ErrorCodes.INCORRECT_PASSWORD.value
 
 
-def test_delete_user_missing_input(test_db_with_user, server_address, monkeypatch):
+def test_delete_user_missing_input(test_db, server_address, monkeypatch):
     del_req = requests.delete(f"{server_address}/api/v2/user",
                               json={})
     assert del_req.status_code == 400
 
 
-def test_delete_user_invalid_token(test_db_with_user, server_address, monkeypatch):
+def test_delete_user_invalid_token(test_db, server_address, monkeypatch):
     del_req = requests.delete(f"{server_address}/api/v2/user",
                               json={
                                   "access_token": 'not_even_valid_form',
-                                  "password": test_db_with_user.password
+                                  "password": test_db.password
                               })
     print(del_req.json())
     assert del_req.status_code == 401
     assert del_req.json()['error'] == ErrorCodes.TOKEN_INVALID.value
 
 
-def test_update_username(test_db_with_user, server_address, monkeypatch):
+def test_update_username(test_db, server_address, monkeypatch):
     del_req = requests.patch(f"{server_address}/api/v2/user",
                              json={
-                                 "access_token": test_db_with_user.access_token,
+                                 "access_token": test_db.access_token,
                                  "username": "validusername"
                              })
     print(del_req.json())
@@ -127,10 +126,10 @@ def test_update_username(test_db_with_user, server_address, monkeypatch):
     assert del_req.json()['username'] == 'validusername'
 
 
-def test_update_username_invalid(test_db_with_user, server_address, monkeypatch):
+def test_update_username_invalid(test_db, server_address, monkeypatch):
     del_req = requests.patch(f"{server_address}/api/v2/user",
                              json={
-                                 "access_token": test_db_with_user.access_token,
+                                 "access_token": test_db.access_token,
                                  "username": "defonotavalidusernamecuzitswaytoolong"
                              })
     print(del_req.json())
@@ -138,7 +137,7 @@ def test_update_username_invalid(test_db_with_user, server_address, monkeypatch)
     assert del_req.json()['error'] == ErrorCodes.USERNAME_INVALID.value
 
 
-def test_update_username_already_exists(test_db_with_user, server_address, monkeypatch):
+def test_update_username_already_exists(test_db, server_address, monkeypatch):
     # create a second user, so we can try to steal its name
     requests.post(f"{server_address}/api/v2/user",
                   json={
@@ -149,7 +148,7 @@ def test_update_username_already_exists(test_db_with_user, server_address, monke
 
     del_req = requests.patch(f"{server_address}/api/v2/user",
                              json={
-                                 "access_token": test_db_with_user.access_token,
+                                 "access_token": test_db.access_token,
                                  "username": "test2"
                              })
     print(del_req.json())
@@ -157,30 +156,30 @@ def test_update_username_already_exists(test_db_with_user, server_address, monke
     assert del_req.json()['error'] == ErrorCodes.USERNAME_TAKEN.value
 
 
-def test_update_username_missing_input(test_db_with_user, server_address, monkeypatch):
+def test_update_username_missing_input(test_db, server_address, monkeypatch):
     patch_req = requests.patch(f"{server_address}/api/v2/user", json={})
     print(patch_req.json())
     assert patch_req.status_code == 400
 
 
-def test_update_bio(test_db_with_user, server_address, monkeypatch):
+def test_update_bio(test_db, server_address, monkeypatch):
     bio_req = requests.patch(f"{server_address}/api/v2/user",
                              json={
-                                 "access_token": test_db_with_user.access_token,
+                                 "access_token": test_db.access_token,
                                  "bio": "this is the new bio content 😀"
                              })
     assert bio_req.status_code == 201
 
 
-def test_update_bio_missing_input(test_db_with_user, server_address, monkeypatch):
+def test_update_bio_missing_input(test_db, server_address, monkeypatch):
     bio_req = requests.patch(f"{server_address}/api/v2/user", json={})
     assert bio_req.status_code == 400
 
 
-def test_update_bio_too_long(test_db_with_user, server_address, monkeypatch):
+def test_update_bio_too_long(test_db, server_address, monkeypatch):
     bio_req = requests.patch(f"{server_address}/api/v2/user",
                              json={
-                                 "access_token": test_db_with_user.access_token,
+                                 "access_token": test_db.access_token,
                                  "bio": token_urlsafe(BIO_MAX_LEN + 1)
                              })
 
@@ -188,10 +187,10 @@ def test_update_bio_too_long(test_db_with_user, server_address, monkeypatch):
     assert bio_req.json()['error'] == ErrorCodes.BIO_NON_CONFORMING.value
 
 
-def test_update_display_name(test_db_with_user, server_address, monkeypatch):
+def test_update_display_name(test_db, server_address, monkeypatch):
     bio_req = requests.patch(f"{server_address}/api/v2/user",
                              json={
-                                 "access_token": test_db_with_user.access_token,
+                                 "access_token": test_db.access_token,
                                  "display_name": "new name"
                              })
 
@@ -199,17 +198,17 @@ def test_update_display_name(test_db_with_user, server_address, monkeypatch):
     assert bio_req.json()['display_name'] == 'new name'
 
 
-def test_update_display_name_missing_input(test_db_with_user, server_address, monkeypatch):
+def test_update_display_name_missing_input(test_db, server_address, monkeypatch):
     bio_req = requests.patch(f"{server_address}/api/v2/user",
                              json={})
 
     assert bio_req.status_code == 400
 
 
-def test_update_display_name_too_long(test_db_with_user, server_address, monkeypatch):
+def test_update_display_name_too_long(test_db, server_address, monkeypatch):
     bio_req = requests.patch(f"{server_address}/api/v2/user",
                              json={
-                                 "access_token": test_db_with_user.access_token,
+                                 "access_token": test_db.access_token,
                                  "display_name": token_urlsafe(DISPLAY_NAME_MAX_LEN + 1)
                              })
 
@@ -217,21 +216,21 @@ def test_update_display_name_too_long(test_db_with_user, server_address, monkeyp
     assert bio_req.json()['error'] == ErrorCodes.DISPLAY_NAME_NON_CONFORMING.value
 
 
-def test_update_no_mod_params(test_db_with_user, server_address, monkeypatch):
+def test_update_no_mod_params(test_db, server_address, monkeypatch):
     bio_req = requests.patch(f"{server_address}/api/v2/user",
                              json={
-                                 "access_token": test_db_with_user.access_token
+                                 "access_token": test_db.access_token
                              })
 
     assert bio_req.status_code == 400
     assert bio_req.json()['error'] == ErrorCodes.USER_MODIFICATION_NO_OPTIONS_GIVEN.value
 
 
-def test_get_user_info(test_db_with_user, server_address, monkeypatch):
+def test_get_user_info(test_db, server_address, monkeypatch):
     info_req = requests.get(f"{server_address}/api/v2/user/info",
                             json={
-                                "access_token": test_db_with_user.access_token,
-                                "username": test_db_with_user.username
+                                "access_token": test_db.access_token,
+                                "username": test_db.username
                             })
 
     assert info_req.status_code == 200
@@ -239,10 +238,10 @@ def test_get_user_info(test_db_with_user, server_address, monkeypatch):
     assert info_req.json()['display_name'] == 'test'
 
 
-def test_get_user_info_invalid_username(test_db_with_user, server_address, monkeypatch):
+def test_get_user_info_invalid_username(test_db, server_address, monkeypatch):
     info_req = requests.get(f"{server_address}/api/v2/user/info",
                             json={
-                                "access_token": test_db_with_user.access_token,
+                                "access_token": test_db.access_token,
                                 "username": "missing_username"
                             })
 
@@ -250,7 +249,7 @@ def test_get_user_info_invalid_username(test_db_with_user, server_address, monke
     assert info_req.json()['error'] == ErrorCodes.USERNAME_NOT_FOUND.value
 
 
-def test_get_user_info_missing_data(test_db_with_user, server_address, monkeypatch):
+def test_get_user_info_missing_data(test_db, server_address, monkeypatch):
     info_req = requests.get(f"{server_address}/api/v2/user/info",
                             json={})
 

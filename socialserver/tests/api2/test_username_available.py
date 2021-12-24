@@ -1,12 +1,12 @@
 # noinspection PyUnresolvedReferences
-from socialserver.util.test import test_db_with_user, server_address, test_db
+from socialserver.util.test import test_db, server_address, test_db
 import requests
 
 
-def test_username_available_name_taken(test_db_with_user, server_address, monkeypatch):
+def test_username_available_name_taken(test_db, server_address, monkeypatch):
     r = requests.get(f"{server_address}/api/v2/user/name_available",
                      json={
-                         "username": test_db_with_user.username
+                         "username": test_db.username
                      })
 
     assert r.status_code == 200
