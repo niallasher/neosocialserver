@@ -24,9 +24,11 @@ def create_app():
     CORS(application)
     api = Api(application)
 
-    @application.get('/')
-    def landing_page():
-        return render_template('server_landing.html')
+    if config.misc.enable_landing_page:
+
+        @application.get('/')
+        def landing_page():
+            return render_template('server_landing.html')
 
     api.add_resource(ServerInfo, '/api/v2/server/info')
 

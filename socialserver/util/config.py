@@ -35,6 +35,12 @@ DEFAULT_CONFIG = f"""
 host = "0.0.0.0"
 port = 51672
 
+[misc]
+# if this is enabled, the server will
+# serve templates/server_landing.html
+# at root. this page can be customized.
+enable_landing_page = true
+
 [database]
 # supported connectors right now:
 # sqlite, postgres
@@ -153,7 +159,6 @@ def _load_toml(toml_string: str) -> AttrDict:
 def _load_config(filename: str) -> AttrDict:
     console.log(f"Trying to load configuration file from {filename}...")
     with open(filename, 'r') as config_file:
-
         config_data = config_file.read()
         config_dict = _load_toml(config_data)
 
