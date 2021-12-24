@@ -23,7 +23,7 @@ class TestingServer(Thread):
         self.server.shutdown()
 
 
-def pytest_sessionstart(session):
+def pytest_sessionstart():
     # start a copy of the flask server in a background
     # thread, so we can test against it.
     application_thread.start()
