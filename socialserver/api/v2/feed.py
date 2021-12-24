@@ -29,7 +29,7 @@ class PostFeed(Resource):
         parser.add_argument('following_only', type=bool, required=False)
         args = parser.parse_args()
 
-        if args['count'] >= MAX_FEED_GET_COUNT:
+        if args['count'] > MAX_FEED_GET_COUNT:
             return {"error": ErrorCodes.FEED_GET_COUNT_TOO_HIGH.value}, 400
 
         requesting_user = get_username_from_token(args['access_token'], db)
