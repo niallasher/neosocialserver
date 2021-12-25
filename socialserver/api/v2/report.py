@@ -1,14 +1,49 @@
 from datetime import datetime
 from typing import List
 from flask_restful import Resource, reqparse
-from socialserver.constants import REPORT_SUPPLEMENTARY_INFO_MAX_LEN, ErrorCodes, ReportReasons
+from socialserver.constants import REPORT_SUPPLEMENTARY_INFO_MAX_LEN, ErrorCodes, ReportReasons, AccountAttributes
 from socialserver.db import db
-from socialserver.util.auth import get_username_from_token
+from socialserver.util.auth import get_username_from_token, get_user_object_from_token
 from socialserver.util.config import config
-from pony.orm import db_session
+from pony.orm import db_session, select
 
 
 class Report(Resource):
+
+    @db_session
+    def get(self):
+
+        parser = reqparse.RequestParser()
+        parser.add_argument("access_token", type=str, required=True)
+        parser.add_argument("post_id", type=int, required=True)
+        args = parser.parse_args()
+
+        user = get_user_object_from_token(args['access_token'], db)
+
+        if not (user.is_admin or user.is_moderator):
+            return {'error': ErrorCodes.USER_NOT_MODERATOR_OR_ADMIN.value}, 401
+
+        wanted_post = db.Post.get(id=args['post_id'])
+        if wanted_post is None:
+            return {'error': ErrorCodes.POST_NOT_FOUND.value}, 404
+
+        reports = []
+        for r in wanted_post.reports:
+            reports.append(
+                {
+                    "creation_time": r.creation_time.timestamp(),
+                    # none represents a deleted account here,
+                    # since the relationship will be null
+                    "reporter": r.reporter.username or None,
+                    "report_info": {
+                        "active": r.active,
+                        "report_reasons": r.report_reason,
+                        "supplementary_info": r.supplementary_info or None
+                    }
+                }
+            )
+
+        return reports, 201
 
     @db_session
     def post(self):
