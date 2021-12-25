@@ -3,7 +3,6 @@
 # noinspection PyUnresolvedReferences
 from socialserver.util.test import test_db, server_address, create_user_with_request
 from socialserver.constants import ErrorCodes
-from pony.orm import db_session
 import requests
 
 
