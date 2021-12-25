@@ -4,6 +4,8 @@ from secrets import randbits
 from hashlib import sha256
 from secrets import token_urlsafe
 
+import pony.orm
+
 hasher = argon2.PasswordHasher()
 
 """
@@ -119,6 +121,22 @@ def get_username_from_token(session_token: str, db) -> str or None:
         access_token_hash=hash_plaintext_sha256(session_token))
     if existing_session is not None:
         return existing_session.user.username
+    else:
+        return None
+
+
+"""
+    get_user_object_from_token
+    returns an object representing the user in the database, or None if no match found
+"""
+
+
+# TODO: figure out how to type a pony database entity
+def get_user_object_from_token(session_token: str, db: pony.orm.Database):
+    existing_session = db.UserSession.get(
+        access_token_hash=hash_plaintext_sha256(session_token))
+    if existing_session is not None:
+        return existing_session.user
     else:
         return None
 
