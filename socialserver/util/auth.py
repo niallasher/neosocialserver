@@ -176,6 +176,9 @@ def auth_reqd(f):
             make_response(jsonify(
                 error=ErrorCodes.AUTHORIZATION_HEADER_NOT_PRESENT.value
             ), 401))
+        # The auth header is in this form: Bearer <token>
+        # we just want <token>, and since there are no spaces in
+        # the token format anyway, it's pretty easy to parse.
         auth_token = headers.get("Authorization").split(" ")[1]
         existing_entry = db.UserSession.get(
             access_token_hash=hash_plaintext_sha256(auth_token))
