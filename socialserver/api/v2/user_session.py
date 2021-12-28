@@ -72,10 +72,6 @@ class UserSession(Resource):
     @auth_reqd
     def delete(self):
 
-        parser = reqparse.RequestParser()
-        parser.add_argument('access_token', type=str, required=True)
-        args = parser.parse_args()
-
         session = db.UserSession.get(
             access_token_hash=hash_plaintext_sha256(
                 request.headers['Authorization'].split(" ")[1]
