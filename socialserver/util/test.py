@@ -139,8 +139,10 @@ def create_user_session_with_request(serveraddress, username, password):
 def create_post_with_request(serveraddress, auth_token, text_content="Test Post"):
     r = requests.post(f"{serveraddress}/api/v2/post/single",
                       json={
-                          "access_token": auth_token,
                           "text_content": text_content
+                      },
+                      headers={
+                          "Authorization": f"Bearer {auth_token}"
                       })
     assert r.status_code == 200
     return r.json()['post_id']
@@ -156,7 +158,9 @@ def create_post_with_request(serveraddress, auth_token, text_content="Test Post"
 def follow_user_with_request(serveraddress: str, auth_token: str, username: str):
     r = requests.post(f"{serveraddress}/api/v2/follow/user",
                       json={
-                          "access_token": auth_token,
                           "username": username
+                      },
+                      headers={
+                          "Authorization": f"Bearer {auth_token}"
                       })
     assert r.status_code == 201

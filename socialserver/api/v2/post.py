@@ -4,16 +4,16 @@ from flask_restful import Resource, reqparse
 from socialserver.db import db
 from pony.orm import db_session, commit
 from socialserver.constants import MAX_IMAGES_PER_POST, POST_MAX_LEN, REGEX_HASHTAG, ErrorCodes
-from socialserver.util.auth import get_username_from_token
+from socialserver.util.auth import get_username_from_token, get_user_from_auth_header, auth_reqd
 
 
 class Post(Resource):
 
     @db_session
+    @auth_reqd
     def post(self):
 
         parser = reqparse.RequestParser()
-        parser.add_argument('access_token', type=str, required=True)
         # TODO: should probably make it possible for people to post
         # just images; socialserver 2.x didn't allow that, and people
         # complained quite a bit!
@@ -23,9 +23,7 @@ class Post(Resource):
                             required=False, action="append")
         args = parser.parse_args()
 
-        requesting_user = get_username_from_token(args['access_token'], db)
-        if requesting_user is None:
-            return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
+        user = get_user_from_auth_header()
 
         # make sure the post is conforming to length requirements.
         # we don't limit the characters used as of now. might look
@@ -77,12 +75,11 @@ class Post(Resource):
 
         new_post = db.Post(
             under_moderation=False,
-            user=db.User.get(username=requesting_user),
+            user=user,
             creation_time=datetime.now(),
             text=text_content,
             images=images,
-            hashtags=db_tags
-        )
+            hashtags=db_tags)
 
         # we commit earlier than normal, so we
         # can return the ID before the function ends
@@ -93,16 +90,14 @@ class Post(Resource):
         return {"post_id": new_post.id}, 200
 
     @db_session
+    @auth_reqd
     def get(self):
 
         parser = reqparse.RequestParser()
-        parser.add_argument('access_token', type=str, required=True)
         parser.add_argument('post_id', type=int, required=True)
         args = parser.parse_args()
 
-        requesting_user = get_username_from_token(args['access_token'], db)
-        if requesting_user is None:
-            return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
+        user = get_user_from_auth_header()
 
         wanted_post = db.Post.get(id=args['post_id'])
         if wanted_post is None:
@@ -114,22 +109,21 @@ class Post(Resource):
 
         # we return POST_NOT_FOUND, so we don't explicitly highlight the
         # fact this post is moderated, just in case.
-        if wanted_post.under_moderation is True and not (requesting_user.is_admin() or requesting_user.is_moderator()):
+        if wanted_post.under_moderation is True and not (user.is_admin or user.is_moderator):
             return {"error": ErrorCodes.POST_NOT_FOUND.value}, 404
 
         # if you've blocked a user, we don't want you to see their posts.
-        if wanted_post.user in db.User.get(username=requesting_user).blocked_users:
+        if wanted_post.user in user.blocked_users:
             return {"error": ErrorCodes.USER_BLOCKED.value}, 400
 
         post_images = []
         for image in wanted_post.images:
             post_images.append(image.identifier)
 
-        user_has_liked_post = db.PostLike.get(user=db.User.get(username=requesting_user),
+        user_has_liked_post = db.PostLike.get(user=user,
                                               post=wanted_post) is not None
 
-        user_owns_post = wanted_post.user == db.User.get(
-            username=requesting_user)
+        user_owns_post = wanted_post.user == user
 
         return {
                    "post": {
