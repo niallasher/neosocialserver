@@ -95,21 +95,8 @@ class UserSessionList(Resource):
     @db_session
     @auth_reqd
     def get(self):
-
-        parser = reqparse.RequestParser()
-        parser.add_argument('access_token', type=str, required=True)
-        args = parser.parse_args()
-
-        user = get_user_from_auth_header()
-
-        session = db.UserSession.get(
-            access_token_hash=hash_plaintext_sha256(args['access_token'])
-        )
-
-        if session is None:
-            return {'error': ErrorCodes.TOKEN_INVALID.value}, 401
-
         sessions = []
+        user = get_user_from_auth_header()
 
         for s in user.sessions:
             user_agent = ua_parse(s.user_agent)
@@ -120,7 +107,9 @@ class UserSessionList(Resource):
                 # current = true if this is the session the user used to request the list
                 # this is just to make it easy for a client to add a tag saying something
                 # like [THIS DEVICE] to an entry in the list of sessions
-                "current": session.access_token_hash == hash_plaintext_sha256(args['access_token']),
+                "current": s.access_token_hash == hash_plaintext_sha256(
+                    request.headers['Authorization'].split(" ")[1]
+                ),
                 # the device that created the session, this should just about always be the
                 # same device that created it anyway, unless you've been reusing access tokens(?)
                 # or have used a backup program or smth to copy ur data

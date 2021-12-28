@@ -63,3 +63,20 @@ def test_get_user_session_info_invalid(test_db, server_address, monkeypatch):
 
     assert info_req.status_code == 401
     assert info_req.json()['error'] == ErrorCodes.TOKEN_INVALID.value
+
+
+def test_get_user_session_list(test_db, server_address):
+    r = requests.get(f"{server_address}/api/v2/user/session/list",
+                     headers={
+                         "Authorization": f"Bearer {test_db.access_token}"
+                     })
+    print(r.json())
+    assert r.status_code == 200
+
+
+def test_get_user_session_list_invalid_auth(test_db, server_address):
+    r = requests.get(f"{server_address}/api/v2/user/session/list",
+                     headers={
+                         "Authorization": f"Bearer invalid"
+                     })
+    assert r.status_code == 401
