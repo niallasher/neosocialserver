@@ -47,8 +47,8 @@ def test_create_session_missing_data(test_db, server_address, monkeypatch):
 
 def test_get_user_session_info(test_db, server_address, monkeypatch):
     info_req = requests.get(f"{server_address}/api/v2/user/session",
-                            json={
-                                "access_token": test_db.access_token
+                            headers={
+                                "Authorization": f"Bearer {test_db.access_token}"
                             })
 
     assert info_req.status_code == 200
@@ -57,14 +57,9 @@ def test_get_user_session_info(test_db, server_address, monkeypatch):
 
 def test_get_user_session_info_invalid(test_db, server_address, monkeypatch):
     info_req = requests.get(f"{server_address}/api/v2/user/session",
-                            json={
-                                "access_token": "invalid_access_token"
+                            headers={
+                                "Authorization": f"Bearer invalid"
                             })
 
     assert info_req.status_code == 401
     assert info_req.json()['error'] == ErrorCodes.TOKEN_INVALID.value
-
-
-def test_get_user_session_missing_info(test_db, server_address, monkeypatch):
-    info_req = requests.get(f"{server_address}/api/v2/user/session", json={})
-    assert info_req.status_code == 400

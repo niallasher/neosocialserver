@@ -4,7 +4,8 @@ from flask_restful import Resource, reqparse
 from pony.orm import db_session
 from flask import request
 from socialserver.constants import ErrorCodes
-from socialserver.util.auth import generate_key, get_ip_from_request, hash_plaintext_sha256, verify_password_valid
+from socialserver.util.auth import generate_key, get_ip_from_request, hash_plaintext_sha256, verify_password_valid, \
+    auth_reqd, get_user_from_auth_header
 from socialserver.util.config import config
 from user_agents import parse as ua_parse
 
@@ -12,30 +13,27 @@ from user_agents import parse as ua_parse
 class UserSession(Resource):
 
     @db_session
+    @auth_reqd
     def get(self):
 
-        # TODO: some sort of generic token check instead
-        # of having to write this each time
-        parser = reqparse.RequestParser()
-        parser.add_argument('access_token', type=str, required=True)
-        args = parser.parse_args()
-
         session = db.UserSession.get(
-            access_token_hash=hash_plaintext_sha256(args['access_token']))
+            access_token_hash=hash_plaintext_sha256(
+                request.headers['Authorization'].split(' ')[1]
+            ))
 
         if session is None:
             return {'error': ErrorCodes.TOKEN_INVALID.value}, 401
 
         return ({
-            "owner": session.user.username,
-            "current_ip": get_ip_from_request(request),
-            "creation_ip": session.creation_ip,
-            "creation_time": session.creation_time.timestamp(),
-            "current_server_time": datetime.now().timestamp(),
-            "last_access_time": session.last_access_time.timestamp(),
-            "user_agent": session.user_agent
-        },
-            200)
+                    "owner": session.user.username,
+                    "current_ip": get_ip_from_request(request),
+                    "creation_ip": session.creation_ip,
+                    "creation_time": session.creation_time.timestamp(),
+                    "current_server_time": datetime.now().timestamp(),
+                    "last_access_time": session.last_access_time.timestamp(),
+                    "user_agent": session.user_agent
+                },
+                200)
 
     @db_session
     def post(self):
@@ -71,6 +69,7 @@ class UserSession(Resource):
         return {"access_token": secret.key}, 200
 
     @db_session
+    @auth_reqd
     def delete(self):
 
         parser = reqparse.RequestParser()
@@ -78,7 +77,9 @@ class UserSession(Resource):
         args = parser.parse_args()
 
         session = db.UserSession.get(
-            access_token_hash=hash_plaintext_sha256(args['access_token']))
+            access_token_hash=hash_plaintext_sha256(
+                request.headers['Authorization'].split(" ")[1]
+            ))
         if session is None:
             return {'error': ErrorCodes.TOKEN_INVALID.value}, 401
 
@@ -87,16 +88,19 @@ class UserSession(Resource):
 
 
 class UserSessionList(Resource):
-
     """
         return a list of the users sessions, with basic info.
     """
+
     @db_session
+    @auth_reqd
     def get(self):
 
         parser = reqparse.RequestParser()
         parser.add_argument('access_token', type=str, required=True)
         args = parser.parse_args()
+
+        user = get_user_from_auth_header()
 
         session = db.UserSession.get(
             access_token_hash=hash_plaintext_sha256(args['access_token'])
@@ -105,11 +109,10 @@ class UserSessionList(Resource):
         if session is None:
             return {'error': ErrorCodes.TOKEN_INVALID.value}, 401
 
-        user_agent = ua_parse(session.user_agent)
         sessions = []
-        user = session.user
 
         for s in user.sessions:
+            user_agent = ua_parse(s.user_agent)
             sessions.append({
                 "creation_ip": s.creation_ip,
                 "creation_time": s.creation_time.timestamp(),
