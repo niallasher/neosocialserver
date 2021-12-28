@@ -152,7 +152,7 @@ def get_user_object_from_token(session_token: str, db: pony.orm.Database):
 """
 
 
-def get_ip_from_request(request) -> str:
+def get_ip_from_request() -> str:
     ip = request.headers.get('X-Forwarded-For')
     if ip is None:
         ip = request.remote_addr

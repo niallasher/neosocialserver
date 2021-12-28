@@ -26,7 +26,7 @@ class UserSession(Resource):
 
         return ({
                     "owner": session.user.username,
-                    "current_ip": get_ip_from_request(request),
+                    "current_ip": get_ip_from_request(),
                     "creation_ip": session.creation_ip,
                     "creation_time": session.creation_time.timestamp(),
                     "current_server_time": datetime.now().timestamp(),
@@ -60,7 +60,7 @@ class UserSession(Resource):
         db.UserSession(
             user=user,
             access_token_hash=secret.hash,
-            creation_ip=get_ip_from_request(request),
+            creation_ip=get_ip_from_request(),
             creation_time=datetime.now(),
             last_access_time=datetime.now(),
             user_agent=request.headers.get('User-Agent')
