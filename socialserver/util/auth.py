@@ -187,3 +187,25 @@ def auth_reqd(f):
         return f(*args, **kwargs)
 
     return decorated_function
+
+
+"""
+    get_username_from_auth_header
+"""
+
+
+def get_user_from_auth_header():
+    # this is only for use in a function that includes the auth_reqd
+    # decorator, which is why we don't handle a non-existent user;
+    # for this to be called, the auth_reqd decorator will have confirmed
+    # the existence of a session anyway (sessions are deleted when their
+    # user is, so them being non-existent isn't an issue anyway)
+    headers = request.headers
+    headers.get("Authorization") or abort(
+        make_response(jsonify(
+            error=ErrorCodes.AUTHORIZATION_HEADER_NOT_PRESENT.value
+        ), 401))
+    auth_token = headers.get("Authorization").split(" ")[1]
+    existing_entry = db.UserSession.get(
+        access_token_hash=hash_plaintext_sha256(auth_token))
+    return existing_entry.user
