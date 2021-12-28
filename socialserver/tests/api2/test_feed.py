@@ -7,7 +7,10 @@ import requests
 
 def test_get_feed_missing_args(test_db, server_address):
     r = requests.get(f"{server_address}/api/v2/feed/posts",
-                     json={})
+                     json={},
+                     headers={
+                         "Authorization": f"Bearer {test_db.access_token}"
+                     })
 
     assert r.status_code == 400
 
@@ -15,9 +18,11 @@ def test_get_feed_missing_args(test_db, server_address):
 def test_get_all_feed_no_posts(test_db, server_address):
     r = requests.get(f'{server_address}/api/v2/feed/posts',
                      json={
-                         "access_token": test_db.access_token,
                          "count": 15,
                          "offset": 0,
+                     },
+                     headers={
+                         "Authorization": f"Bearer {test_db.access_token}"
                      })
     assert r.status_code == 201
     assert r.json()['meta']['reached_end'] == True
@@ -27,9 +32,11 @@ def test_get_all_feed_no_posts(test_db, server_address):
 def test_get_all_feed_get_count_too_high(test_db, server_address):
     r = requests.get(f'{server_address}/api/v2/feed/posts',
                      json={
-                         "access_token": test_db.access_token,
                          "count": MAX_FEED_GET_COUNT + 1,
                          "offset": 0
+                     },
+                     headers={
+                         "Authorization": f"Bearer {test_db.access_token}"
                      })
 
     assert r.status_code == 400
@@ -43,9 +50,11 @@ def test_get_all_feed_less_than_count_posts(test_db, server_address):
                                  test_db.access_token)
     r = requests.get(f'{server_address}/api/v2/feed/posts',
                      json={
-                         "access_token": test_db.access_token,
                          "count": 15,
                          "offset": 0
+                     },
+                     headers={
+                         "Authorization": f"Bearer {test_db.access_token}"
                      })
     assert r.status_code == 201
     assert r.json()['meta']['reached_end'] == True
@@ -59,9 +68,11 @@ def test_get_all_feed_more_than_count_posts(test_db, server_address):
 
     r = requests.get(f'{server_address}/api/v2/feed/posts',
                      json={
-                         "access_token": test_db.access_token,
                          "count": 15,
                          "offset": 0
+                     },
+                     headers={
+                         "Authorization": f"Bearer {test_db.access_token}"
                      })
 
     assert r.status_code == 201
@@ -83,10 +94,12 @@ def test_get_posts_from_specific_usernames(test_db, server_address):
 
     r = requests.get(f"{server_address}/api/v2/feed/posts",
                      json={
-                         "access_token": test_db.access_token,
                          "count": 15,
                          "offset": 0,
                          "username": ["user1", "user2"]
+                     },
+                     headers={
+                         "Authorization": f"Bearer {test_db.access_token}"
                      })
 
     print(r.json())
@@ -116,10 +129,12 @@ def test_get_posts_from_followed_accounts(test_db, server_address):
 
     r = requests.get(f"{server_address}/api/v2/feed/posts",
                      json={
-                         "access_token": test_db.access_token,
                          "count": 15,
                          "offset": 0,
                          "following_only": True
+                     },
+                     headers={
+                         "Authorization": f"Bearer {test_db.access_token}"
                      })
 
     print(r.json())

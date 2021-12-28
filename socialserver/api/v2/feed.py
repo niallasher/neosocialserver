@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse
 from socialserver.constants import MAX_FEED_GET_COUNT, ErrorCodes
 from socialserver.db import db
-from socialserver.util.auth import get_username_from_token
+from socialserver.util.auth import get_username_from_token, auth_reqd, get_user_from_auth_header
 from pony.orm import db_session
 from pony import orm
 
@@ -9,10 +9,10 @@ from pony import orm
 class PostFeed(Resource):
 
     @db_session
+    @auth_reqd
     def get(self):
 
         parser = reqparse.RequestParser()
-        parser.add_argument('access_token', type=str, required=True)
         parser.add_argument('count', type=int, required=True)
         # maybe we should just assume zero if an offset isn't specified?
         # but I think it's better to be explicit about including it, as
@@ -32,10 +32,7 @@ class PostFeed(Resource):
         if args['count'] > MAX_FEED_GET_COUNT:
             return {"error": ErrorCodes.FEED_GET_COUNT_TOO_HIGH.value}, 400
 
-        requesting_user = get_username_from_token(args['access_token'], db)
-        if requesting_user is None:
-            return {"error": ErrorCodes.TOKEN_INVALID.value}, 403
-        requesting_user_db = db.User.get(username=requesting_user)
+        requesting_user_db = get_user_from_auth_header()
 
         # we don't want to show users that are blocked
         # in the feed ofc.
