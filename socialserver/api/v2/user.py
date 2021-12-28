@@ -4,7 +4,8 @@ from socialserver.db import db as prod_db
 from flask_restful import Resource, reqparse
 from socialserver.constants import BIO_MAX_LEN, DISPLAY_NAME_MAX_LEN, MAX_PASSWORD_LEN, MIN_PASSWORD_LEN, ErrorCodes, \
     REGEX_USERNAME_VALID
-from socialserver.util.auth import generate_salt, get_username_from_token, hash_password, verify_password_valid
+from socialserver.util.auth import generate_salt, get_username_from_token, hash_password, verify_password_valid, \
+    auth_reqd, get_user_from_auth_header
 from pony.orm import db_session
 from socialserver.util.config import config
 
@@ -14,18 +15,12 @@ db = prod_db
 class UserInfo(Resource):
 
     @db_session
+    @auth_reqd
     def get(self):
 
         parser = reqparse.RequestParser()
-        parser.add_argument('access_token', type=str, required=True)
         parser.add_argument('username', type=str, required=True)
         args = parser.parse_args()
-
-        # in the future, we might not require sign-in for read only access
-        # to some parts, but for now we do.
-        requesting_user = get_username_from_token(args['access_token'], db)
-        if requesting_user is None:
-            return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
 
         wanted_user = db.User.get(username=args['username'])
         if wanted_user is None:
@@ -115,10 +110,10 @@ class User(Resource):
         return {"needs_approval": config.auth.registration.approval_required}, 201
 
     @db_session
+    @auth_reqd
     def patch(self):
 
         parser = reqparse.RequestParser()
-        parser.add_argument('access_token', type=str, required=True)
         parser.add_argument('display_name', type=str, required=False)
         parser.add_argument('username', type=str, required=False)
         parser.add_argument('bio', type=str, required=False)
@@ -127,8 +122,7 @@ class User(Resource):
 
         args = parser.parse_args()
 
-        username = get_username_from_token(args['access_token'], db)
-        user = db.User.get(username=username)
+        user = get_user_from_auth_header()
 
         if args['display_name'] is not None:
             if len(args['display_name']) > DISPLAY_NAME_MAX_LEN:
@@ -169,21 +163,17 @@ class User(Resource):
         return {"error": ErrorCodes.USER_MODIFICATION_NO_OPTIONS_GIVEN.value}, 400
 
     @db_session
+    @auth_reqd
     def delete(self):
 
         parser = reqparse.RequestParser()
-        parser.add_argument('access_token', type=str, required=True)
         parser.add_argument('password', type=str, required=True)
         args = parser.parse_args()
 
         print(db.select("select * from User"))
         print(db.select("select * from UserSession"))
 
-        requesting_username = get_username_from_token(args['access_token'], db)
-        if requesting_username is None:
-            return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
-
-        requesting_user = db.User.get(username=requesting_username)
+        requesting_user = get_user_from_auth_header()
 
         if not verify_password_valid(args['password'],
                                      requesting_user.password_salt,
