@@ -1,12 +1,11 @@
 from datetime import datetime
 from typing import List
 from flask_restful import Resource, reqparse
-from socialserver.constants import REPORT_SUPPLEMENTARY_INFO_MAX_LEN, ErrorCodes, ReportReasons, AccountAttributes
+from socialserver.constants import REPORT_SUPPLEMENTARY_INFO_MAX_LEN, ErrorCodes, ReportReasons
 from socialserver.db import db
-from socialserver.util.auth import get_username_from_token, get_user_object_from_token, auth_reqd, \
-    get_user_from_auth_header
+from socialserver.util.auth import auth_reqd, get_user_from_auth_header
 from socialserver.util.config import config
-from pony.orm import db_session, select
+from pony.orm import db_session
 
 
 class Report(Resource):

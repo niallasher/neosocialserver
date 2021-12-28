@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask_restful import Resource, reqparse
 from socialserver.db import db
-from socialserver.util.auth import get_username_from_token, auth_reqd, get_user_from_auth_header
+from socialserver.util.auth import auth_reqd, get_user_from_auth_header
 from socialserver.constants import ErrorCodes
 from pony.orm import db_session
 

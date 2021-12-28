@@ -4,8 +4,8 @@ from socialserver.db import db as prod_db
 from flask_restful import Resource, reqparse
 from socialserver.constants import BIO_MAX_LEN, DISPLAY_NAME_MAX_LEN, MAX_PASSWORD_LEN, MIN_PASSWORD_LEN, ErrorCodes, \
     REGEX_USERNAME_VALID
-from socialserver.util.auth import generate_salt, get_username_from_token, hash_password, verify_password_valid, \
-    auth_reqd, get_user_from_auth_header
+from socialserver.util.auth import generate_salt, hash_password, verify_password_valid, auth_reqd, \
+    get_user_from_auth_header
 from pony.orm import db_session
 from socialserver.util.config import config
 

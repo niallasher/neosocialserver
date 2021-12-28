@@ -2,7 +2,7 @@
 from socialserver.util.test import test_db, server_address, create_user_with_request, create_post_with_request, \
     create_user_session_with_request
 import requests
-from socialserver.constants import ErrorCodes, ReportReasons, AccountAttributes
+from socialserver.constants import ReportReasons, AccountAttributes
 from pony.orm import db_session, commit
 
 
@@ -50,9 +50,9 @@ def test_try_create_report_own_post(test_db, server_address):
 
 
 def test_create_report_missing_args(test_db, server_address):
-    post_id = create_post_with_request(server_address,
-                                       test_db.access_token,
-                                       text_content="valid opinion that I disagree with")
+    create_post_with_request(server_address,
+                             test_db.access_token,
+                             text_content="valid opinion that I disagree with")
 
     r = requests.post(f"{server_address}/api/v2/report/post",
                       json={},

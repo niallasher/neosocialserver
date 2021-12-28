@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse
 from socialserver.constants import MAX_FEED_GET_COUNT, ErrorCodes
 from socialserver.db import db
-from socialserver.util.auth import get_username_from_token, auth_reqd, get_user_from_auth_header
+from socialserver.util.auth import auth_reqd, get_user_from_auth_header
 from pony.orm import db_session
 from pony import orm
 

@@ -3,7 +3,6 @@ import datetime
 from socialserver.constants import BIO_MAX_LEN, COMMENT_MAX_LEN, DISPLAY_NAME_MAX_LEN, \
     REPORT_SUPPLEMENTARY_INFO_MAX_LEN, TAG_MAX_LEN, USERNAME_MAX_LEN, AccountAttributes
 from socialserver.util.config import config
-from socialserver.util.output import console
 
 
 # these are used when define_entities

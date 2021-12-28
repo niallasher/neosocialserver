@@ -25,7 +25,7 @@ def test_get_all_feed_no_posts(test_db, server_address):
                          "Authorization": f"Bearer {test_db.access_token}"
                      })
     assert r.status_code == 201
-    assert r.json()['meta']['reached_end'] == True
+    assert r.json()['meta']['reached_end'] is True
     assert len(r.json()['posts']) == 0
 
 
@@ -57,7 +57,7 @@ def test_get_all_feed_less_than_count_posts(test_db, server_address):
                          "Authorization": f"Bearer {test_db.access_token}"
                      })
     assert r.status_code == 201
-    assert r.json()['meta']['reached_end'] == True
+    assert r.json()['meta']['reached_end'] is True
     assert len(r.json()['posts']) == 14
 
 
@@ -76,7 +76,7 @@ def test_get_all_feed_more_than_count_posts(test_db, server_address):
                      })
 
     assert r.status_code == 201
-    assert r.json()['meta']['reached_end'] == False
+    assert r.json()['meta']['reached_end'] is False
     assert len(r.json()['posts']) == 15
 
 

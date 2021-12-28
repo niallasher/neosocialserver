@@ -4,7 +4,7 @@ from flask_restful import Resource, reqparse
 from socialserver.db import db
 from pony.orm import db_session, commit
 from socialserver.constants import MAX_IMAGES_PER_POST, POST_MAX_LEN, REGEX_HASHTAG, ErrorCodes
-from socialserver.util.auth import get_username_from_token, get_user_from_auth_header, auth_reqd
+from socialserver.util.auth import get_user_from_auth_header, auth_reqd
 
 
 class Post(Resource):
