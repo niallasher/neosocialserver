@@ -21,10 +21,12 @@ def test_create_report(test_db, server_address):
 
     r = requests.post(f"{server_address}/api/v2/report/post",
                       json={
-                          "access_token": test_db.access_token,
                           "report_reason": [ReportReasons.DISCRIMINATION.value],
                           "supplemental_info": "test data test data",
                           "post_id": post_id
+                      },
+                      headers={
+                          "Authorization": f"Bearer {test_db.access_token}"
                       })
 
     assert r.status_code == 201
@@ -36,10 +38,12 @@ def test_try_create_report_own_post(test_db, server_address):
 
     r = requests.post(f"{server_address}/api/v2/report/post",
                       json={
-                          "access_token": test_db.access_token,
                           "report_reason": [ReportReasons.DISCRIMINATION.value],
                           "supplemental_info": "test data test data",
                           "post_id": post_id
+                      },
+                      headers={
+                          "Authorization": f"Bearer {test_db.access_token}"
                       })
 
     assert r.status_code == 400
@@ -51,7 +55,10 @@ def test_create_report_missing_args(test_db, server_address):
                                        text_content="valid opinion that I disagree with")
 
     r = requests.post(f"{server_address}/api/v2/report/post",
-                      json={})
+                      json={},
+                      headers={
+                          "Authorization": f"Bearer {test_db.access_token}"
+                      })
 
     assert r.status_code == 400
 
@@ -72,16 +79,21 @@ def test_get_report_from_post_id(test_db, server_address):
 
     assert requests.post(f"{server_address}/api/v2/report/post",
                          json={
-                             "access_token": test_db.access_token,
                              "report_reason": [ReportReasons.ILLEGAL_CONTENT.value],
                              "supplemental_info": "i don't like this post very much, so it's bad",
                              "post_id": post_id
+                         },
+                         headers={
+                             "Authorization": f"Bearer {test_db.access_token}"
                          }).status_code == 201
 
     r = requests.get(f"{server_address}/api/v2/report/post",
+
                      json={
-                         "access_token": test_db.access_token,
                          "post_id": post_id
+                     },
+                     headers={
+                         "Authorization": f"Bearer {test_db.access_token}"
                      })
 
     assert r.status_code == 201

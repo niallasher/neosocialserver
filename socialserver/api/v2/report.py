@@ -3,7 +3,8 @@ from typing import List
 from flask_restful import Resource, reqparse
 from socialserver.constants import REPORT_SUPPLEMENTARY_INFO_MAX_LEN, ErrorCodes, ReportReasons, AccountAttributes
 from socialserver.db import db
-from socialserver.util.auth import get_username_from_token, get_user_object_from_token
+from socialserver.util.auth import get_username_from_token, get_user_object_from_token, auth_reqd, \
+    get_user_from_auth_header
 from socialserver.util.config import config
 from pony.orm import db_session, select
 
@@ -11,14 +12,14 @@ from pony.orm import db_session, select
 class Report(Resource):
 
     @db_session
+    @auth_reqd
     def get(self):
 
         parser = reqparse.RequestParser()
-        parser.add_argument("access_token", type=str, required=True)
         parser.add_argument("post_id", type=int, required=True)
         args = parser.parse_args()
 
-        user = get_user_object_from_token(args['access_token'], db)
+        user = get_user_from_auth_header()
 
         if not (user.is_admin or user.is_moderator):
             return {'error': ErrorCodes.USER_NOT_MODERATOR_OR_ADMIN.value}, 401
@@ -46,10 +47,10 @@ class Report(Resource):
         return reports, 201
 
     @db_session
+    @auth_reqd
     def post(self):
 
         parser = reqparse.RequestParser()
-        parser.add_argument("access_token", type=str, required=True)
         parser.add_argument("post_id", type=int, required=True)
         # we are going to allow multiple infringement report reasons
         # per post, since we're not allowing a single user to report
@@ -59,10 +60,7 @@ class Report(Resource):
         parser.add_argument("supplemental_info", type=str, required=False)
         args = parser.parse_args()
 
-        reporting_user: str = get_username_from_token(args['access_token'], db)
-        if reporting_user is None:
-            return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
-        reporting_user_db = db.User.get(username=reporting_user)
+        reporting_user_db = get_user_from_auth_header()
 
         post_to_be_reported = db.Post.get(id=args['post_id'])
         if post_to_be_reported is None:
@@ -113,19 +111,15 @@ class Report(Resource):
         return {}, 201
 
     @db_session
+    @auth_reqd
     def patch(self):
 
         parser = reqparse.RequestParser()
-        parser.add_argument("access_token", type=str, required=True)
         parser.add_argument("report_id", type=int, required=True)
         parser.add_argument("mark_active", type=bool, required=True)
         args = parser.parse_args()
 
-        modifying_user = get_username_from_token(args['access_token'], db)
-        if modifying_user is None:
-            return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
-
-        modifying_user_db = db.User.get(username=modifying_user)
+        modifying_user_db = get_user_from_auth_header()
 
         # only a moderator or admin should be able to influence this
         if True not in [modifying_user_db.is_moderator, modifying_user_db.is_admin]:
