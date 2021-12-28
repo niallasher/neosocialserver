@@ -72,6 +72,7 @@ def get_server_address():
 
 
 def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -> None:
+    monkeypatch.setattr("socialserver.util.auth.db", db)
     monkeypatch.setattr("socialserver.api.v2.block.db", db)
     monkeypatch.setattr("socialserver.api.v2.feed.db", db)
     monkeypatch.setattr("socialserver.api.v2.follow.db", db)
