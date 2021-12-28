@@ -1,5 +1,6 @@
 from flask_restful import Resource
 from socialserver.constants import SERVER_VERSION
+from socialserver.util.auth import auth_reqd
 
 
 class ServerInfo(Resource):
@@ -10,7 +11,6 @@ class ServerInfo(Resource):
 
     # noinspection PyMethodMayBeStatic
     def get(self):
-
         return {
-            "version": SERVER_VERSION,
-        }, 201
+                   "version": SERVER_VERSION,
+               }, 201

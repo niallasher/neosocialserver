@@ -1,8 +1,13 @@
+from functools import wraps
 from types import SimpleNamespace
 import argon2
 from secrets import randbits
 from hashlib import sha256
 from secrets import token_urlsafe
+from pony.orm import db_session
+from socialserver.db import db
+from flask import abort, request, make_response, jsonify
+from socialserver.constants import ErrorCodes
 
 import pony.orm
 
@@ -152,3 +157,33 @@ def get_ip_from_request(request) -> str:
     if ip is None:
         ip = request.remote_addr
     return ip
+
+
+"""
+    auth_reqd
+    
+    Decorator for any resources that require auth.
+    It will validate whether a token is correct.
+"""
+
+
+def auth_reqd(f):
+    @wraps(f)
+    @db_session
+    def decorated_function(*args, **kwargs):
+        headers = request.headers
+        headers.get("Authorization") or abort(
+            make_response(jsonify(
+                error=ErrorCodes.AUTHORIZATION_HEADER_NOT_PRESENT.value
+            ), 401))
+        auth_token = headers.get("Authorization").split(" ")[1]
+        existing_entry = db.UserSession.get(
+            access_token_hash=hash_plaintext_sha256(auth_token))
+        if existing_entry is None:
+            abort(
+                make_response(jsonify(
+                    error=ErrorCodes.TOKEN_INVALID.value
+                ), 401))
+        return f(*args, **kwargs)
+
+    return decorated_function

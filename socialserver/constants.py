@@ -1,4 +1,5 @@
 from enum import Enum
+
 # semver spec.
 # major/minor/patch.
 # any breaking changes, or the introduction
@@ -48,7 +49,6 @@ MAX_IMAGE_SIZE_PROFILE_PICTURE = (64, 64)
 MAX_IMAGE_SIZE_PROFILE_PICTURE_LARGE = (128, 128)
 MAX_IMAGE_SIZE_HEADER = (600, 400)
 MAX_IMAGE_SIZE_GALLERY_PREVIEW = (256, 256)
-
 
 """
   AccountAttributes
@@ -148,6 +148,7 @@ class ErrorCodes(Enum):
     USER_NOT_MODERATOR_OR_ADMIN = 44
     REPORT_NOT_FOUND = 45
     ACCOUNT_NOT_APPROVED = 46
+    AUTHORIZATION_HEADER_NOT_PRESENT = 47
 
 
 """
