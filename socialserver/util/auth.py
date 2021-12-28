@@ -112,13 +112,16 @@ def hash_plaintext_sha256(plaintext: str) -> str:
     return sha256(plaintext.encode()).hexdigest()
 
 
+# NOTE: the following two methods aren't used by Api v2, BUT THEY SHOULD NOT BE REMOVED!
+# They are still applicable to the (currently unimplemented) Api v1 support and will be used!
+
 """
     get_username_from_token
     returns a username if a session token is valid, otherwise none
 """
 
 
-def get_username_from_token(session_token: str, db) -> str or None:
+def get_username_from_token(session_token: str) -> str or None:
     # note: we don't need or want a db_session here, since
     # anything calling it will already have to be wrapped in
     # one, which extends down to here.
@@ -137,7 +140,7 @@ def get_username_from_token(session_token: str, db) -> str or None:
 
 
 # TODO: figure out how to type a pony database entity
-def get_user_object_from_token(session_token: str, db: pony.orm.Database):
+def get_user_object_from_token(session_token: str):
     existing_session = db.UserSession.get(
         access_token_hash=hash_plaintext_sha256(session_token))
     if existing_session is not None:
