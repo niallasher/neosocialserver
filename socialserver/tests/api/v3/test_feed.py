@@ -6,7 +6,7 @@ import requests
 
 
 def test_get_feed_missing_args(test_db, server_address):
-    r = requests.get(f"{server_address}/api/v2/feed/posts",
+    r = requests.get(f"{server_address}/api/v3/feed/posts",
                      json={},
                      headers={
                          "Authorization": f"Bearer {test_db.access_token}"
@@ -16,7 +16,7 @@ def test_get_feed_missing_args(test_db, server_address):
 
 
 def test_get_all_feed_no_posts(test_db, server_address):
-    r = requests.get(f'{server_address}/api/v2/feed/posts',
+    r = requests.get(f'{server_address}/api/v3/feed/posts',
                      json={
                          "count": 15,
                          "offset": 0,
@@ -30,7 +30,7 @@ def test_get_all_feed_no_posts(test_db, server_address):
 
 
 def test_get_all_feed_get_count_too_high(test_db, server_address):
-    r = requests.get(f'{server_address}/api/v2/feed/posts',
+    r = requests.get(f'{server_address}/api/v3/feed/posts',
                      json={
                          "count": MAX_FEED_GET_COUNT + 1,
                          "offset": 0
@@ -48,7 +48,7 @@ def test_get_all_feed_less_than_count_posts(test_db, server_address):
     for i in range(1, 15):
         create_post_with_request(server_address,
                                  test_db.access_token)
-    r = requests.get(f'{server_address}/api/v2/feed/posts',
+    r = requests.get(f'{server_address}/api/v3/feed/posts',
                      json={
                          "count": 15,
                          "offset": 0
@@ -66,7 +66,7 @@ def test_get_all_feed_more_than_count_posts(test_db, server_address):
         create_post_with_request(server_address,
                                  test_db.access_token)
 
-    r = requests.get(f'{server_address}/api/v2/feed/posts',
+    r = requests.get(f'{server_address}/api/v3/feed/posts',
                      json={
                          "count": 15,
                          "offset": 0
@@ -92,7 +92,7 @@ def test_get_posts_from_specific_usernames(test_db, server_address):
     create_post_with_request(server_address, auth_token=at_user_one)
     create_post_with_request(server_address, auth_token=at_user_two)
 
-    r = requests.get(f"{server_address}/api/v2/feed/posts",
+    r = requests.get(f"{server_address}/api/v3/feed/posts",
                      json={
                          "count": 15,
                          "offset": 0,
@@ -127,7 +127,7 @@ def test_get_posts_from_followed_accounts(test_db, server_address):
     # we don't want this one to show up; we're not following user3
     create_post_with_request(server_address, auth_token=at_user_three)
 
-    r = requests.get(f"{server_address}/api/v2/feed/posts",
+    r = requests.get(f"{server_address}/api/v3/feed/posts",
                      json={
                          "count": 15,
                          "offset": 0,

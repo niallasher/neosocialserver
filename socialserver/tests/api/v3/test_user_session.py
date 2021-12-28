@@ -7,7 +7,7 @@ import requests
 
 
 def test_create_session(test_db, server_address, monkeypatch):
-    creation_req = requests.post(f"{server_address}/api/v2/user/session",
+    creation_req = requests.post(f"{server_address}/api/v3/user/session",
                                  json={
                                      "username": test_db.username,
                                      "password": test_db.password
@@ -17,7 +17,7 @@ def test_create_session(test_db, server_address, monkeypatch):
 
 
 def test_create_session_invalid_password(test_db, server_address, monkeypatch):
-    creation_req = requests.post(f"{server_address}/api/v2/user/session",
+    creation_req = requests.post(f"{server_address}/api/v3/user/session",
                                  json={
                                      "username": test_db.username,
                                      "password": "invalid_password"
@@ -28,7 +28,7 @@ def test_create_session_invalid_password(test_db, server_address, monkeypatch):
 
 
 def test_create_session_invalid_username(test_db, server_address, monkeypatch):
-    creation_req = requests.post(f"{server_address}/api/v2/user/session",
+    creation_req = requests.post(f"{server_address}/api/v3/user/session",
                                  json={
                                      "username": "userdoesntexist",
                                      "password": test_db.password
@@ -39,14 +39,14 @@ def test_create_session_invalid_username(test_db, server_address, monkeypatch):
 
 
 def test_create_session_missing_data(test_db, server_address, monkeypatch):
-    creation_req = requests.post(f"{server_address}/api/v2/user/session",
+    creation_req = requests.post(f"{server_address}/api/v3/user/session",
                                  json={})
 
     assert creation_req.status_code == 400
 
 
 def test_get_user_session_info(test_db, server_address, monkeypatch):
-    info_req = requests.get(f"{server_address}/api/v2/user/session",
+    info_req = requests.get(f"{server_address}/api/v3/user/session",
                             headers={
                                 "Authorization": f"Bearer {test_db.access_token}"
                             })
@@ -56,7 +56,7 @@ def test_get_user_session_info(test_db, server_address, monkeypatch):
 
 
 def test_get_user_session_info_invalid(test_db, server_address, monkeypatch):
-    info_req = requests.get(f"{server_address}/api/v2/user/session",
+    info_req = requests.get(f"{server_address}/api/v3/user/session",
                             headers={
                                 "Authorization": f"Bearer invalid"
                             })
@@ -66,7 +66,7 @@ def test_get_user_session_info_invalid(test_db, server_address, monkeypatch):
 
 
 def test_get_user_session_list(test_db, server_address):
-    r = requests.get(f"{server_address}/api/v2/user/session/list",
+    r = requests.get(f"{server_address}/api/v3/user/session/list",
                      headers={
                          "Authorization": f"Bearer {test_db.access_token}"
                      })
@@ -75,7 +75,7 @@ def test_get_user_session_list(test_db, server_address):
 
 
 def test_get_user_session_list_invalid_auth(test_db, server_address):
-    r = requests.get(f"{server_address}/api/v2/user/session/list",
+    r = requests.get(f"{server_address}/api/v3/user/session/list",
                      headers={
                          "Authorization": f"Bearer invalid"
                      })

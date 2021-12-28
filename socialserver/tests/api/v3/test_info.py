@@ -6,5 +6,5 @@ import requests
 
 
 def test_info(server_address, monkeypatch):
-    req = requests.get(f"{server_address}/api/v2/server/info")
+    req = requests.get(f"{server_address}/api/v3/server/info")
     assert req.status_code == 201

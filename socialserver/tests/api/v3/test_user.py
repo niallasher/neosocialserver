@@ -9,7 +9,7 @@ from secrets import token_urlsafe
 
 
 def test_create_user(test_db, server_address):
-    user_creation_request = requests.post(f"{server_address}/api/v2/user",
+    user_creation_request = requests.post(f"{server_address}/api/v3/user",
                                           json={
                                               "display_name": "Test User",
                                               "username": "testuser",
@@ -20,7 +20,7 @@ def test_create_user(test_db, server_address):
 
 
 def test_create_user_with_bio(test_db, server_address):
-    user_creation_request = requests.post(f"{server_address}/api/v2/user",
+    user_creation_request = requests.post(f"{server_address}/api/v3/user",
                                           json={
                                               "display_name": "Test User",
                                               "username": "testuser",
@@ -31,7 +31,7 @@ def test_create_user_with_bio(test_db, server_address):
 
 
 def test_create_user_bio_too_long(test_db, server_address):
-    user_creation_request = requests.post(f"{server_address}/api/v2/user",
+    user_creation_request = requests.post(f"{server_address}/api/v3/user",
                                           json={
                                               "display_name": "Test User",
                                               "username": "testuser",
@@ -44,13 +44,13 @@ def test_create_user_bio_too_long(test_db, server_address):
 
 @db_session
 def test_attempt_create_duplicate_user(test_db, server_address):
-    requests.post(f"{server_address}/api/v2/user",
+    requests.post(f"{server_address}/api/v3/user",
                   json={
                       "display_name": "Test User",
                       "username": "testuser",
                       "password": "password",
                   })
-    user_creation_request = requests.post(f"{server_address}/api/v2/user",
+    user_creation_request = requests.post(f"{server_address}/api/v3/user",
                                           json={
                                               "display_name": "Test User",
                                               "username": "testuser",
@@ -62,11 +62,11 @@ def test_attempt_create_duplicate_user(test_db, server_address):
 
 
 def test_create_user_missing_args(test_db, server_address):
-    assert requests.post(f"{server_address}/api/v2/user", json={}).status_code == 400
+    assert requests.post(f"{server_address}/api/v3/user", json={}).status_code == 400
 
 
 def test_create_user_username_too_long(test_db, server_address):
-    invalid_req = requests.post(f"{server_address}/api/v2/user",
+    invalid_req = requests.post(f"{server_address}/api/v3/user",
                                 json={
                                     "display_name": "Test User",
                                     "username": "idontknowwhattoputherebutitsgottabelong",
@@ -77,7 +77,7 @@ def test_create_user_username_too_long(test_db, server_address):
 
 
 def test_create_user_password_too_short(test_db, server_address):
-    r = requests.post(f"{server_address}/api/v2/user",
+    r = requests.post(f"{server_address}/api/v3/user",
                       json={
                           "display_name": "Test User",
                           "username": "testuser",
@@ -88,7 +88,7 @@ def test_create_user_password_too_short(test_db, server_address):
 
 
 def test_create_user_password_too_long(test_db, server_address):
-    r = requests.post(f"{server_address}/api/v2/user",
+    r = requests.post(f"{server_address}/api/v3/user",
                       json={
                           "display_name": "Test User",
                           "username": "testuser",
@@ -99,7 +99,7 @@ def test_create_user_password_too_long(test_db, server_address):
 
 
 def test_delete_user(test_db, server_address):
-    del_req = requests.delete(f"{server_address}/api/v2/user",
+    del_req = requests.delete(f"{server_address}/api/v3/user",
                               json={
                                   "password": test_db.password
                               },
@@ -113,7 +113,7 @@ def test_delete_user(test_db, server_address):
 
 @db_session
 def test_delete_user_invalid_password(test_db, server_address):
-    del_req = requests.delete(f"{server_address}/api/v2/user",
+    del_req = requests.delete(f"{server_address}/api/v3/user",
                               json={
                                   "password": "defo_not_the_right_password"
                               },
@@ -127,7 +127,7 @@ def test_delete_user_invalid_password(test_db, server_address):
 
 
 def test_delete_user_missing_input(test_db, server_address):
-    del_req = requests.delete(f"{server_address}/api/v2/user",
+    del_req = requests.delete(f"{server_address}/api/v3/user",
                               json={},
                               headers={
                                   "Authorization": f"Bearer {test_db.access_token}"
@@ -137,7 +137,7 @@ def test_delete_user_missing_input(test_db, server_address):
 
 
 def test_delete_user_invalid_token(test_db, server_address):
-    del_req = requests.delete(f"{server_address}/api/v2/user",
+    del_req = requests.delete(f"{server_address}/api/v3/user",
                               json={
                                   "password": test_db.password
                               },
@@ -151,7 +151,7 @@ def test_delete_user_invalid_token(test_db, server_address):
 
 
 def test_update_username(test_db, server_address):
-    del_req = requests.patch(f"{server_address}/api/v2/user",
+    del_req = requests.patch(f"{server_address}/api/v3/user",
                              json={
                                  "username": "validusername"
                              },
@@ -165,7 +165,7 @@ def test_update_username(test_db, server_address):
 
 
 def test_update_username_invalid(test_db, server_address):
-    del_req = requests.patch(f"{server_address}/api/v2/user",
+    del_req = requests.patch(f"{server_address}/api/v3/user",
                              json={
                                  "username": "defonotavalidusernamecuzitswaytoolong"
                              },
@@ -180,14 +180,14 @@ def test_update_username_invalid(test_db, server_address):
 
 def test_update_username_already_exists(test_db, server_address):
     # create a second user, so we can try to steal its name
-    requests.post(f"{server_address}/api/v2/user",
+    requests.post(f"{server_address}/api/v3/user",
                   json={
                       "display_name": "Test User 2",
                       "username": "test2",
                       "password": "password",
                   })
 
-    del_req = requests.patch(f"{server_address}/api/v2/user",
+    del_req = requests.patch(f"{server_address}/api/v3/user",
                              json={
                                  "username": "test2"
                              },
@@ -201,7 +201,7 @@ def test_update_username_already_exists(test_db, server_address):
 
 
 def test_update_bio(test_db, server_address):
-    bio_req = requests.patch(f"{server_address}/api/v2/user",
+    bio_req = requests.patch(f"{server_address}/api/v3/user",
                              json={
                                  "bio": "this is the new bio content 😀"
                              },
@@ -213,7 +213,7 @@ def test_update_bio(test_db, server_address):
 
 
 def test_update_bio_too_long(test_db, server_address):
-    bio_req = requests.patch(f"{server_address}/api/v2/user",
+    bio_req = requests.patch(f"{server_address}/api/v3/user",
                              json={
                                  "bio": token_urlsafe(BIO_MAX_LEN + 1)
                              },
@@ -226,7 +226,7 @@ def test_update_bio_too_long(test_db, server_address):
 
 
 def test_update_display_name(test_db, server_address):
-    bio_req = requests.patch(f"{server_address}/api/v2/user",
+    bio_req = requests.patch(f"{server_address}/api/v3/user",
                              json={
                                  "display_name": "new name"
                              },
@@ -239,7 +239,7 @@ def test_update_display_name(test_db, server_address):
 
 
 def test_update_display_name_too_long(test_db, server_address):
-    bio_req = requests.patch(f"{server_address}/api/v2/user",
+    bio_req = requests.patch(f"{server_address}/api/v3/user",
                              json={
                                  "display_name": token_urlsafe(DISPLAY_NAME_MAX_LEN + 1)
                              },
@@ -252,7 +252,7 @@ def test_update_display_name_too_long(test_db, server_address):
 
 
 def test_update_no_mod_params(test_db, server_address):
-    bio_req = requests.patch(f"{server_address}/api/v2/user",
+    bio_req = requests.patch(f"{server_address}/api/v3/user",
                              json={},
                              headers={
                                  "Authorization": f"Bearer {test_db.access_token}"
@@ -263,7 +263,7 @@ def test_update_no_mod_params(test_db, server_address):
 
 
 def test_get_user_info(test_db, server_address):
-    info_req = requests.get(f"{server_address}/api/v2/user/info",
+    info_req = requests.get(f"{server_address}/api/v3/user/info",
                             json={
                                 "username": test_db.username
                             },
@@ -277,7 +277,7 @@ def test_get_user_info(test_db, server_address):
 
 
 def test_get_user_info_invalid_username(test_db, server_address):
-    info_req = requests.get(f"{server_address}/api/v2/user/info",
+    info_req = requests.get(f"{server_address}/api/v3/user/info",
                             json={
                                 "username": "missing_username"
                             },
@@ -290,7 +290,7 @@ def test_get_user_info_invalid_username(test_db, server_address):
 
 
 def test_get_user_info_missing_data(test_db, server_address):
-    info_req = requests.get(f"{server_address}/api/v2/user/info",
+    info_req = requests.get(f"{server_address}/api/v3/user/info",
                             json={},
                             headers={
                                 "Authorization": f"Bearer {test_db.access_token}"

@@ -10,7 +10,7 @@ def test_block_user(test_db, server_address, monkeypatch):
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
 
-    block_req = requests.post(f"{server_address}/api/v2/block/user",
+    block_req = requests.post(f"{server_address}/api/v3/block/user",
                               json={
                                   "username": "user2"
                               },
@@ -25,7 +25,7 @@ def test_block_user_invalid_token(test_db, server_address, monkeypatch):
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
 
-    block_req = requests.post(f"{server_address}/api/v2/block/user",
+    block_req = requests.post(f"{server_address}/api/v3/block/user",
                               json={
                                   "username": "user2"
                               },
@@ -41,7 +41,7 @@ def test_try_block_already_tried_user(test_db, server_address, monkeypatch):
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
 
-    requests.post(f"{server_address}/api/v2/block/user",
+    requests.post(f"{server_address}/api/v3/block/user",
                   json={
                       "username": "user2"
                   },
@@ -49,7 +49,7 @@ def test_try_block_already_tried_user(test_db, server_address, monkeypatch):
                       "Authorization": f"Bearer {test_db.access_token}"
                   })
 
-    block_req = requests.post(f"{server_address}/api/v2/block/user",
+    block_req = requests.post(f"{server_address}/api/v3/block/user",
                               json={
                                   "username": "user2"
                               },
@@ -65,7 +65,7 @@ def test_block_user_missing_info(test_db, server_address, monkeypatch):
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
 
-    block_req = requests.post(f"{server_address}/api/v2/block/user",
+    block_req = requests.post(f"{server_address}/api/v3/block/user",
                               json={},
                               headers={
                                   "Authorization": f"Bearer {test_db.access_token}"
@@ -79,7 +79,7 @@ def test_remove_block(test_db, server_address, monkeypatch):
     create_user_with_request(server_address, username="user2", password="hunter22")
 
     # we'll need to create a block if we want to remove it :)
-    requests.post(f"{server_address}/api/v2/block/user",
+    requests.post(f"{server_address}/api/v3/block/user",
                   json={
                       "username": "user2"
                   },
@@ -87,7 +87,7 @@ def test_remove_block(test_db, server_address, monkeypatch):
                       "Authorization": f"Bearer {test_db.access_token}"
                   })
 
-    block_del_req = requests.delete(f"{server_address}/api/v2/block/user",
+    block_del_req = requests.delete(f"{server_address}/api/v3/block/user",
                                     json={
                                         "username": "user2"
                                     },
@@ -102,7 +102,7 @@ def test_remove_block_not_exists(test_db, server_address, monkeypatch):
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
 
-    block_del_req = requests.delete(f"{server_address}/api/v2/block/user",
+    block_del_req = requests.delete(f"{server_address}/api/v3/block/user",
                                     json={
                                         "username": "user2"
                                     },
@@ -118,7 +118,7 @@ def test_remove_block_missing_info(test_db, server_address, monkeypatch):
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
 
-    block_del_req = requests.delete(f"{server_address}/api/v2/block/user",
+    block_del_req = requests.delete(f"{server_address}/api/v3/block/user",
                                     json={},
                                     headers={
                                         "Authorization": f"Bearer {test_db.access_token}"
@@ -131,7 +131,7 @@ def test_remove_block_invalid_token(test_db, server_address, monkeypatch):
     # create a second user to block
     create_user_with_request(server_address, username="user2", password="hunter22")
 
-    block_del_req = requests.delete(f"{server_address}/api/v2/block/user",
+    block_del_req = requests.delete(f"{server_address}/api/v3/block/user",
                                     json={
                                         "username": "user2"
                                     },

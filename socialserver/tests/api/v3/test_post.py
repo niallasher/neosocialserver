@@ -5,7 +5,7 @@ import requests
 
 
 def test_create_single_post(test_db, server_address, monkeypatch):
-    r = requests.post(f"{server_address}/api/v2/post/single",
+    r = requests.post(f"{server_address}/api/v3/post/single",
                       json={
                           "text_content": "Test Post"
                       },
@@ -20,7 +20,7 @@ def test_create_single_post(test_db, server_address, monkeypatch):
 
 
 def test_create_single_post_missing_args(test_db, server_address, monkeypatch):
-    r = requests.post(f"{server_address}/api/v2/post/single",
+    r = requests.post(f"{server_address}/api/v3/post/single",
                       json={},
                       headers={
                           "Authorization": f"Bearer {test_db.access_token}"
@@ -30,7 +30,7 @@ def test_create_single_post_missing_args(test_db, server_address, monkeypatch):
 
 
 def test_create_single_post_invalid_access_token(test_db, server_address, monkeypatch):
-    r = requests.post(f"{server_address}/api/v2/post/single",
+    r = requests.post(f"{server_address}/api/v3/post/single",
                       json={
                           "text_content": "Test Post"
                       },
@@ -46,7 +46,7 @@ def test_get_single_post(test_db, server_address, monkeypatch):
     new_post_id = create_post_with_request(server_address,
                                            test_db.access_token)
 
-    r = requests.get(f"{server_address}/api/v2/post/single",
+    r = requests.get(f"{server_address}/api/v3/post/single",
                      json={
                          "post_id": new_post_id
                      },
@@ -60,7 +60,7 @@ def test_get_single_post(test_db, server_address, monkeypatch):
 
 
 def test_get_single_post_not_exist(test_db, server_address, monkeypatch):
-    r = requests.get(f"{server_address}/api/v2/post/single",
+    r = requests.get(f"{server_address}/api/v3/post/single",
                      json={
                          # we're on a blank database. 1 shouldn't exist.
                          "post_id": 1
@@ -77,7 +77,7 @@ def test_get_single_post_invalid_access_token(test_db, server_address, monkeypat
     new_post_id = create_post_with_request(server_address,
                                            test_db.access_token)
 
-    r = requests.get(f"{server_address}/api/v2/post/single",
+    r = requests.get(f"{server_address}/api/v3/post/single",
                      json={
                          "post_id": new_post_id
                      },
@@ -93,7 +93,7 @@ def test_get_single_post_missing_args(test_db, server_address, monkeypatch):
     create_post_with_request(server_address,
                              test_db.access_token)
 
-    r = requests.get(f"{server_address}/api/v2/post/single",
+    r = requests.get(f"{server_address}/api/v3/post/single",
                      json={},
                      headers={
                          "Authorization": f"Bearer {test_db.access_token}"

@@ -73,15 +73,15 @@ def get_server_address():
 
 def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -> None:
     monkeypatch.setattr("socialserver.util.auth.db", db)
-    monkeypatch.setattr("socialserver.api.v2.block.db", db)
-    monkeypatch.setattr("socialserver.api.v2.feed.db", db)
-    monkeypatch.setattr("socialserver.api.v2.follow.db", db)
-    monkeypatch.setattr("socialserver.api.v2.image.db", db)
-    monkeypatch.setattr("socialserver.api.v2.post.db", db)
-    monkeypatch.setattr("socialserver.api.v2.report.db", db)
-    monkeypatch.setattr("socialserver.api.v2.user.db", db)
-    monkeypatch.setattr("socialserver.api.v2.user_session.db", db)
-    monkeypatch.setattr("socialserver.api.v2.username_available.db", db)
+    monkeypatch.setattr("socialserver.api.v3.block.db", db)
+    monkeypatch.setattr("socialserver.api.v3.feed.db", db)
+    monkeypatch.setattr("socialserver.api.v3.follow.db", db)
+    monkeypatch.setattr("socialserver.api.v3.image.db", db)
+    monkeypatch.setattr("socialserver.api.v3.post.db", db)
+    monkeypatch.setattr("socialserver.api.v3.report.db", db)
+    monkeypatch.setattr("socialserver.api.v3.user.db", db)
+    monkeypatch.setattr("socialserver.api.v3.user_session.db", db)
+    monkeypatch.setattr("socialserver.api.v3.username_available.db", db)
     return None
 
 
@@ -93,7 +93,7 @@ def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -
 
 
 def create_user_with_request(serveraddress, username="username", password="password", display_name="name"):
-    r = requests.post(f"{serveraddress}/api/v2/user",
+    r = requests.post(f"{serveraddress}/api/v3/user",
                       json={
                           "display_name": display_name,
                           "username": username,
@@ -117,7 +117,7 @@ def create_user_with_request(serveraddress, username="username", password="passw
 
 
 def create_user_session_with_request(serveraddress, username, password):
-    r = requests.post(f"{serveraddress}/api/v2/user/session",
+    r = requests.post(f"{serveraddress}/api/v3/user/session",
                       json={
                           "username": username,
                           "password": password
@@ -137,7 +137,7 @@ def create_user_session_with_request(serveraddress, username, password):
 
 
 def create_post_with_request(serveraddress, auth_token, text_content="Test Post"):
-    r = requests.post(f"{serveraddress}/api/v2/post/single",
+    r = requests.post(f"{serveraddress}/api/v3/post/single",
                       json={
                           "text_content": text_content
                       },
@@ -156,7 +156,7 @@ def create_post_with_request(serveraddress, auth_token, text_content="Test Post"
 
 
 def follow_user_with_request(serveraddress: str, auth_token: str, username: str):
-    r = requests.post(f"{serveraddress}/api/v2/follow/user",
+    r = requests.post(f"{serveraddress}/api/v3/follow/user",
                       json={
                           "username": username
                       },

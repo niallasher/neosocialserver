@@ -112,7 +112,7 @@ def hash_plaintext_sha256(plaintext: str) -> str:
     return sha256(plaintext.encode()).hexdigest()
 
 
-# NOTE: the following two methods aren't used by Api v2, BUT THEY SHOULD NOT BE REMOVED!
+# NOTE: the following two methods aren't used by Api v3, BUT THEY SHOULD NOT BE REMOVED!
 # They are still applicable to the (currently unimplemented) Api v1 support and will be used!
 
 """
