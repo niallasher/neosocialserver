@@ -12,8 +12,10 @@ def test_block_user(test_db, server_address, monkeypatch):
 
     block_req = requests.post(f"{server_address}/api/v2/block/user",
                               json={
-                                  "access_token": test_db.get("access_token"),
                                   "username": "user2"
+                              },
+                              headers={
+                                  "Authorization": f"Bearer {test_db.access_token}"
                               })
 
     assert block_req.status_code == 201
@@ -25,8 +27,10 @@ def test_block_user_invalid_token(test_db, server_address, monkeypatch):
 
     block_req = requests.post(f"{server_address}/api/v2/block/user",
                               json={
-                                  "access_token": "lolnope",
                                   "username": "user2"
+                              },
+                              headers={
+                                  "Authorization": f"Bearer invalid"
                               })
 
     assert block_req.status_code == 401
@@ -39,14 +43,18 @@ def test_try_block_already_tried_user(test_db, server_address, monkeypatch):
 
     requests.post(f"{server_address}/api/v2/block/user",
                   json={
-                      "access_token": test_db.get("access_token"),
                       "username": "user2"
+                  },
+                  headers={
+                      "Authorization": f"Bearer {test_db.access_token}"
                   })
 
     block_req = requests.post(f"{server_address}/api/v2/block/user",
                               json={
-                                  "access_token": test_db.get("access_token"),
                                   "username": "user2"
+                              },
+                              headers={
+                                  "Authorization": f"Bearer {test_db.access_token}"
                               })
 
     assert block_req.status_code == 400
@@ -58,7 +66,10 @@ def test_block_user_missing_info(test_db, server_address, monkeypatch):
     create_user_with_request(server_address, username="user2", password="hunter22")
 
     block_req = requests.post(f"{server_address}/api/v2/block/user",
-                              json={})
+                              json={},
+                              headers={
+                                  "Authorization": f"Bearer {test_db.access_token}"
+                              })
 
     assert block_req.status_code == 400
 
@@ -70,13 +81,18 @@ def test_remove_block(test_db, server_address, monkeypatch):
     # we'll need to create a block if we want to remove it :)
     requests.post(f"{server_address}/api/v2/block/user",
                   json={
-                      "access_token": test_db.get("access_token"),
                       "username": "user2"
+                  },
+                  headers={
+                      "Authorization": f"Bearer {test_db.access_token}"
                   })
+
     block_del_req = requests.delete(f"{server_address}/api/v2/block/user",
                                     json={
-                                        "access_token": test_db.get("access_token"),
                                         "username": "user2"
+                                    },
+                                    headers={
+                                        "Authorization": f"Bearer {test_db.access_token}"
                                     })
 
     assert block_del_req.status_code == 204
@@ -88,8 +104,10 @@ def test_remove_block_not_exists(test_db, server_address, monkeypatch):
 
     block_del_req = requests.delete(f"{server_address}/api/v2/block/user",
                                     json={
-                                        "access_token": test_db.get("access_token"),
                                         "username": "user2"
+                                    },
+                                    headers={
+                                        "Authorization": f"Bearer {test_db.access_token}"
                                     })
 
     assert block_del_req.status_code == 404
@@ -101,7 +119,10 @@ def test_remove_block_missing_info(test_db, server_address, monkeypatch):
     create_user_with_request(server_address, username="user2", password="hunter22")
 
     block_del_req = requests.delete(f"{server_address}/api/v2/block/user",
-                                    json={})
+                                    json={},
+                                    headers={
+                                        "Authorization": f"Bearer {test_db.access_token}"
+                                    })
 
     assert block_del_req.status_code == 400
 
@@ -112,8 +133,10 @@ def test_remove_block_invalid_token(test_db, server_address, monkeypatch):
 
     block_del_req = requests.delete(f"{server_address}/api/v2/block/user",
                                     json={
-                                        "access_token": "not_correct",
                                         "username": "user2"
+                                    },
+                                    headers={
+                                        "Authorization": f"Bearer invalid"
                                     })
 
     assert block_del_req.status_code == 401
