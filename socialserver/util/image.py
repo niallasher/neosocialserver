@@ -10,7 +10,7 @@ from PIL import Image, ImageOps
 from pony.orm import commit, db_session
 from socialserver.util.config import config
 from socialserver.db import db
-from socialserver.constants import ImageTypes,  MAX_PIXEL_RATIO, MAX_IMAGE_SIZE_GALLERY_PREVIEW, \
+from socialserver.constants import ImageTypes, MAX_PIXEL_RATIO, MAX_IMAGE_SIZE_GALLERY_PREVIEW, \
     MAX_IMAGE_SIZE_POST_PREVIEW, MAX_IMAGE_SIZE_POST, MAX_IMAGE_SIZE_PROFILE_PICTURE, \
     MAX_IMAGE_SIZE_PROFILE_PICTURE_LARGE
 from secrets import token_urlsafe
@@ -19,20 +19,17 @@ from copy import copy
 from rich import print
 from typing import Tuple
 
-
 IMAGE_DIR = config.media.images.storage_dir
 # where straight uploaded images are stored.
 # the optimized ones are stored one above it
 IMAGE_DIR_ORIGINAL = IMAGE_DIR + '/originals'
 IMAGE_QUALITY = config.media.images.quality
 
-
 # check if the image directory exists,
 # if it doesn't, create it
 if not path.exists(IMAGE_DIR):
     makedirs(IMAGE_DIR)
     print(f"Created image storage directory, {IMAGE_DIR}")
-
 
 """
     save_imageset_to_disk
@@ -45,7 +42,6 @@ if not path.exists(IMAGE_DIR):
 # TODO: not sure how to best represent a dict with pythons type
 # annotations. Need to fix this.
 def save_images_to_disk(images: dict, access_id: str) -> None:
-
     def save_with_pixel_ratio(image, filename, pixel_ratio):
         image.save(f"{IMAGE_DIR}/{access_id}/{filename}_{pixel_ratio}x.jpg",
                    type="JPEG", quality=IMAGE_QUALITY, progressive=True)
@@ -57,7 +53,7 @@ def save_images_to_disk(images: dict, access_id: str) -> None:
                 f"{IMAGE_DIR}/{access_id}/{ImageTypes.ORIGINAL.value}.jpg", type="JPEG", quality=IMAGE_QUALITY)
         else:
             for j in images[i]:
-                save_with_pixel_ratio(j, i.value, images[i].index(j)+1)
+                save_with_pixel_ratio(j, i.value, images[i].index(j) + 1)
                 # FIXME: incredibly hacky way of dealing with duplicates.
                 images[i][images[i].index(j)] = token_urlsafe(16)
 
@@ -81,7 +77,7 @@ def create_random_image_identifier() -> str:
 
 
 def mult_size_tuple(size: Tuple[int, int], multiplier: int) -> Tuple[int, int]:
-    return tuple((int(size[0]*multiplier), int(size[1]*multiplier)))
+    return tuple((int(size[0] * multiplier), int(size[1] * multiplier)))
 
 
 """
@@ -239,7 +235,7 @@ def handle_upload(image_package: str, userid: int) -> SimpleNamespace:
     # 0 to 3, where the pixel ratio is the index + 1. except for posts.
     # we always deliver them in ''full'' quality (defined by MAX_IMAGE_SIZE_POST)
     arr_gallery_preview_image = resize_image_aspect_aware(
-        image, MAX_IMAGE_SIZE_GALLERY_PREVIEW)
+        original_image, MAX_IMAGE_SIZE_GALLERY_PREVIEW)
 
     # if upload_type == ImageUploadTypes.PROFILE_PICTURE:
     arr_profilepic = resize_image_aspect_aware(
