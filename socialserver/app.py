@@ -14,7 +14,7 @@ from socialserver.api.v3.user import User, UserInfo
 from socialserver.api.v3.username_available import UsernameAvailable
 from socialserver.api.v3.feed import PostFeed
 from socialserver.api.v3.post import Post
-from socialserver.api.v3.image import Image
+from socialserver.api.v3.image import Image, NewImage
 from socialserver.api.v3.block import Block
 from socialserver.api.v3.follow import Follow
 
@@ -41,6 +41,7 @@ def create_app():
     api.add_resource(PostFeed, '/api/v3/feed/posts')
 
     api.add_resource(Image, '/api/v3/image/<imageid>')
+    api.add_resource(NewImage, '/api/v3/image')
 
     api.add_resource(Follow, '/api/v3/follow/user')
     api.add_resource(Block, '/api/v3/block/user')
