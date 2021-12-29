@@ -21,19 +21,22 @@ early stages of development.
 - ```python3 -m socialserver devel-run``` for development, ```gunicorn socialserver``` for production
 - If you want to change settings, default config is at ```$SOCIALSERVER_ROOT/config.toml```. It can be over-ridden with
   ```$SOCIALSERVER_CONFIG_FILE``` to change the location that is checked.
-- The server will create the default configuration file automatically, and serve on all avaliable interfaces, using port
-  51672.
+- The server will create the default configuration file automatically, and serve on all available interfaces, using port
+    51672.
 
-### Running the test suite
+### Tests
 
-To invoke the test suite, run  ```python3 -m socialserver test```.
+The test suite is written using pytest. Just run ```pytest socialserver``` from the repository root, or alternatively
+```python3 -m socialserver test```.
 
 ### Notes
 
-- Currently, there is literally no stability. Not even the API version number (I'm considering skipping /api/v2 and
-  going straight to /api/v3 so I can have parity between the server major version and the API version).
-    - Yeah, /api/v1 persisted between original server versions 1 and 2 despite breaking changes being introduced in it.
-      God knows what I was thnking.
+- Currently, there is no stability; API version 3 has not been frozen yet, and *anything* is possible to change!
+- API version 2 does not exist
+    - If you ask where it is, or what happened to it, somebody will show up at your house within the week to have you
+      silenced.
+    - The current API version is always to be the same as the server major version, and due to some terrible decisions
+      in the past APIv1 was current from server versions 0.0.1 to 2.5.0
 - There is currently no setup process to create a server admin. You can use the hacky little built in user creation
   wizard by running ```python3 -m socialserver mk-user```, to create an admin user. This will change in the future.
 - There is currently no real API documentation. If for whatever reason you want to mess with this in it's current state,
@@ -41,7 +44,7 @@ To invoke the test suite, run  ```python3 -m socialserver test```.
 
 ### What currently works?
 
-#### Via /api/v2
+#### Via /api/v3
 
 - Creating a user
 - Modifying user (incl avatar and header image, with already uploaded images)
