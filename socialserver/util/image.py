@@ -1,4 +1,5 @@
 import datetime
+import json.decoder
 import re
 from base64 import urlsafe_b64decode
 from io import BytesIO
@@ -12,11 +13,12 @@ from socialserver.util.config import config
 from socialserver.db import db
 from socialserver.constants import ImageTypes, MAX_PIXEL_RATIO, MAX_IMAGE_SIZE_GALLERY_PREVIEW, \
     MAX_IMAGE_SIZE_POST_PREVIEW, MAX_IMAGE_SIZE_POST, MAX_IMAGE_SIZE_PROFILE_PICTURE, \
-    MAX_IMAGE_SIZE_PROFILE_PICTURE_LARGE
+    MAX_IMAGE_SIZE_PROFILE_PICTURE_LARGE, ImageSupportedMimeTypes
 from secrets import token_urlsafe
 from json import loads
 from copy import copy
 from rich import print
+import magic
 from typing import Tuple
 
 IMAGE_DIR = config.media.images.storage_dir
@@ -149,14 +151,14 @@ def calculate_largest_fit(image: PIL.Image, max_size: Tuple[int, int]) -> Tuple[
 
 
 """
-    convert_data_url_to_image
-    Converts a data url to a PIL image, for further processing.
+    convert_data_url_to_byte_buffer
+    Converts a data url to a BytesIO buffer, for further processing.
     Does not resize, compress or save the image. Just loads it,
     and returns it.
 """
 
 
-def convert_data_url_to_image(data_url: str) -> PIL.Image:
+def convert_data_url_to_byte_buffer(data_url: str) -> BytesIO:
     # strip the mime type declaration, and the data: prefix,
     # so we can convert to binary and create an image
     data_url = re.sub(r'^data:image/.+;base64,', '', data_url)
@@ -164,6 +166,19 @@ def convert_data_url_to_image(data_url: str) -> PIL.Image:
     # write to disk, and we can use the image directly.
     # we only want to store it once processing is done.
     binary_data = BytesIO(urlsafe_b64decode(data_url))
+    return binary_data
+
+
+""" 
+    convert_data_url_to_image
+    
+    Converts a data_url to a pil.Image object,
+    using convert_data_url_to_byte_buffer
+"""
+
+
+def convert_data_url_to_image(data_url: str) -> PIL.Image:
+    binary_data = convert_data_url_to_byte_buffer(data_url)
     image = Image.open(binary_data).convert('RGB')
     return image
 
@@ -204,6 +219,64 @@ def generate_image_of_type(identifier):
 
 
 """
+    InvalidImageException
+    
+    Raised if there is an issue with the image format
+"""
+
+
+class InvalidImageException(Exception):
+    pass
+
+
+"""
+    _check_buffer_mimetype
+    
+    Check the file type of binary data, to ensure it matches an
+    array of mimetypes. Returns true if ok, false if not.
+"""
+
+
+def _check_buffer_mimetype(buffer, mimetypes):
+    mimetype = magic.from_buffer(buffer.read(2048), mime=True)
+    buffer.seek(0)
+    if mimetype not in mimetypes:
+        return False
+    return True
+
+
+"""
+    _verify_image_package
+        
+    verify an image package given to the function, raising an
+    InvalidImageException if it's invalid 
+"""
+
+
+def _verify_image_package(image_package):
+    # the original is required no matter what!
+    if 'original' not in image_package.keys():
+        # note: these exceptions should bubble up
+        # to where the handle_image function was called.
+        # they should not be caught in handle_image itself!
+        raise InvalidImageException
+    original_buffer = convert_data_url_to_byte_buffer(image_package['original'])
+
+    # validate the mimetype of the original image
+    if not _check_buffer_mimetype(original_buffer, ImageSupportedMimeTypes):
+        raise InvalidImageException
+
+    if 'cropped' in image_package.keys():
+        if not _check_buffer_mimetype(original_buffer, ImageSupportedMimeTypes):
+            raise InvalidImageException
+
+    # we don't need to return anything;
+    # the exception will interrupt control
+    # flow if we have a problem. otherwise
+    # we just want to continue
+
+
+"""
     handle_upload
     Take a JSON string (read notes.md, #images) containing b64 images, and process it.
     Will save it, store a db entry, and return
@@ -217,7 +290,12 @@ def generate_image_of_type(identifier):
 def handle_upload(image_package: str, userid: int) -> SimpleNamespace:
     # Retrieve enum value for upload type
     # deserialize the JSON containing image data urls
-    images = loads(image_package)
+    try:
+        images = loads(image_package)
+    except json.decoder.JSONDecodeError:
+        raise InvalidImageException
+    # check that the given data is valid.
+    _verify_image_package(images)
     # if the client didn't supply a cropped image for the purpose,
     # we'll just use the original image in its place.
     # this is a fallback, in case of a client that doesn't do
