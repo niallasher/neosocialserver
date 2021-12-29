@@ -8,6 +8,8 @@ from socialserver.util.auth import auth_reqd, get_user_from_auth_header
 from flask_restful import Resource, reqparse
 from pony.orm import db_session
 
+IMAGE_DIR = config.media.images.storage_dir
+
 
 class Image(Resource):
 
@@ -39,7 +41,7 @@ class Image(Resource):
         if args['wanted_type'] == 'post':
             pixel_ratio = 1
 
-        file = f"{config.media.images.storage_dir}/{kwargs.get('imageid')}/{wanted_image_type.value}_{pixel_ratio}x.jpg"
+        file = f"{IMAGE_DIR}/{kwargs.get('imageid')}/{wanted_image_type.value}_{pixel_ratio}x.jpg"
 
         if not path.exists(file):
             return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404

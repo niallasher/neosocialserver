@@ -1,4 +1,4 @@
-from os import rmdir, remove, path
+from os import rmdir, remove, path, mkdir
 from socialserver.util.output import console
 from socialserver import application
 from werkzeug.serving import make_server
@@ -25,6 +25,8 @@ class TestingServer(Thread):
 
 
 def pytest_sessionstart():
+    if not path.exists("/tmp/socialserver_image_testing"):
+        mkdir("/tmp/socialserver_image_testing")
     # start a copy of the flask server in a background
     # thread, so we can test against it.
     application_thread.start()
@@ -34,13 +36,6 @@ def pytest_sessionstart():
 def pytest_sessionfinish():
     application_thread.kill()
     remove('/tmp/test.db')
-    if path.exists('/tmp/socialserver_testing'):
-        remove('/tmp/socialserver_testing/config.toml')
-        # we should probably use this for testing in the future,
-        # but right now it relies on SOCIALSERVER_ROOT being set before
-        # execution.
-        remove('/tmp/socialserver_testing/socialserver.db')
-        rmdir('/tmp/socialserver_testing')
 
 
 application_thread = TestingServer(application)
