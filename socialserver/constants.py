@@ -153,6 +153,39 @@ class ErrorCodes(Enum):
 
 
 """
+    LegacyErrorCodes
+    
+    Error codes for old API compatibility reasons reasons
+    Invite codes are commented out for now, since I'm not sure
+    whether they'll make their way to the new server.
+"""
+
+
+class LegacyErrorCodes(Enum):
+    IMAGE_NOT_FOUND = "I01"
+    TOKEN_INVALID = "A01"
+    # INVITE_CODE_INVALID = "A02"
+    # INVITE_CODE_USED = "A03"
+    TOTP_REQUIRED = "A04"
+    TOTP_INCORRECT = "A05"
+    TOTP_ALREADY_ADDED = "A06"
+    TOTP_ALREADY_REMOVED_OR_NOT_PRESENT = "A07"
+    INVALID_ACTION_FIELD_ON_TOTP_POST_CALL = "A08"
+    TOTP_NON_EXISTENT_CANNOT_CONFIRM = "A09"
+    INCORRECT_PASSWORD = "PA01"
+    PASSWORD_NON_CONFORMING = "PA02"
+    PASSWORD_DAMAGED = "PA03"
+    USER_NOT_ADMIN = "AC01"
+    INSUFFICIENT_PERMISSIONS_TO_MODIFY_USER_DESTRUCTIVE = "AC02"
+    USERNAME_NOT_FOUND = "U01"
+    USERNAME_TAKEN = "U02"
+    POST_NOT_FOUND = "P01"
+    INSUFFICIENT_PERMISSIONS_TO_VIEW_POST = "P02"
+    INSUFFICIENT_PERMISSIONS_TO_ACCESS_MODQUEUE = "MQ01"
+    GENERIC_SERVER_ERROR = "GS01"
+
+
+"""
   ReportReasons
   A list of reasons to report a post
 """

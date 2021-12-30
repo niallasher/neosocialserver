@@ -6,7 +6,7 @@ from flask_cors import CORS
 # it sets up traceback pretty printing when it's imported!
 from socialserver.util.output import console
 from socialserver.util.config import config
-# API Version 2
+# API Version 3
 from socialserver.api.v3.report import Report
 from socialserver.api.v3.info import ServerInfo
 from socialserver.api.v3.user_session import UserSession, UserSessionList
@@ -17,6 +17,8 @@ from socialserver.api.v3.post import Post
 from socialserver.api.v3.image import Image, NewImage
 from socialserver.api.v3.block import Block
 from socialserver.api.v3.follow import Follow
+# API Version 1
+from socialserver.api.v1.user import LegacyUser
 
 
 def create_app():
@@ -49,6 +51,7 @@ def create_app():
     api.add_resource(Report, '/api/v3/report/post')
 
     if config.legacy.api_v1_interface.enable:
+        api.add_resource(LegacyUser, '/api/v1/users')
         console.log("[red]Warning:[/red] The v1 legacy interface hasn't been implemented yet!")
 
     return application

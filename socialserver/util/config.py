@@ -78,13 +78,13 @@ silent_fail_on_double_report = false
 # and it cannot really benefit from the better efficiency
 # of the modern one. it does get somewhat better image
 # efficiency though, which is a definite plus.
-enable = false
+enable = true
 # api v1 doesn't have an interface for providing a pixel ratio
 # so we can't optimize images there. you can define a default here.
 # 2 is a somewhat sane default, since a lot of people are on phones
 # with high dpi screens now
 image_pixel_ratio = 2
-signup_enabled = false
+signup_enabled = true
 """
 
 """
