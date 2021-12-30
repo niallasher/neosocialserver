@@ -19,6 +19,7 @@ from socialserver.api.v3.block import Block
 from socialserver.api.v3.follow import Follow
 # API Version 1
 from socialserver.api.v1.user import LegacyUser
+from socialserver.api.v1.info import LegacyInfo
 
 
 def create_app():
@@ -52,6 +53,7 @@ def create_app():
 
     if config.legacy.api_v1_interface.enable:
         api.add_resource(LegacyUser, '/api/v1/users')
+        api.add_resource(LegacyInfo, '/api/v1/info')
         console.log("[red]Warning:[/red] The v1 legacy interface hasn't been implemented yet!")
 
     return application
