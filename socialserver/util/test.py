@@ -91,6 +91,7 @@ def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -
     monkeypatch.setattr("socialserver.api.v3.username_available.db", db)
     # api v1
     monkeypatch.setattr("socialserver.api.v1.user.db", db)
+    monkeypatch.setattr("socialserver.api.v1.comment.filter_by_post.db", db)
     return None
 
 

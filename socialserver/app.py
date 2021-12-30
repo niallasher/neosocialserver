@@ -53,9 +53,9 @@ def create_app():
     api.add_resource(Report, '/api/v3/report/post')
 
     if config.legacy.api_v1_interface.enable:
+        api.add_resource(LegacyCommentFilterByPost, '/api/v1/comments/byPost')
         api.add_resource(LegacyUser, '/api/v1/users')
         api.add_resource(LegacyInfo, '/api/v1/info')
-        api.add_resource(LegacyCommentFilterByPost, '/api/v1/comments/byPost')
         console.log("[red]Warning:[/red] The v1 legacy interface hasn't been implemented yet!")
 
     return application
