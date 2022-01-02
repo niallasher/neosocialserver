@@ -3,7 +3,6 @@ import pytest
 import requests
 from os import getenv
 from socialserver.db import create_test_db
-from socialserver.util.config import config
 import magic
 from attrdict import AttrDict
 from json import dumps
@@ -92,6 +91,7 @@ def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -
     # api v1
     monkeypatch.setattr("socialserver.api.v1.user.db", db)
     monkeypatch.setattr("socialserver.api.v1.comment.filter_by_post.db", db)
+    monkeypatch.setattr("socialserver.api.v1.usermod.db", db)
     return None
 
 

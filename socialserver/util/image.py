@@ -6,6 +6,7 @@ from io import BytesIO
 from math import gcd
 from os import makedirs, mkdir, path
 from types import SimpleNamespace
+from base64 import urlsafe_b64encode
 import PIL
 from PIL import Image, ImageOps
 from pony.orm import commit, db_session
@@ -274,6 +275,38 @@ def _verify_image_package(image_package):
     # the exception will interrupt control
     # flow if we have a problem. otherwise
     # we just want to continue
+
+
+"""
+    check_image_exists
+    check if an image exists based on it's id
+"""
+
+
+def check_image_exists(id: str):
+    return db.Image.get(identifier=id) is not None
+
+
+"""
+    get_image_data_url_legacy
+    
+    gets an image as a dataurl, for use with the legacy client.
+"""
+
+
+def get_image_data_url_legacy(identifier: str, image_type: ImageTypes) -> str:
+    if not check_image_exists(identifier):
+        raise InvalidImageException
+
+    # TODO: sort out the configuration so we can decide what pixel ratio to send to a classic client
+    pixel_ratio = 1
+
+    file = f"{IMAGE_DIR}/{identifier}/{image_type.value}_{pixel_ratio}x.jpg"
+
+    # data_url = re.sub(r'^data:image/.+;base64,', '', data_url)
+
+    with open(file, "rb") as image_file:
+        return "data:image/jpg;base64," + urlsafe_b64encode(file.read()).decode()
 
 
 """

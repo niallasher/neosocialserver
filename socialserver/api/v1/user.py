@@ -2,9 +2,10 @@ from datetime import datetime
 import re
 from pony.orm import db_session
 from socialserver.db import db
+from socialserver.util.image import get_image_data_url_legacy
 from socialserver.util.config import config
 from socialserver.constants import DISPLAY_NAME_MAX_LEN, MAX_PASSWORD_LEN, MIN_PASSWORD_LEN, REGEX_USERNAME_VALID, \
-    LegacyErrorCodes, AccountAttributes
+    LegacyErrorCodes, AccountAttributes, ImageTypes
 from socialserver.util.auth import generate_salt, hash_password, verify_password_valid, get_user_object_from_token
 from flask_restful import Resource, reqparse
 
@@ -45,12 +46,12 @@ class LegacyUser(Resource):
             if user.header_pic is None:
                 header_data = ""
             else:
-                header_data = ""
+                header_data = get_image_data_url_legacy(user.header_pic.identifier, ImageTypes.HEADER)
 
             if user.profile_pic is None:
                 avatar_data = ""
             else:
-                avatar_data = ""
+                avatar_data = get_image_data_url_legacy(user.profile_pic.identifier, ImageTypes.PROFILE_PICTURE_LARGE)
 
         user_owns_page = r_user == user
         follower_count = len(user.followers)

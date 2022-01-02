@@ -19,6 +19,7 @@ from socialserver.api.v3.block import Block
 from socialserver.api.v3.follow import Follow
 # API Version 1
 from socialserver.api.v1.user import LegacyUser
+from socialserver.api.v1.usermod import LegacyUsermod
 from socialserver.api.v1.info import LegacyInfo
 from socialserver.api.v1.comment.filter_by_post import LegacyCommentFilterByPost
 
@@ -56,6 +57,7 @@ def create_app():
         api.add_resource(LegacyCommentFilterByPost, '/api/v1/comments/byPost')
         api.add_resource(LegacyUser, '/api/v1/users')
         api.add_resource(LegacyInfo, '/api/v1/info')
+        api.add_resource(LegacyUsermod, '/api/v1/usermod')
         console.log("[red]Warning:[/red] The v1 legacy interface hasn't been implemented yet!")
 
     return application
