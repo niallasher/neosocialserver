@@ -81,4 +81,3 @@ def test_update_avatar_legacy(test_db, server_address):
                           "username": test_db.username
                       })
     print(r2.json())
-    assert 1 == 2
