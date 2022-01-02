@@ -298,4 +298,4 @@ def test_get_user_info_missing_data(test_db, server_address):
 
     assert info_req.status_code == 400
 
-# TODO: pictures. api2 doesn't even have support for these yet, so it shouldn't be an issue
+# TODO: pictures. api3 doesn't even have support for these yet, so it shouldn't be an issue
