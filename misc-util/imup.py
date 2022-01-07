@@ -34,7 +34,7 @@ try:
         # load a giant file for no reason (if it isn't an image)
         initial_data = file.read(2048)
         mimetype = magic.from_buffer(initial_data, mime=True)
-        if not mimetype in VALID_MIME_TYPES:
+        if mimetype not in VALID_MIME_TYPES:
             print(f"Invalid mime type on file! Got {mimetype}, expected one of {VALID_MIME_TYPES}")
             exit(1)
         # we could seek and reuse this read, but there isn't much point. 
