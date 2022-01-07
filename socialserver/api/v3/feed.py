@@ -87,7 +87,7 @@ class PostFeed(Resource):
             user_owns_post = post.user == requesting_user_db
 
             post_images = []
-            for image in post.images:
+            for image in post.get_images:
                 post_images.append(image.identifier)
 
             posts.append(

@@ -33,11 +33,11 @@ class Post(Resource):
         if len(text_content) >= POST_MAX_LEN:
             return {"error": ErrorCodes.POST_TOO_LONG.value}, 400
 
-        # we want to store db refs to the images,
-        # instead of retrieving them from id whenever
-        # somebody wants the post, so we populate the images
-        # array with them.
+        # images is just used for relationship purposes, and might be removed soon?
+        # this is due to it being a set (in db), and therefore not being indexable,
+        # and not keeping it's order
         images = []
+        image_ids = []
         if args['images'] is not None:
             referenced_images = args['images']
             print(referenced_images)
@@ -53,6 +53,7 @@ class Post(Resource):
                 if image is None:
                     return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404
                 images.append(image)
+                image_ids.append(image.id)
 
         # checking for hashtags in the post content
         # hashtags can be 1 to 12 chars long and only alphanumeric.
@@ -79,6 +80,7 @@ class Post(Resource):
             creation_time=datetime.now(),
             text=text_content,
             images=images,
+            image_ids=image_ids,
             hashtags=db_tags)
 
         # we commit earlier than normal, so we
@@ -117,7 +119,7 @@ class Post(Resource):
             return {"error": ErrorCodes.USER_BLOCKED.value}, 400
 
         post_images = []
-        for image in wanted_post.images:
+        for image in wanted_post.get_images:
             post_images.append(image.identifier)
 
         user_has_liked_post = db.PostLike.get(user=user,

@@ -95,11 +95,32 @@ def define_entities(db_object):
         user = orm.Required('User')
         creation_time = orm.Required(datetime.datetime)
         text = orm.Required(str)
+        # the reason for this one is purely for relationship reasons,
+        # however a set is not of any use for this application;
+        # it's unordered, and we want to keep the correct order for
+        # images on a post
         images = orm.Set('Image', reverse="associated_posts")
+        # this is the useful one instead, since it retains
+        # the proper ordering, and can be indexed etc.
+        image_ids = orm.Optional(orm.IntArray)
         comments = orm.Set('Comment', cascade_delete=True)
         likes = orm.Set('PostLike', cascade_delete=True)
         hashtags = orm.Set('Hashtag')
         reports = orm.Set('PostReport', cascade_delete=True)
+
+        @property
+        def get_images(self):
+            # this helper function will return all image
+            # objects using image_ids. the benefit of this
+            # over accessing the images property is that
+            # this retains the order, and is indexable, since it
+            # returns a list.
+            images = []
+            for i in self.image_ids:
+                i_db = db.Image.get(id=i)
+                if i_db is not None:
+                    images.append(i_db)
+            return images
 
     class PostReport(db_object.Entity):
         # we don't want to just delete these I don't think?
