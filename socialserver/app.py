@@ -20,6 +20,7 @@ from socialserver.api.v3.follow import Follow
 # API Version 1
 from socialserver.api.v1.user import LegacyUser
 from socialserver.api.v1.usermod import LegacyUsermod
+from socialserver.api.v1.post import LegacyPost
 from socialserver.api.v1.authentication import LegacyAuthentication
 from socialserver.api.v1.info import LegacyInfo
 from socialserver.api.v1.comment.filter_by_post import LegacyCommentFilterByPost
@@ -56,6 +57,7 @@ def create_app():
     api.add_resource(Report, '/api/v3/report/post')
 
     if config.legacy.api_v1_interface.enable:
+        api.add_resource(LegacyPost, '/api/v1/posts')
         api.add_resource(LegacyCommentFilterByPost, '/api/v1/comments/byPost')
         api.add_resource(LegacyUser, '/api/v1/users')
         api.add_resource(LegacyInfo, '/api/v1/info')

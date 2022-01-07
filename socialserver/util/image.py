@@ -6,7 +6,7 @@ from io import BytesIO
 from math import gcd
 from os import makedirs, mkdir, path
 from types import SimpleNamespace
-from base64 import urlsafe_b64encode
+from base64 import b64encode
 import PIL
 from PIL import Image, ImageOps
 from pony.orm import commit, db_session
@@ -306,7 +306,7 @@ def get_image_data_url_legacy(identifier: str, image_type: ImageTypes) -> str:
     # data_url = re.sub(r'^data:image/.+;base64,', '', data_url)
 
     with open(file, "rb") as image_file:
-        return "data:image/jpg;base64," + urlsafe_b64encode(file.read()).decode()
+        return "data:image/jpg;base64," + b64encode(image_file.read()).decode()
 
 
 """
@@ -316,7 +316,6 @@ def get_image_data_url_legacy(identifier: str, image_type: ImageTypes) -> str:
     a SimpleNamespace with the following keys:
         - id: db.Image ID
         - uid: Image identifier
-
 """
 
 
