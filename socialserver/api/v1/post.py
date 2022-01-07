@@ -2,7 +2,7 @@ from socialserver.db import db
 from flask_restful import Resource, reqparse
 from socialserver.util.auth import get_user_object_from_token
 from socialserver.util.image import get_image_data_url_legacy, check_image_exists
-from socialserver.constants import LegacyErrorCodes, ImageTypes
+from socialserver.constants import LegacyErrorCodes, ImageTypes, MAX_FEED_GET_COUNT
 from pony.orm import db_session, select, desc
 
 
@@ -12,9 +12,9 @@ class LegacyPost(Resource):
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument("session_token", type=str, help="Key for session authentication.", required=True)
-        parser.add_argument("post_id", type=int, help="Post ID to get.")
         parser.add_argument("count", type=int, help="amount to retrieve.")
         parser.add_argument("offset", type=int, help="amount to offset.")
+        parser.add_argument("post_id", type=int, help="Post ID to get.", default=None)
 
         args = parser.parse_args()
 
@@ -71,6 +71,14 @@ class LegacyPost(Resource):
 
         # feed mode
         else:
+
+            if None in [args['count'], args['offset']]:
+                return {}, 401
+
+            # also a slight breaking change, but don't think there's any other option here
+            if args['count'] >= MAX_FEED_GET_COUNT:
+                return {}, 401
+
             blocks = select(b.blocking for b in db.Block
                             if b.user == user)[:]
             query = select(p for p in db.Post if p.user not in blocks and p.under_moderation is False).order_by(
@@ -81,5 +89,3 @@ class LegacyPost(Resource):
                 post_ids.append(post.id)
 
             return post_ids, 201
-
-        return {}, 404
