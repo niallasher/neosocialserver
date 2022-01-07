@@ -27,16 +27,20 @@ class LegacyPost(Resource):
         if args.post_id is not None:
             post = db.Post.get(id=args['post_id'])
             if post is None:
-                return {"err": LegacyErrorCodes.POST_NOT_FOUND.value}
+                # should be a 404, but the old server did it this way :(
+                # (yes, it does return not authorized if it can't find anything lol)
+                return {"err": LegacyErrorCodes.POST_NOT_FOUND.value}, 401
 
             if post.under_moderation and True not in [user.is_moderator, user.is_admin]:
                 return {"err": LegacyErrorCodes.INSUFFICIENT_PERMISSIONS_TO_VIEW_POST.value}, 401
 
             image_data = ""
-            if len(post.images) >= 1:
-                # API v1 only works with one image, so we'll
-                # send the first!
-                image_data = get_image_data_url_legacy(post.images[0].identifier, ImageTypes.POST_PREVIEW)
+            images = post.get_images
+            if len(images) >= 1:
+                # the legacy api can only handle one image per post, so we're gonna send the first one.
+                # in the future, we might stitch them together in a collage form, but for now I just want
+                # basic functionality.
+                image_data = get_image_data_url_legacy(images[0].identifier, ImageTypes.POST_PREVIEW)
 
             is_own_post = post.user == user
 
@@ -73,11 +77,11 @@ class LegacyPost(Resource):
         else:
 
             if None in [args['count'], args['offset']]:
-                return {}, 401
+                return {}, 400
 
             # also a slight breaking change, but don't think there's any other option here
             if args['count'] >= MAX_FEED_GET_COUNT:
-                return {}, 401
+                return {}, 400
 
             blocks = select(b.blocking for b in db.Block
                             if b.user == user)[:]
