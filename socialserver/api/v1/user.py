@@ -31,6 +31,8 @@ class LegacyUser(Resource):
             user = db.User.get(username=args['username'])
             if user is None:
                 return {}, 404
+        else:
+            user = r_user
 
         if args['disable_include_images'] is None:
             include_images = True
@@ -41,7 +43,7 @@ class LegacyUser(Resource):
         avatar_data = ""
 
         # TODO: fix this up once there are default images to send back!
-        if args['disable_include_images']:
+        if not args['disable_include_images']:
 
             if user.header_pic is None:
                 header_data = ""
