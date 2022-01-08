@@ -1,12 +1,111 @@
 from socialserver.db import db
 from flask_restful import Resource, reqparse
 from socialserver.util.auth import get_user_object_from_token
+from socialserver.util.config import config
 from socialserver.util.image import get_image_data_url_legacy, check_image_exists
-from socialserver.constants import LegacyErrorCodes, ImageTypes, MAX_FEED_GET_COUNT
+from socialserver.constants import LegacyErrorCodes, ImageTypes, MAX_FEED_GET_COUNT, POST_MAX_LEN, REGEX_HASHTAG
+import re
 from pony.orm import db_session, select, desc
+from datetime import datetime
 
 
 class LegacyPost(Resource):
+
+    @db_session
+    def post(self):
+
+        parser = reqparse.RequestParser()
+
+        parser.add_argument("session_token", type=str, help="Key for session authentication.")
+        parser.add_argument("post_text", type=str, help="Text for post to contain.", required=True)
+        parser.add_argument("post_image_hash", type=str, help="Hash for image if wanted.", required=False)
+
+        args = parser.parse_args()
+
+        user = get_user_object_from_token(args['session_token'])
+        if user is None:
+            return {}, 401
+
+        text_content = args['post_text']
+        if len(text_content) > POST_MAX_LEN:
+            # api v1 didn't error out here. this behaviour is
+            # inconsistent with api v3, but it is here for compatibility.
+            # ill consider causing an error later, but I am trying to avoid
+            # causing unnecessary failures the old client wouldn't understand
+            # for ux reasons.
+            text_content = text_content[0:POST_MAX_LEN - 1]  # starting from 0, so -1 from POST_MAX_LEN!
+
+        # strip out any newlines that have been put in
+        text_content = text_content.replace('\n', '')
+
+        # the legacy api can only upload one image btw
+        images = []
+        image_ids = []
+        if args['post_image_hash']:
+            image = db.Image.get(identifier=args['post_image_hash'])
+            # make sure the image actually exists
+            if image is None:
+                return {}, 404
+            images.append(image)
+            image_ids.append(image.id)
+
+        # while the old api doesn't understand hashtags or anything,
+        # we still want to make them for people using the new one!
+        hashregex = re.compile(REGEX_HASHTAG)
+        # the regex is case-insensitive,
+        # but we want to store them lowercase in db anyway!
+        tags = hashregex.findall(text_content.lower())
+
+        # db_tags will be populated with each tag associated with the post.
+        db_tags = []
+        for tag_name in tags:
+            existing_tag = db.Hashtag.get(name=tag_name)
+            if existing_tag is None:
+                tag = db.Hashtag(creation_time=datetime.now(),
+                                 name=tag_name)
+            else:
+                tag = existing_tag
+            db_tags.append(tag)
+
+        db.Post(
+            under_moderation=False,
+            user=user,
+            creation_time=datetime.now(),
+            text=text_content,
+            images=images,
+            image_ids=image_ids,
+            hashtags=db_tags
+        )
+
+        # api v1 didn't return the post id.
+        return {}, 201
+
+    @db_session
+    def delete(self):
+
+        parser = reqparse.RequestParser()
+
+        parser.add_argument("session_token", type=str, help="Key for session authentication.", required=True)
+        parser.add_argument("post_id", type=int, help="Post to remove.", required=True)
+
+        args = parser.parse_args()
+
+        user = get_user_object_from_token(args['session_token'])
+        if user is None:
+            return {}, 401
+
+        post = db.Post.get(id=args['post_id'])
+        if post is None:
+            # original server doesn't even check,
+            # so the client probably doesn't handle 404 very well
+            # we'll send back a 401, since that's explicitly handled
+            return {}, 401
+
+        if post.user == user:
+            post.delete()
+            return {}, 201
+
+        return {}, 401
 
     @db_session
     def get(self):
