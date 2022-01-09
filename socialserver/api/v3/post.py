@@ -26,12 +26,16 @@ class Post(Resource):
         user = get_user_from_auth_header()
 
         # make sure the post is conforming to length requirements.
-        # we don't limit the characters used as of now. might look
+        # we don't limit the characters used as of now (except for newlines). might look
         # into this later? probably not needed, but unicode can be weird.
 
         text_content = args['text_content']
-        if len(text_content) >= POST_MAX_LEN:
+        if len(text_content) > POST_MAX_LEN:
             return {"error": ErrorCodes.POST_TOO_LONG.value}, 400
+
+        # strip out any newlines. the client shouldn't allow users to add
+        # them for UX purposes!
+        text_content = text_content.replace('\n', '')
 
         # images is just used for relationship purposes, and might be removed soon?
         # this is due to it being a set (in db), and therefore not being indexable,
