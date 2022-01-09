@@ -1,10 +1,7 @@
-from socialserver.util.test import test_db, create_post_with_request, server_address, \
-    convert_remote_image_to_data_url, create_image_package_from_data_url
+from socialserver.util.test import test_db, create_post_with_request, server_address, image_data_url
 from socialserver.constants import DISPLAY_NAME_MAX_LEN
 from secrets import token_urlsafe
 import requests
-
-image_data_url = convert_remote_image_to_data_url("https://picsum.photos/512.jpg")
 
 
 def test_update_display_name_legacy(test_db, server_address, monkeypatch):
@@ -61,10 +58,10 @@ def test_update_username_invalid_legacy(test_db, server_address):
     assert r.status_code == 400
 
 
-def test_update_avatar_legacy(test_db, server_address):
+def test_update_avatar_legacy(test_db, server_address, image_data_url):
     image_identifier = requests.post(f"{server_address}/api/v3/image",
                                      json={
-                                         'image_package': create_image_package_from_data_url(image_data_url)
+                                         "original_image": image_data_url
                                      },
                                      headers={
                                          "Authorization": f"Bearer {test_db.access_token}"

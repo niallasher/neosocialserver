@@ -1,10 +1,8 @@
-from socialserver.util.test import test_db, server_address, convert_remote_image_to_data_url
+from socialserver.util.test import test_db, server_address, image_data_url
 import requests
 
-image_data_url = convert_remote_image_to_data_url("https://picsum.photos/512.jpg")
 
-
-def test_upload_image_legacy(test_db, server_address):
+def test_upload_image_legacy(test_db, server_address, image_data_url):
     r = requests.post(f"{server_address}/api/v1/images",
                       json={
                           "session_token": test_db.access_token,
