@@ -19,6 +19,13 @@ class LegacyAuthentication(Resource):
     @db_session
     def post(self):
 
+        # notes for totp implementation:
+        # if totp_enabled and no totp, then return
+        # {'err': LegacyErrorCodes.TOTP_REQUIRED.value}, 401.
+        # if it's invalid:
+        # {'err': LegacyErrorCodes.TOTP_INCORRECT.value}, 401
+        # v1 will return the totp request even if pw is wrong.
+
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str, required=True)
         parser.add_argument('password', type=str, required=True)
