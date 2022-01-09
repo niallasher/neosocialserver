@@ -85,6 +85,15 @@ enable = true
 # with high dpi screens now
 image_pixel_ratio = 2
 signup_enabled = true
+# enabling this will server full post images to legacy clients,
+# instead of post preview images. enabling this gives them far higher
+# quality, however it causes a drastic increase in payload size when loading
+# a post. as a side note, this will deliver the image in it's proper aspect ratio
+# instead of a square, which makes v1 clients a lot more useful tbf but it really
+# does hurt network transfer size.
+deliver_full_post_images = false
+
+
 """
 
 """
