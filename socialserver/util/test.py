@@ -7,6 +7,7 @@ import magic
 from attrdict import AttrDict
 from json import dumps
 from base64 import urlsafe_b64encode
+from socialserver.static.test_data.test_image import TEST_IMAGE_B64
 
 UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 " \
      "Mobile/15A372 Safari/604.1 "
@@ -48,6 +49,17 @@ def test_db(monkeypatch):
 @pytest.fixture
 def server_address():
     return get_server_address()
+
+
+"""
+    image_data_url
+    returns a test image data url
+"""
+
+
+@pytest.fixture
+def image_data_url():
+    return TEST_IMAGE_B64
 
 
 """
@@ -93,6 +105,8 @@ def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -
     monkeypatch.setattr("socialserver.api.v1.comment.filter_by_post.db", db)
     monkeypatch.setattr("socialserver.api.v1.usermod.db", db)
     monkeypatch.setattr("socialserver.api.v1.authentication.db", db)
+    monkeypatch.setattr("socialserver.api.v1.post_filter.filter_by_user.db", db)
+    monkeypatch.setattr("socialserver.api.v1.post.db", db)
     return None
 
 
@@ -176,31 +190,3 @@ def follow_user_with_request(serveraddress: str, auth_token: str, username: str)
                           "Authorization": f"Bearer {auth_token}"
                       })
     assert r.status_code == 201
-
-
-"""
-    convert_remote_image_to_data_url
-    
-    loads an image from a given url, and converts it to a data url.
-"""
-
-
-def convert_remote_image_to_data_url(url) -> str:
-    # get raw image data
-    r = requests.get(url, stream=True).raw.read()
-    mimetype = magic.from_buffer(r, mime=True)
-    data = urlsafe_b64encode(r).decode()
-    return f"data:{mimetype};base64,{data}"
-
-
-"""
-    create_image_package_from_data_url
-    
-    creates an image package for passing to POST /api/v3/image
-"""
-
-
-def create_image_package_from_data_url(data_url) -> str:
-    return dumps({
-        "original": data_url
-    })
