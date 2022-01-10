@@ -1,12 +1,14 @@
 from socialserver.db import db
 from flask_restful import Resource, reqparse
-from socialserver.util.auth import get_user_object_from_token
+from socialserver.util.auth import get_user_object_from_token_or_abort
 from socialserver.util.config import config
 from socialserver.util.image import get_image_data_url_legacy, check_image_exists
 from socialserver.constants import LegacyErrorCodes, ImageTypes, MAX_FEED_GET_COUNT, POST_MAX_LEN, REGEX_HASHTAG
 import re
 from pony.orm import db_session, select, desc
 from datetime import datetime
+
+SERVE_FULL_POST_IMAGES = config.legacy.api_v1_interface.deliver_full_post_images
 
 
 class LegacyPost(Resource):
@@ -22,9 +24,7 @@ class LegacyPost(Resource):
 
         args = parser.parse_args()
 
-        user = get_user_object_from_token(args['session_token'])
-        if user is None:
-            return {}, 401
+        user = get_user_object_from_token_or_abort(args['session_token'])
 
         text_content = args['post_text']
         if len(text_content) > POST_MAX_LEN:
@@ -90,9 +90,7 @@ class LegacyPost(Resource):
 
         args = parser.parse_args()
 
-        user = get_user_object_from_token(args['session_token'])
-        if user is None:
-            return {}, 401
+        user = get_user_object_from_token_or_abort(args['session_token'])
 
         post = db.Post.get(id=args['post_id'])
         if post is None:
@@ -117,9 +115,7 @@ class LegacyPost(Resource):
 
         args = parser.parse_args()
 
-        user = get_user_object_from_token(args['session_token'])
-        if user is None:
-            return {}, 401
+        user = get_user_object_from_token_or_abort(args['session_token'])
 
         # if a post id is specified, we want to grab
         # a single post, instead of a feed!
@@ -139,7 +135,8 @@ class LegacyPost(Resource):
                 # the legacy api can only handle one image per post, so we're gonna send the first one.
                 # in the future, we might stitch them together in a collage form, but for now I just want
                 # basic functionality.
-                image_data = get_image_data_url_legacy(images[0].identifier, ImageTypes.POST_PREVIEW)
+                image_serve_type = ImageTypes.POST if SERVE_FULL_POST_IMAGES else ImageTypes.POST_PREVIEW
+                image_data = get_image_data_url_legacy(images[0].identifier, image_serve_type)
 
             is_own_post = post.user == user
 

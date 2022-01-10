@@ -1,6 +1,6 @@
 from socialserver.db import db
 from pony.orm import db_session, select, desc
-from socialserver.util.auth import get_user_object_from_token
+from socialserver.util.auth import get_user_object_from_token_or_abort
 from flask_restful import Resource, reqparse
 
 
@@ -17,9 +17,7 @@ class LegacyCommentFilterByPost(Resource):
 
         args = parser.parse_args()
 
-        user = get_user_object_from_token(args['session_token'])
-        if user is None:
-            return {}, 401
+        user = get_user_object_from_token_or_abort(args['session_token'])
 
         post = db.Post.get(id=args['post_id'])
         if post is None:

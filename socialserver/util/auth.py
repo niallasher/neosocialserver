@@ -7,7 +7,7 @@ from secrets import token_urlsafe
 from pony.orm import db_session
 from socialserver.db import db
 from flask import abort, request, make_response, jsonify
-from socialserver.constants import ErrorCodes
+from socialserver.constants import ErrorCodes, LegacyErrorCodes
 
 import pony.orm
 
@@ -121,7 +121,7 @@ def hash_plaintext_sha256(plaintext: str) -> str:
 """
 
 
-def get_username_from_token(session_token: str) -> str or None:
+def get_username_from_token_or_abort(session_token: str) -> str or None:
     # note: we don't need or want a db_session here, since
     # anything calling it will already have to be wrapped in
     # one, which extends down to here.
@@ -130,7 +130,8 @@ def get_username_from_token(session_token: str) -> str or None:
     if existing_session is not None:
         return existing_session.user.username
     else:
-        return None
+        # blank response for legacy api that doesn't specify it
+        abort(make_response(jsonify(), 401))
 
 
 """
@@ -140,13 +141,14 @@ def get_username_from_token(session_token: str) -> str or None:
 
 
 # TODO: figure out how to type a pony database entity
-def get_user_object_from_token(session_token: str):
+def get_user_object_from_token_or_abort(session_token: str):
     existing_session = db.UserSession.get(
         access_token_hash=hash_plaintext_sha256(session_token))
     if existing_session is not None:
         return existing_session.user
     else:
-        return None
+        # blank response for legacy api that doesn't specify it
+        abort(make_response(jsonify(err=LegacyErrorCodes.TOKEN_INVALID.value), 401))
 
 
 """

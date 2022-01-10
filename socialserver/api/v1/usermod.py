@@ -1,5 +1,5 @@
 from socialserver.util.test import test_db, create_post_with_request, server_address
-from socialserver.util.auth import get_user_object_from_token, generate_salt, hash_password
+from socialserver.util.auth import get_user_object_from_token_or_abort, generate_salt, hash_password
 from socialserver.util.image import check_image_exists
 from socialserver.constants import REGEX_USERNAME_VALID, MAX_PASSWORD_LEN, MIN_PASSWORD_LEN, DISPLAY_NAME_MAX_LEN
 from socialserver.db import db
@@ -24,9 +24,7 @@ class LegacyUsermod(Resource):
 
         args = parser.parse_args()
 
-        user = get_user_object_from_token(args['session_token'])
-        if user is None:
-            return {}, 401
+        user = get_user_object_from_token_or_abort(args['session_token'])
 
         if args['username'] is not None:
             if not bool(re.match(REGEX_USERNAME_VALID, args['username'])):
@@ -38,7 +36,7 @@ class LegacyUsermod(Resource):
             if not MIN_PASSWORD_LEN <= len(args['password']) <= MAX_PASSWORD_LEN:
                 return {}, 400
             salt = generate_salt()
-            hashed_password = hash_password(args['password'])
+            hashed_password = hash_password(args['password'], salt)
             user.password_salt = salt
             user.password_hash = hashed_password
             return {}, 201

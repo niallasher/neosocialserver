@@ -6,7 +6,8 @@ from socialserver.util.image import get_image_data_url_legacy
 from socialserver.util.config import config
 from socialserver.constants import DISPLAY_NAME_MAX_LEN, MAX_PASSWORD_LEN, MIN_PASSWORD_LEN, REGEX_USERNAME_VALID, \
     LegacyErrorCodes, AccountAttributes, ImageTypes
-from socialserver.util.auth import generate_salt, hash_password, verify_password_valid, get_user_object_from_token
+from socialserver.util.auth import generate_salt, hash_password, verify_password_valid, \
+    get_user_object_from_token_or_abort
 from flask_restful import Resource, reqparse
 
 
@@ -22,7 +23,7 @@ class LegacyUser(Resource):
                             help="Set to not include images in the returned data.")
         args = parser.parse_args()
 
-        r_user = get_user_object_from_token(args['session_token'])
+        r_user = get_user_object_from_token_or_abort(args['session_token'])
         if r_user is None:
             return {"err": LegacyErrorCodes.TOKEN_INVALID.value}, 401
 
@@ -87,11 +88,7 @@ class LegacyUser(Resource):
 
         args = parser.parse_args()
 
-        user = get_user_object_from_token(args['session_token'])
-        if user is None:
-            # interface stability: the original
-            # server didn't give an error here.
-            return {}, 401
+        user = get_user_object_from_token_or_abort(args['session_token'])
 
         # in any normal circumstance, this would just be a required
         # argument, but recreating the 1.x - 2.x interfaces seems to

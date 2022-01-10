@@ -1,5 +1,5 @@
 from socialserver.util.image import handle_upload, InvalidImageException
-from socialserver.util.auth import get_user_object_from_token
+from socialserver.util.auth import get_user_object_from_token_or_abort
 from pony.orm import db_session
 from flask_restful import reqparse, Resource
 from json import dumps
@@ -15,9 +15,7 @@ class LegacyImageV1(Resource):
 
         args = parser.parse_args()
 
-        user = get_user_object_from_token(args["session_token"])
-        if user is None:
-            return {}, 401
+        user = get_user_object_from_token_or_abort(args["session_token"])
 
         image_package = {
             "original": args['image_data']
