@@ -17,15 +17,29 @@ from socialserver.api.v3.post import Post
 from socialserver.api.v3.image import Image, NewImage
 from socialserver.api.v3.block import Block
 from socialserver.api.v3.follow import Follow
-# API Version 1
+# API legacy (v1/v2, it's confusing!)
+from socialserver.api.v1.like import LegacyLike
+from socialserver.api.v1.bio import LegacyUserBio
+from socialserver.api.v1.follows import LegacyUserFollows, LegacyUserFollowing
 from socialserver.api.v1.user import LegacyUser
 from socialserver.api.v1.usermod import LegacyUsermod
 from socialserver.api.v1.post import LegacyPost
 from socialserver.api.v1.authentication import LegacyAuthentication
 from socialserver.api.v1.info import LegacyInfo
-from socialserver.api.v1.comment.filter_by_post import LegacyCommentFilterByPost
+from socialserver.api.v1.comment_filter.filter_by_post import LegacyCommentFilterByPost
 from socialserver.api.v1.image import LegacyImageV1
 from socialserver.api.v1.post_filter.filter_by_user import LegacyPostFilterByUser
+from socialserver.api.v1.like_filter.by_post import LegacyLikeFilterByPost
+from socialserver.api.v1.follower import LegacyFollower
+from socialserver.api.v1.block import LegacyBlock, LegacyUserBlocks
+from socialserver.api.v1.comment import LegacyComment
+from socialserver.api.v1.comment import LegacyCommentLike
+from socialserver.api.v1.user_deauth import LegacyAllDeauth
+from socialserver.api.v1.invite_codes import LegacyInviteCodes
+from socialserver.api.v1.privileged_ops.admin_usermod import LegacyAdminUserMod
+from socialserver.api.v1.privileged_ops.admin_delete_user import LegacyAdminDeleteUser
+from socialserver.api.v1.privileged_ops.admin_delete_post import LegacyAdminDeletePost
+from socialserver.api.v1.modqueue import LegacyModQueue
 
 
 def create_app():
@@ -58,7 +72,7 @@ def create_app():
     api.add_resource(Report, '/api/v3/report/post')
 
     if config.legacy.api_v1_interface.enable:
-        api.add_resource(LegacyPostFilterByUser, '/api/v/1/posts/byUser')
+        api.add_resource(LegacyPostFilterByUser, '/api/v1/posts/byUser')
         api.add_resource(LegacyPost, '/api/v1/posts')
         api.add_resource(LegacyCommentFilterByPost, '/api/v1/comments/byPost')
         api.add_resource(LegacyUser, '/api/v1/users')
@@ -66,5 +80,21 @@ def create_app():
         api.add_resource(LegacyUsermod, '/api/v1/usermod')
         api.add_resource(LegacyAuthentication, "/api/v1/auth")
         api.add_resource(LegacyImageV1, "/api/v1/images")
+        api.add_resource(LegacyUserFollows, "/api/v1/followers/userFollows")
+        api.add_resource(LegacyUserBio, "/api/v1/users/bio")
+        api.add_resource(LegacyUserFollowing, "/api/v1/followers/followsUser")
+        api.add_resource(LegacyLikeFilterByPost, "/api/v1/likes/byPost")
+        api.add_resource(LegacyLike, "/api/v1/likes")
+        api.add_resource(LegacyFollower, "/api/v1/followers")
+        api.add_resource(LegacyBlock, "/api/v1/block")
+        api.add_resource(LegacyUserBlocks, "/api/v1/users/blockList")
+        api.add_resource(LegacyComment, "/api/v1/comments")
+        api.add_resource(LegacyInviteCodes, "/api/v1/invitecodes")
+        api.add_resource(LegacyAdminUserMod, "/api/v1/admin/usermod")
+        api.add_resource(LegacyAdminDeleteUser, "/api/v1/admin/userdel")
+        api.add_resource(LegacyAdminDeletePost, "/api/v1/admin/postdel")
+        api.add_resource(LegacyModQueue, "/api/v1/modqueue")
+        api.add_resource(LegacyCommentLike, "/api/v2/comments/like")
+        api.add_resource(LegacyAllDeauth, "/api/v2/user/deauth")
 
     return application
