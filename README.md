@@ -35,8 +35,10 @@ The test suite is written using pytest. Just run ```pytest socialserver``` from 
 - API version 2 does not exist
     - If you ask where it is, or what happened to it, somebody will show up at your house within the week to have you
       silenced.
+    - It kinda exists. APIv1 doesn't work without a few endpoints marked as APIv2. Make no mistake, these are not
+      seperate, as some APIv1 functionality utilises APIv2 features, because reasons???
     - The current API version is always to be the same as the server major version, and due to some terrible decisions
-      in the past APIv1 was current from server versions 0.0.1 to 2.5.0
+      in the past (see above point)
 - There is currently no setup process to create a server admin. You can use the hacky little built in user creation
   wizard by running ```python3 -m socialserver mk-user```, to create an admin user. This will change in the future.
 - There is currently no real API documentation. If for whatever reason you want to mess with this in it's current state,
@@ -58,6 +60,10 @@ The test suite is written using pytest. Just run ```pytest socialserver``` from 
 - Post feed
 - Post feed from users you follow
 - Post feed from specific set of usernames
+
+### Via legacy API
+
+- All original functionalities from socialshare.club except TOTP (coming soon) (relative to the age of the universe)
 
 #### Via local utilities
 
