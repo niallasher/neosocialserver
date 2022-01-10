@@ -18,28 +18,28 @@ from socialserver.api.v3.image import Image, NewImage
 from socialserver.api.v3.block import Block
 from socialserver.api.v3.follow import Follow
 # API legacy (v1/v2, it's confusing!)
-from socialserver.api.v1.like import LegacyLike
-from socialserver.api.v1.bio import LegacyUserBio
-from socialserver.api.v1.follows import LegacyUserFollows, LegacyUserFollowing
-from socialserver.api.v1.user import LegacyUser
-from socialserver.api.v1.usermod import LegacyUsermod
-from socialserver.api.v1.post import LegacyPost
-from socialserver.api.v1.authentication import LegacyAuthentication
-from socialserver.api.v1.info import LegacyInfo
-from socialserver.api.v1.comment_filter.filter_by_post import LegacyCommentFilterByPost
-from socialserver.api.v1.image import LegacyImageV1
-from socialserver.api.v1.post_filter.filter_by_user import LegacyPostFilterByUser
-from socialserver.api.v1.like_filter.by_post import LegacyLikeFilterByPost
-from socialserver.api.v1.follower import LegacyFollower
-from socialserver.api.v1.block import LegacyBlock, LegacyUserBlocks
-from socialserver.api.v1.comment import LegacyComment
-from socialserver.api.v1.comment import LegacyCommentLike
-from socialserver.api.v1.user_deauth import LegacyAllDeauth
-from socialserver.api.v1.invite_codes import LegacyInviteCodes
-from socialserver.api.v1.privileged_ops.admin_usermod import LegacyAdminUserMod
-from socialserver.api.v1.privileged_ops.admin_delete_user import LegacyAdminDeleteUser
-from socialserver.api.v1.privileged_ops.admin_delete_post import LegacyAdminDeletePost
-from socialserver.api.v1.modqueue import LegacyModQueue
+from socialserver.api.legacy.like import LegacyLike
+from socialserver.api.legacy.bio import LegacyUserBio
+from socialserver.api.legacy.follows import LegacyUserFollows, LegacyUserFollowing
+from socialserver.api.legacy.user import LegacyUser
+from socialserver.api.legacy.usermod import LegacyUsermod
+from socialserver.api.legacy.post import LegacyPost
+from socialserver.api.legacy.authentication import LegacyAuthentication
+from socialserver.api.legacy.info import LegacyInfo
+from socialserver.api.legacy.comment_filter.filter_by_post import LegacyCommentFilterByPost
+from socialserver.api.legacy.image import LegacyImageV1
+from socialserver.api.legacy.post_filter.filter_by_user import LegacyPostFilterByUser
+from socialserver.api.legacy.like_filter.by_post import LegacyLikeFilterByPost
+from socialserver.api.legacy.follower import LegacyFollower
+from socialserver.api.legacy.block import LegacyBlock, LegacyUserBlocks
+from socialserver.api.legacy.comment import LegacyComment
+from socialserver.api.legacy.comment import LegacyCommentLike
+from socialserver.api.legacy.user_deauth import LegacyAllDeauth
+from socialserver.api.legacy.invite_codes import LegacyInviteCodes
+from socialserver.api.legacy.privileged_ops.admin_usermod import LegacyAdminUserMod
+from socialserver.api.legacy.privileged_ops.admin_delete_user import LegacyAdminDeleteUser
+from socialserver.api.legacy.privileged_ops.admin_delete_post import LegacyAdminDeletePost
+from socialserver.api.legacy.modqueue import LegacyModQueue
 
 
 def create_app():
