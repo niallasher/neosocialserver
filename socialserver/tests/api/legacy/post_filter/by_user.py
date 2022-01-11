@@ -4,7 +4,7 @@ import requests
 from socialserver.constants import MAX_FEED_GET_COUNT
 
 
-def test_get_post_feed_for_user_legacy(test_db, server_address):
+def test_get_by_user_post_feed_for_user_legacy(test_db, server_address):
     create_user_with_request(server_address, username="test2", password="password")
     user_token = create_user_session_with_request(server_address, username="test2", password="password")
     post_id = create_post_with_request(server_address, user_token, text_content="test")
@@ -21,7 +21,7 @@ def test_get_post_feed_for_user_legacy(test_db, server_address):
     assert r.json()[0] == post_id
 
 
-def test_get_post_feed_for_multiple_users_legacy(test_db, server_address):
+def test_get_by_user_post_feed_for_multiple_users_legacy(test_db, server_address):
     create_user_with_request(server_address, username="test2", password="password")
     create_user_with_request(server_address, username="test3", password="password")
     user_token = create_user_session_with_request(server_address, username="test2", password="password")
@@ -45,7 +45,7 @@ def test_get_post_feed_for_multiple_users_legacy(test_db, server_address):
     assert r.json()[0] == post_id_2
 
 
-def test_get_post_feed_get_count_too_high_legacy(test_db, server_address):
+def test_get_by_user_post_feed_get_count_too_high_legacy(test_db, server_address):
     r = requests.get(f"{server_address}/api/v1/posts/byUser",
                      json={
                          "session_token": test_db.access_token,
@@ -56,7 +56,7 @@ def test_get_post_feed_get_count_too_high_legacy(test_db, server_address):
     assert r.status_code == 400
 
 
-def test_get_post_feed_invalid_usernames_legacy(test_db, server_address):
+def test_get_by_user_post_feed_invalid_usernames_legacy(test_db, server_address):
     r = requests.get(f"{server_address}/api/v1/posts/byUser",
                      json={
                          "session_token": test_db.access_token,
@@ -67,7 +67,7 @@ def test_get_post_feed_invalid_usernames_legacy(test_db, server_address):
     assert r.status_code == 406
 
 
-def test_get_post_feed_mixed_valid_invalid_users_legacy(test_db, server_address):
+def test_get_by_user_post_feed_mixed_valid_invalid_users_legacy(test_db, server_address):
     create_user_with_request(server_address, username="test2", password="password")
     user_token = create_user_session_with_request(server_address, username="test2", password="password")
     post_id = create_post_with_request(server_address, user_token, text_content="test")
