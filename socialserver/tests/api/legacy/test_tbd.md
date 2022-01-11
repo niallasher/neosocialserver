@@ -3,8 +3,8 @@
 ## Todo
 
 - [ ] Posts
-    - [ ] Creation
-    - [ ] Deletion
+    - [x] Creation
+    - [x] Deletion
     - [ ] Filter by User
 - [ ] Followers
     - [ ] Following Count
