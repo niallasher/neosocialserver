@@ -40,3 +40,7 @@ eyes, but the compatibility target here is ```2.3.0```.
 
 In practice, the production version of socialserver ended up with a lot of weird little patches, and some
 functionality/edge cases not present in the original code. These will not be replicated.
+
+If config.legacy_api_interface.report_legacy_version is True, the server will always report it's version number as
+```2.99.0``` when the legacy server_info endpoint is called, to work around some possible issues with very old
+socialshare versions feature detection.

@@ -92,6 +92,12 @@ signup_enabled = true
 # instead of a square, which makes v1 clients a lot more useful tbf but it really
 # does hurt network transfer size.
 deliver_full_post_images = false
+# this option toggles whether the legacy API will return the current server
+# version, or 2.99.0 when /server_info is requested. this is a workaround for
+# some possible incompatibilities with older versions of the socialshare client, 
+# which, IIRC, only checked the minor server semver version, when determining server
+# availability.
+report_legacy_version = false
 
 
 """
