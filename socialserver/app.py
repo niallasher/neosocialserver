@@ -71,7 +71,7 @@ def create_app():
 
     api.add_resource(Report, '/api/v3/report/post')
 
-    if config.legacy.api_v1_interface.enable:
+    if config.legacy_api_interface.enable:
         api.add_resource(LegacyPostFilterByUser, '/api/v1/posts/byUser')
         api.add_resource(LegacyPost, '/api/v1/posts')
         api.add_resource(LegacyCommentFilterByPost, '/api/v1/comments/byPost')

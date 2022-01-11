@@ -8,7 +8,7 @@ import re
 from pony.orm import db_session, select, desc
 from datetime import datetime
 
-SERVE_FULL_POST_IMAGES = config.legacy.api_v1_interface.deliver_full_post_images
+SERVE_FULL_POST_IMAGES = config.legacy_api_interface.deliver_full_post_images
 
 
 class LegacyPost(Resource):

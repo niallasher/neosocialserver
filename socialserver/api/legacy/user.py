@@ -107,7 +107,7 @@ class LegacyUser(Resource):
 
         # we don't really have a better error to launch back here,
         # since the old client doesn't support any others
-        if not config.legacy.api_v1_interface.signup_enabled:
+        if not config.legacy_api_interface.signup_enabled:
             return {"err": LegacyErrorCodes.GENERIC_SERVER_ERROR.value}, 400
 
         # not compatible with the v1 client, and i'm not sure if it

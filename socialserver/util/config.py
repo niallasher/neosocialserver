@@ -73,7 +73,7 @@ approval_required = false
 # undeserving post.
 silent_fail_on_double_report = false
 
-[legacy.api_v1_interface]
+[legacy_api_interface]
 # the legacy api is not going to get any new features
 # and it cannot really benefit from the better efficiency
 # of the modern one. it does get somewhat better image
