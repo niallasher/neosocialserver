@@ -1,6 +1,7 @@
 from flask_restful import Resource, reqparse
 from socialserver.db import db
 from socialserver.util.auth import get_user_object_from_token_or_abort
+from socialserver.constants import MAX_FEED_GET_COUNT
 from pony.orm import db_session, select, desc
 
 
@@ -22,6 +23,9 @@ class LegacyPostFilterByUser(Resource):
         args = parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args['session_token'])
+
+        if args['count'] > MAX_FEED_GET_COUNT:
+            return {}, 400
 
         # add every valid user from the request into a list,
         # to filter by later.
