@@ -36,7 +36,7 @@ functionality, namely when logging in, so I decided it was less confusing to jus
 ### Targeted compatibility
 
 This probably won't mean much to most people, since the original server code is private, due to being abhorrent to the
-eyes, but the compatibility target here is ```2.5.0```.
+eyes, but the compatibility target here is ```2.3.0```.
 
 In practice, the production version of socialserver ended up with a lot of weird little patches, and some
 functionality/edge cases not present in the original code. These will not be replicated.
