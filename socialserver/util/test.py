@@ -107,6 +107,15 @@ def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -
     monkeypatch.setattr("socialserver.api.legacy.authentication.db", db)
     monkeypatch.setattr("socialserver.api.legacy.post_filter.filter_by_user.db", db)
     monkeypatch.setattr("socialserver.api.legacy.post.db", db)
+    monkeypatch.setattr("socialserver.api.legacy.user_deauth.db", db)
+    monkeypatch.setattr("socialserver.api.legacy.modqueue.db", db)
+    monkeypatch.setattr("socialserver.api.legacy.like.db", db)
+    monkeypatch.setattr("socialserver.api.legacy.invite_codes.db", db)
+    monkeypatch.setattr("socialserver.api.legacy.follows.db", db)
+    monkeypatch.setattr("socialserver.api.legacy.follower.db", db)
+    monkeypatch.setattr("socialserver.api.legacy.comment.db", db)
+    monkeypatch.setattr("socialserver.api.legacy.block.db", db)
+    monkeypatch.setattr("socialserver.api.legacy.bio.db", db)
     return None
 
 
