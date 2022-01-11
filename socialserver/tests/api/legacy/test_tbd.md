@@ -2,7 +2,7 @@
 
 ## Todo
 
-- [ ] Posts
+- [x] Posts
     - [x] Creation
     - [x] Deletion
     - [x] Filter by User
