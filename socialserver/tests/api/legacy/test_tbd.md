@@ -5,7 +5,7 @@
 - [ ] Posts
     - [x] Creation
     - [x] Deletion
-    - [ ] Filter by User
+    - [x] Filter by User
 - [ ] Followers
     - [ ] Following Count
     - [ ] Follower Count
