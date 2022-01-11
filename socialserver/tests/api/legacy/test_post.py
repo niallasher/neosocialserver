@@ -1,7 +1,8 @@
 from socialserver.util.test import test_db, server_address, create_post_with_request, create_user_with_request, \
     create_user_session_with_request
 import requests
-from socialserver.constants import LegacyErrorCodes, MAX_FEED_GET_COUNT
+from socialserver.constants import LegacyErrorCodes, MAX_FEED_GET_COUNT, POST_MAX_LEN
+from secrets import token_urlsafe
 
 
 def test_get_post_feed_legacy(test_db, server_address):
@@ -77,6 +78,16 @@ def test_create_post_invalid_token_legacy(test_db, server_address):
                           "post_text": "test"
                       })
     assert r.status_code == 401
+
+
+def test_create_post_too_long_legacy(test_db, server_address):
+    r = requests.post(f"{server_address}/api/v1/posts",
+                      json={
+                          "session_token": test_db.access_token,
+                          "post_text": token_urlsafe(1024)
+                      })
+    # shouldn't fail because v1 just truncates!
+    assert r.status_code == 201
 
 
 def test_create_post_missing_args_legacy(test_db, server_address):
