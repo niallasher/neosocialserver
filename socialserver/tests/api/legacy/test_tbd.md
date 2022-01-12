@@ -6,9 +6,9 @@
     - [x] Creation
     - [x] Deletion
     - [x] Filter by User
-- [ ] Followers
-    - [ ] Following Count
-    - [ ] Follower Count
+- [x] Followers
+    - [x] Following Count
+    - [x] Follower Count
 - [ ] Likes
     - [ ] Counts
     - [ ] Listing

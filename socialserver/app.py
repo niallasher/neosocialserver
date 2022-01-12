@@ -30,7 +30,7 @@ from socialserver.api.legacy.comment_filter.filter_by_post import LegacyCommentF
 from socialserver.api.legacy.image import LegacyImageV1
 from socialserver.api.legacy.post_filter.by_user import LegacyPostFilterByUser
 from socialserver.api.legacy.like_filter.by_post import LegacyLikeFilterByPost
-from socialserver.api.legacy.follower import LegacyFollower
+from socialserver.api.legacy.follower_list import LegacyFollower
 from socialserver.api.legacy.block import LegacyBlock, LegacyUserBlocks
 from socialserver.api.legacy.comment import LegacyComment
 from socialserver.api.legacy.comment import LegacyCommentLike
