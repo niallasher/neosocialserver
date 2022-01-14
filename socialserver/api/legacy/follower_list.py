@@ -71,6 +71,6 @@ class LegacyFollower(Resource):
             return {}, 404
 
         return {
-            "username": follower.username,
-            "displayName": follower.displayName
-        }
+                   "username": follower.username,
+                   "displayName": follower.display_name
+               }, 201
