@@ -54,8 +54,6 @@ class LegacyLike(Resource):
         args = parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args['session_token'])
-        if user is None:
-            return {}, 401
 
         like = db.PostLike.get(id=args['like_id'])
 
