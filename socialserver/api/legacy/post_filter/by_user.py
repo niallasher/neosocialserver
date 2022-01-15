@@ -22,7 +22,7 @@ class LegacyPostFilterByUser(Resource):
 
         args = parser.parse_args()
 
-        user = get_user_object_from_token_or_abort(args['session_token'])
+        r_user = get_user_object_from_token_or_abort(args['session_token'])
 
         if args['count'] > MAX_FEED_GET_COUNT:
             return {}, 400
@@ -40,11 +40,12 @@ class LegacyPostFilterByUser(Resource):
         if len(users) == 0:
             return {}, 406
 
-        blocks = select(b.blocking for b in db.Block if b.user == user)[::]
+        blocks = select(b.blocking for b in db.Block
+                        if b.user == r_user)[:]
 
-        query = select((p) for p in db.Post
-                       if p.user in users
-                       and p.user not in blocks
+        query = select(p for p in db.Post
+                       if p.user not in blocks
+                       and p.user in users
                        and not p.under_moderation).order_by(desc(db.Post.id)).limit(
             args['count'], offset=args['offset'])
 
