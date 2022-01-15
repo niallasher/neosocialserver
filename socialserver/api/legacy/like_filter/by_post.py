@@ -1,7 +1,8 @@
 from flask_restful import Resource, reqparse
 from socialserver.db import db
 from socialserver.util.auth import get_user_object_from_token_or_abort
-from pony.orm import db_session
+from pony.orm import db_session, select, desc
+from socialserver.constants import MAX_FEED_GET_COUNT
 
 
 class LegacyLikeFilterByPost(Resource):
@@ -17,14 +18,18 @@ class LegacyLikeFilterByPost(Resource):
 
         args = parser.parse_args()
 
-        user = get_user_object_from_token_or_abort(args['session_token'])
+        get_user_object_from_token_or_abort(args['session_token'])
+
+        if args['count'] > MAX_FEED_GET_COUNT:
+            return {}, 400
 
         post = db.Post.get(id=args['post_id'])
         if post is None:
             return {}, 404
 
         like_ids = []
-        likes = post.likes
+        likes = select(l for l in db.PostLike
+                       if l.post == post).order_by(desc(db.PostLike.id)).limit(args['count'], offset=args['offset'])[:]
         for like in likes:
             like_ids.append(like.id)
 
