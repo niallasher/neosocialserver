@@ -9,10 +9,10 @@
 - [x] Followers
     - [x] Following Count
     - [x] Follower Count
-- [ ] Likes
-    - [ ] Counts
-    - [ ] Listing
-    - [ ] Creation/Deletion
+- [x] Likes
+    - [x] Counts
+    - [x] Listing
+    - [x] Creation/Deletion
 - [ ] Blocks
     - [ ] Creation/Deletion
     - [ ] Listing
