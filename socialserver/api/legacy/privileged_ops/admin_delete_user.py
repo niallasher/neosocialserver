@@ -20,11 +20,11 @@ class LegacyAdminDeleteUser(Resource):
         r_user = get_user_object_from_token_or_abort(args['session_token'])
 
         if not r_user.is_admin:
-            return {"err": LegacyErrorCodes.USER_NOT_ADMIN}, 401
+            return {"err": LegacyErrorCodes.USER_NOT_ADMIN.value}, 401
 
         # this is a *super*-destructive action. we definitely want a password check here!
         if not verify_password_valid(args['password'], r_user.password_salt, r_user.password_hash):
-            return {"err": LegacyErrorCodes.INCORRECT_PASSWORD}, 401
+            return {"err": LegacyErrorCodes.INCORRECT_PASSWORD.value}, 401
 
         user = db.User.get(username=args['username'])
         if user is None:
@@ -32,7 +32,7 @@ class LegacyAdminDeleteUser(Resource):
 
         if user.is_admin:
             # "Et tu, Brute?" followed by complete inaction.
-            return {"err": LegacyErrorCodes.INSUFFICIENT_PERMISSIONS_TO_MODIFY_USER_DESTRUCTIVE}
+            return {"err": LegacyErrorCodes.INSUFFICIENT_PERMISSIONS_TO_MODIFY_USER_DESTRUCTIVE.value}
 
         # rip bozo
         user.delete()
