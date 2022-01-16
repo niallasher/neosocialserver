@@ -3,6 +3,7 @@ import pytest
 import requests
 from os import getenv
 from socialserver.db import create_test_db
+from pony.orm import db_session
 import magic
 from attrdict import AttrDict
 from json import dumps
@@ -37,6 +38,21 @@ def test_db(monkeypatch):
         "display_name": "test",
         "access_token": access_token
     })
+
+
+"""
+    set_user_attributes_db
+    set a users attributes via a database object, allowing for creation
+    of admins in a test.
+"""
+
+
+@db_session
+def set_user_attributes_db(db: pony.orm.Database, username: str, attributes: list):
+    user = db.User.get(username=username)
+    if user is None:
+        raise ValueError
+    user.account_attributes = attributes
 
 
 """
