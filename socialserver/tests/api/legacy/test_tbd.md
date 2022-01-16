@@ -21,7 +21,7 @@
     - [ ] Deletion
     - [ ] Listing
     - [ ] Liking
-- [ ] User All Deauth
+- [x] User All Deauth
 - [ ] Invite code stub
 - [ ] Admin Tools
     - [ ] Delete User
