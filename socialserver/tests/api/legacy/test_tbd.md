@@ -22,7 +22,7 @@
     - [ ] Listing
     - [ ] Liking
 - [x] User All Deauth
-- [ ] Invite code stub
+- [x] Invite code stub
 - [ ] Admin Tools
     - [ ] Delete User
     - [ ] Modify User
