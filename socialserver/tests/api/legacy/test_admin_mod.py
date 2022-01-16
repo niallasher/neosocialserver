@@ -121,3 +121,18 @@ def test_attempt_admin_mod_invalid_username_legacy(test_db, server_address):
                           "username": "does_not_exist"
                       })
     assert r.status_code == 404
+
+
+def test_attempt_admin_mod_invalid_modtype_legacy(test_db, server_address):
+    set_user_attributes_db(test_db.db,
+                           test_db.username,
+                           [AccountAttributes.ADMIN.value])
+    r = requests.post(f"{server_address}/api/v1/admin/usermod",
+                      json={
+                          "session_token": test_db.access_token,
+                          "modtype": "definitely_invalid",
+                          "username": test_db.username
+                      })
+    # this is supposed to be 500. the old server returned 500,
+    # so the compatibility stuff requires this :(
+    assert r.status_code == 500
