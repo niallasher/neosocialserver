@@ -32,7 +32,7 @@ class LegacyAdminDeleteUser(Resource):
 
         if user.is_admin:
             # "Et tu, Brute?" followed by complete inaction.
-            return {"err": LegacyErrorCodes.INSUFFICIENT_PERMISSIONS_TO_MODIFY_USER_DESTRUCTIVE.value}
+            return {"err": LegacyErrorCodes.INSUFFICIENT_PERMISSIONS_TO_MODIFY_USER_DESTRUCTIVE.value}, 401
 
         # rip bozo
         user.delete()

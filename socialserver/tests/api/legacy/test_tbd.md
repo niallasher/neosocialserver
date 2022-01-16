@@ -23,8 +23,8 @@
     - [ ] Liking
 - [x] User All Deauth
 - [x] Invite code stub
-- [ ] Admin Tools
-    - [ ] Delete User
+- [.] Admin Tools
+    - [x] Delete User
     - [ ] Modify User
     - [ ] Delete Post
 - [ ] Modqueue
