@@ -25,7 +25,7 @@
 - [x] Invite code stub
 - [.] Admin Tools
     - [x] Delete User
-    - [ ] Modify User
+    - [x] Modify User
     - [ ] Delete Post
 - [ ] Modqueue
     - [ ] Remove
