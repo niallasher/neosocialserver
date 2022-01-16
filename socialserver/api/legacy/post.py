@@ -181,7 +181,9 @@ class LegacyPost(Resource):
 
             blocks = select(b.blocking for b in db.Block
                             if b.user == user)[:]
-            query = select(p for p in db.Post if p.user not in blocks and p.under_moderation is False).order_by(
+            query = select(p for p in db.Post
+                           if p.user not in blocks
+                           and p.under_moderation is False).order_by(
                 desc(db.Post.id)).limit(args['count'], offset=args['offset'])
 
             post_ids = []
