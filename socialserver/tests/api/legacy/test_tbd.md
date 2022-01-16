@@ -13,9 +13,9 @@
     - [x] Counts
     - [x] Listing
     - [x] Creation/Deletion
-- [ ] Blocks
-    - [ ] Creation/Deletion
-    - [ ] Listing
+- [x] Blocks
+    - [x] Creation/Deletion
+    - [x] Listing
 - [ ] Comments
     - [ ] Creation
     - [ ] Deletion
