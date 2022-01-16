@@ -133,6 +133,9 @@ def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -
     monkeypatch.setattr("socialserver.api.legacy.comment.db", db)
     monkeypatch.setattr("socialserver.api.legacy.block.db", db)
     monkeypatch.setattr("socialserver.api.legacy.bio.db", db)
+    monkeypatch.setattr("socialserver.api.legacy.privileged_ops.admin_delete_user.db", db)
+    monkeypatch.setattr("socialserver.api.legacy.privileged_ops.admin_delete_post.db", db)
+    monkeypatch.setattr("socialserver.api.legacy.privileged_ops.admin_usermod.db", db)
     return None
 
 
