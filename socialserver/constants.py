@@ -186,6 +186,18 @@ class LegacyErrorCodes(Enum):
 
 
 """
+    LegacyAdminUserModTypes
+    
+    Enum containing valid legacy admin usermod operations
+"""
+
+
+class LegacyAdminUserModTypes(Enum):
+    VERIFICATION_STATUS = "verified"
+    MODERATOR_STATUS = "moderator"
+
+
+"""
   ReportReasons
   A list of reasons to report a post
 """

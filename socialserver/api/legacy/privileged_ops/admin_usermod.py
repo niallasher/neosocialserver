@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse
 from socialserver.db import db
 from socialserver.util.auth import get_user_object_from_token_or_abort
-from socialserver.constants import LegacyErrorCodes, AccountAttributes
+from socialserver.constants import LegacyErrorCodes, AccountAttributes, LegacyAdminUserModTypes
 from pony.orm import db_session
 
 
@@ -30,7 +30,7 @@ class LegacyAdminUserMod(Resource):
         # FIXME: very weird bug; clicking verify will verify a user. they can only be unverified by clicking remove mod!
 
         # toggle verification status
-        if args['modtype'] == "verified":
+        if args['modtype'] == LegacyAdminUserModTypes.VERIFICATION_STATUS.value:
             if user.is_verified:
                 user.account_attributes.remove(AccountAttributes.VERIFIED.value)
             else:
@@ -38,7 +38,7 @@ class LegacyAdminUserMod(Resource):
             return {}, 201
         # toggle mod status
 
-        elif args['modtype'] == "moderator":
+        elif args['modtype'] == LegacyAdminUserModTypes.MODERATOR_STATUS.value:
             if user.is_moderator:
                 user.account_attributes.remove(AccountAttributes.MODERATOR.value)
             else:
