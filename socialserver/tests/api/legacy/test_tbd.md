@@ -23,10 +23,10 @@
     - [ ] Liking
 - [x] User All Deauth
 - [x] Invite code stub
-- [.] Admin Tools
+- [x] Admin Tools
     - [x] Delete User
     - [x] Modify User
-    - [ ] Delete Post
+    - [x] Delete Post
 - [ ] Modqueue
     - [ ] Remove
     - [ ] Add
