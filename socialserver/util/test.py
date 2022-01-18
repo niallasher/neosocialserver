@@ -5,10 +5,10 @@ from os import getenv
 from socialserver.db import create_test_db
 from pony.orm import db_session
 import magic
-from attrdict import AttrDict
 from json import dumps
 from base64 import urlsafe_b64encode
 from socialserver.static.test_data.test_image import TEST_IMAGE_B64
+from socialserver.util.namespace import dict_to_simple_namespace
 
 UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 " \
      "Mobile/15A372 Safari/604.1 "
@@ -31,7 +31,7 @@ def test_db(monkeypatch):
     access_token = create_user_session_with_request(get_server_address(),
                                                     username="test",
                                                     password="password")
-    return AttrDict({
+    return dict_to_simple_namespace({
         "db": test_db,
         "username": "test",
         "password": "password",

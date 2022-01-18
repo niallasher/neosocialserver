@@ -1,9 +1,9 @@
 import os
 import toml
-from attrdict import AttrDict
-from typing import Union
 from socialserver.util.output import console
 from pathlib import Path
+from socialserver.util.namespace import dict_to_simple_namespace
+from types import SimpleNamespace
 
 # if the user doesn't specify a server root storage dir,
 # we're going to store everything in $HOME/socialserver.
@@ -113,25 +113,25 @@ report_legacy_version = false
 """
 
 
-def _test_config(current_config: AttrDict, schema: AttrDict) -> None:
+def _test_config(current_config: SimpleNamespace, schema: SimpleNamespace) -> None:
     # Data isn't validated, just structure, so feel free to use a loaded
     # copy of DEFAULT_CONFIG as your schema.
 
-    def _recursive_unwrap_dict_keys(dict_obj: Union[AttrDict, dict], prefix=""):
+    def _recursive_unwrap_ns_keys(dict_obj: SimpleNamespace, prefix=""):
         keys = []
-        for dict_key in dict_obj.keys():
+        for dict_key in vars(dict_obj).keys():
             keys.append(prefix + dict_key)
             # if type == dict we're dealing with a nested one,
             # so we'll recurse using it as the base, with an
             # updated prefix
-            if type(dict_obj.get(dict_key)) is dict:
-                nested_keys = _recursive_unwrap_dict_keys(dict_obj.get(dict_key), prefix=(prefix + dict_key + "."))
+            if type(vars(dict_obj).get(dict_key)) is dict:
+                nested_keys = _recursive_unwrap_ns_keys(dict_obj.get(dict_key), prefix=(prefix + dict_key + "."))
                 for nested_key in nested_keys:
                     keys.append(nested_key)
         return keys
 
-    current_config_keys = _recursive_unwrap_dict_keys(current_config)
-    schema_config_keys = _recursive_unwrap_dict_keys(schema)
+    current_config_keys = _recursive_unwrap_ns_keys(current_config)
+    schema_config_keys = _recursive_unwrap_ns_keys(schema)
 
     # check for any keys that are in the schema,
     # but *not* in current_config_keys. exit if
@@ -155,13 +155,14 @@ def _test_config(current_config: AttrDict, schema: AttrDict) -> None:
 """
     _load_toml
     
-    Loads a string containing a TOML file, into an AttrDict,
+    Loads a string containing a TOML file, into a SimpleNamespace,
     which allows for property access via dot notation.
 """
 
 
-def _load_toml(toml_string: str) -> AttrDict:
-    return AttrDict(toml.loads(toml_string))
+def _load_toml(toml_string: str) -> SimpleNamespace:
+    dt = toml.loads(toml_string)
+    return dict_to_simple_namespace(dt)
 
 
 """
@@ -171,7 +172,7 @@ def _load_toml(toml_string: str) -> AttrDict:
 """
 
 
-def _load_config(filename: str) -> AttrDict:
+def _load_config(filename: str) -> SimpleNamespace:
     console.log(f"Trying to load configuration file from {filename}...")
     with open(filename, 'r') as config_file:
         config_data = config_file.read()
