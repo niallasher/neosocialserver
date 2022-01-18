@@ -41,11 +41,16 @@ from socialserver.api.legacy.privileged_ops.admin_delete_user import LegacyAdmin
 from socialserver.api.legacy.privileged_ops.admin_delete_post import LegacyAdminDeletePost
 from socialserver.api.legacy.modqueue import LegacyModQueue
 
+TOTP_REPLAY_PREVENTION_ENABLED = config.auth.totp.replay_prevention_enabled
+
 
 def create_app():
     application = Flask(__name__)
     CORS(application)
     api = Api(application)
+
+    if not TOTP_REPLAY_PREVENTION_ENABLED:
+        console.print("[bold red]TOTP replay prevention is disabled!")
 
     if config.misc.enable_landing_page:
         @application.get('/')

@@ -64,6 +64,13 @@ enabled = true
 # before they are allowed in
 approval_required = false
 
+[auth.totp]
+# good for security, however the old server didn't implement it.
+# you should keep it on, since it will cause minor ux paper-cuts for the
+# old client, while providing a pretty good boost in security just in case somebody
+# is watching a user sign in etc.
+replay_prevention_enabled = true
+
 [posts]
 # this is an anti-spam tactic; socialserver
 # allows for each user to report a specific post
