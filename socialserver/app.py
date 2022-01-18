@@ -42,6 +42,7 @@ from socialserver.api.legacy.privileged_ops.admin_delete_post import LegacyAdmin
 from socialserver.api.legacy.modqueue import LegacyModQueue
 
 TOTP_REPLAY_PREVENTION_ENABLED = config.auth.totp.replay_prevention_enabled
+LESS_SECURE_PASSWORD_CHANGE_ENABLED = config.legacy_api_interface.enable_less_secure_password_change
 
 
 def create_app():
@@ -77,7 +78,12 @@ def create_app():
     api.add_resource(Report, '/api/v3/report/post')
 
     if config.legacy_api_interface.enable:
-        console.print("[bold red]Enabling legacy interface!")
+        console.print("[bold red]Legacy interface enabled!\nThis might reduce security.")
+
+        if LESS_SECURE_PASSWORD_CHANGE_ENABLED:
+            console.print("[bold red]Insecure password change enabled.\n" +
+                          "Please only enable this for compatibility reasons")
+
         api.add_resource(LegacyPostFilterByUser, '/api/v1/posts/byUser')
         api.add_resource(LegacyPost, '/api/v1/posts')
         api.add_resource(LegacyCommentFilterByPost, '/api/v1/comments/byPost')

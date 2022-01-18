@@ -105,6 +105,11 @@ deliver_full_post_images = false
 # which, IIRC, only checked the minor server semver version, when determining server
 # availability.
 report_legacy_version = false
+# the legacy api does not require confirmation of the previous password before
+# switching to a new one. if disabled, this setting will prevent any legacy password
+# change requests from going through. best to keep this disabled unless trying to keep
+# maximum compatibility with 1.x clients.
+enable_less_secure_password_change = false
 
 
 """
