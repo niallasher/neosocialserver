@@ -1,11 +1,14 @@
 from socialserver.util.test import test_db, create_post_with_request, server_address
 from socialserver.util.auth import get_user_object_from_token_or_abort, generate_salt, hash_password
 from socialserver.util.image import check_image_exists
+from socialserver.util.config import config
 from socialserver.constants import REGEX_USERNAME_VALID, MAX_PASSWORD_LEN, MIN_PASSWORD_LEN, DISPLAY_NAME_MAX_LEN
 from socialserver.db import db
 import re
 from flask_restful import Resource, reqparse
 from pony.orm import db_session, commit
+
+LESS_SECURE_PASSWORD_CHANGE_ENABLED = config.legacy_api_interface.enable_less_secure_password_change
 
 
 class LegacyUsermod(Resource):
@@ -33,13 +36,17 @@ class LegacyUsermod(Resource):
             return {}, 201
 
         if args['password'] is not None:
-            if not MIN_PASSWORD_LEN <= len(args['password']) <= MAX_PASSWORD_LEN:
-                return {}, 400
-            salt = generate_salt()
-            hashed_password = hash_password(args['password'], salt)
-            user.password_salt = salt
-            user.password_hash = hashed_password
-            return {}, 201
+            if LESS_SECURE_PASSWORD_CHANGE_ENABLED:
+                if not MIN_PASSWORD_LEN <= len(args['password']) <= MAX_PASSWORD_LEN:
+                    return {}, 400
+                salt = generate_salt()
+                hashed_password = hash_password(args['password'], salt)
+                user.password_salt = salt
+                user.password_hash = hashed_password
+                return {}, 201
+            # return an invalid request if insecure password changes
+            # are disabled server side. not good ux, but no alternative!
+            return {}, 400
 
         if args['display_name'] is not None:
             if not 1 <= len(args['display_name']) <= DISPLAY_NAME_MAX_LEN:
