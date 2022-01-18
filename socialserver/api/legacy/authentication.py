@@ -45,7 +45,7 @@ class LegacyAuthentication(Resource):
             # for whatever reason, this was what API v1 did.
             return {"err": LegacyErrorCodes.PASSWORD_DAMAGED.value}, 401
 
-        if user.totp_secret is not None:
+        if user.totp is not None:
             # TODO: need to do this. it'll be here by release,
             # but I haven't written anything for it yet. stub for now.
             return {"err": LegacyErrorCodes.TOTP_REQUIRED.value}, 401

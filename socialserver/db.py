@@ -20,6 +20,7 @@ def define_entities(db_object):
         password_salt = orm.Required(str)
         creation_time = orm.Required(datetime.datetime)
         birthday = orm.Optional(datetime.date)
+        totp = orm.Optional('Totp')
         # legacy accounts are the ones imported from socialserver 2.x during migration
         # this doesn't mean much now, but might become important in the future
         # so might as well have it.
@@ -27,8 +28,6 @@ def define_entities(db_object):
         # check out AccountAttributes enum in constants for more info
         account_attributes = orm.Required(orm.IntArray)
         bio = orm.Optional(str, max_len=BIO_MAX_LEN)
-        totp_secret = orm.Optional(str, nullable=True)
-        last_used_totp = orm.Optional(str, nullable=True)
         posts = orm.Set('Post', cascade_delete=True)
         comments = orm.Set('Comment', cascade_delete=True)
         post_likes = orm.Set('PostLike', cascade_delete=True)
@@ -75,6 +74,17 @@ def define_entities(db_object):
         @property
         def has_header_picture(self):
             return self.header_pic is not None
+
+        @property
+        def totp_enabled(self):
+            return self.totp is not None
+
+    class Totp(db_object.Entity):
+        user = orm.Required('User')
+        secret = orm.Required(str)
+        # used for replay attack prevention.
+        # optional since it might not always be populated.
+        last_used_code = orm.Optional(str)
 
     class UserSession(db_object.Entity):
         # data collection is for security purposes.
