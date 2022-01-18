@@ -16,11 +16,11 @@
 - [x] Blocks
     - [x] Creation/Deletion
     - [x] Listing
-- [ ] Comments
-    - [ ] Creation
-    - [ ] Deletion
-    - [ ] Listing
-    - [ ] Liking
+- [x] Comments
+    - [x] Creation
+    - [x] Deletion
+    - [x] Listing
+    - [x] Liking
 - [x] User All Deauth
 - [x] Invite code stub
 - [x] Admin Tools
