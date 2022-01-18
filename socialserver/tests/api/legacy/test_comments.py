@@ -168,7 +168,7 @@ def test_like_comment_legacy(test_db, server_address):
     assert r.json()['likeCount'] == 1
 
 
-def test_like_comment_legacy(test_db, server_address):
+def test_unlike_comment_legacy(test_db, server_address):
     post_id = create_post_with_request(server_address, test_db.access_token,
                                        text_content="post text post text")
 
