@@ -152,12 +152,12 @@ class LegacyCommentLike(Resource):
                 creation_time=datetime.now()
             )
             return {
-                "commentLiked": True,
-                "likeCount": current_like_count + 1
-            }
+                       "commentLiked": True,
+                       "likeCount": current_like_count + 1
+                   }, 201
 
         existing_like.delete()
         return {
-            "commentLiked": False,
-            "likeCount": current_like_count - 1
-        }
+                   "commentLiked": False,
+                   "likeCount": current_like_count - 1
+               }, 201
