@@ -38,7 +38,6 @@ class UserSession(Resource):
     @db_session
     def post(self):
 
-        # TODO: reimplement TOTP
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str, required=True)
         parser.add_argument('password', type=str, required=True)
