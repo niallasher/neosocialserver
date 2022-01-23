@@ -70,6 +70,12 @@ approval_required = false
 # old client, while providing a pretty good boost in security just in case somebody
 # is watching a user sign in etc.
 replay_prevention_enabled = true
+# the issuer string returned with otp urls
+issuer = "socialserver"
+# the time after which an unconfirmed totp will expire and be removed
+# from the database. should be high enough to give the user a good chance
+# to confirm it.
+unconfirmed_expiry_time = 300 # 5 minutes
 
 [posts]
 # this is an anti-spam tactic; socialserver

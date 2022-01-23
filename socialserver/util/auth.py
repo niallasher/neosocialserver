@@ -2,14 +2,15 @@ from functools import wraps
 from types import SimpleNamespace
 import argon2
 from secrets import randbits
+from base64 import b32encode
 from hashlib import sha256
 from secrets import token_urlsafe
 from pony.orm import db_session
 from socialserver.db import db
 from flask import abort, request, make_response, jsonify
 from socialserver.constants import ErrorCodes, LegacyErrorCodes
-
-import pony.orm
+from socialserver.util.config import config
+import pyotp
 
 hasher = argon2.PasswordHasher()
 
@@ -224,3 +225,61 @@ def get_user_from_auth_header():
             ), 401)
         )
     return existing_entry.user
+
+
+"""
+    check_totp_valid
+    
+    check a given totp code against a secret
+"""
+
+
+def check_totp_valid(totp: int, user_obj) -> None:
+    secret = user_obj.totp.secret
+    auth = pyotp.TOTP(secret)
+
+    if config.auth.totp.replay_prevention_enabled:
+        # if both conditions are satisfied, then the code must have already been used,
+        # so we don't accept it!
+        if totp == user_obj.totp.last_used_code and auth.verify(user_obj.totp.last_used_code):
+            raise TotpExpendedException
+
+    if not auth.verify(totp):
+        raise TotpInvalidException
+
+    user_obj.totp.last_used_code = totp
+
+
+"""
+    generate_totp_secret
+    
+    create & return a totp secret
+"""
+
+
+def generate_totp_secret() -> str:
+    g_bytes = randbits(32).__str__().encode()
+    return b32encode(g_bytes).decode()
+
+
+"""
+    TotpExpendedException
+    
+    Exception for when a totp code has already been used
+    (replay prevention)
+"""
+
+
+class TotpExpendedException(Exception):
+    pass
+
+
+"""
+    TotpInvalidException
+    
+    Exception for when a totp code is not valid
+"""
+
+
+class TotpInvalidException(Exception):
+    pass

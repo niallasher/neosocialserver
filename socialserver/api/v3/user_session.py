@@ -5,7 +5,7 @@ from pony.orm import db_session
 from flask import request
 from socialserver.constants import ErrorCodes
 from socialserver.util.auth import generate_key, get_ip_from_request, hash_plaintext_sha256, verify_password_valid, \
-    auth_reqd, get_user_from_auth_header
+    auth_reqd, get_user_from_auth_header, check_totp_valid, TotpExpendedException, TotpInvalidException
 from socialserver.util.config import config
 from user_agents import parse as ua_parse
 
@@ -42,6 +42,8 @@ class UserSession(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str, required=True)
         parser.add_argument('password', type=str, required=True)
+        # Only needed if TOTP is enabled!
+        parser.add_argument('totp', type=str, required=False)
         args = parser.parse_args()
 
         user = db.User.get(username=args['username'])
@@ -54,6 +56,21 @@ class UserSession(Resource):
         if config.auth.registration.approval_required:
             if user.approved is not True:
                 return {"error": ErrorCodes.ACCOUNT_NOT_APPROVED.value}, 401
+
+        # if the user has totp, and hasn't specified one, send back an error
+        # telling the client they'll need to supply it.
+        if user.totp is not None and user.totp.confirmed:
+            # default value for the unspecified arg is an
+            # empty string, hence this and not args['totp'] is None!
+            if args['totp'] == "" or args['totp'] is None:
+                return {"error": ErrorCodes.TOTP_REQUIRED.value}, 400
+
+            try:
+                check_totp_valid(args['totp'], user)
+            except TotpExpendedException:
+                return {"error": ErrorCodes.TOTP_EXPENDED.value}, 401
+            except TotpInvalidException:
+                return {"error": ErrorCodes.TOTP_INCORRECT.value}, 401
 
         secret = generate_key()
 

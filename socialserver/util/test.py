@@ -114,6 +114,7 @@ def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -
     monkeypatch.setattr("socialserver.api.v3.post.db", db)
     monkeypatch.setattr("socialserver.api.v3.report.db", db)
     monkeypatch.setattr("socialserver.api.v3.user.db", db)
+    monkeypatch.setattr("socialserver.api.v3.two_factor.db", db)
     monkeypatch.setattr("socialserver.api.v3.user_session.db", db)
     monkeypatch.setattr("socialserver.api.v3.username_available.db", db)
     # legacy api
@@ -132,6 +133,7 @@ def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -
     monkeypatch.setattr("socialserver.api.legacy.follower_list.db", db)
     monkeypatch.setattr("socialserver.api.legacy.comment.db", db)
     monkeypatch.setattr("socialserver.api.legacy.block.db", db)
+    monkeypatch.setattr("socialserver.api.legacy.two_factor.db", db)
     monkeypatch.setattr("socialserver.api.legacy.bio.db", db)
     monkeypatch.setattr("socialserver.api.legacy.privileged_ops.admin_delete_user.db", db)
     monkeypatch.setattr("socialserver.api.legacy.privileged_ops.admin_delete_post.db", db)

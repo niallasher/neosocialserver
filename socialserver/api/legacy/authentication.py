@@ -2,7 +2,8 @@ from flask_restful import Resource, reqparse
 from pony.orm import db_session
 from socialserver.db import db
 from socialserver.constants import LegacyErrorCodes
-from socialserver.util.auth import verify_password_valid, generate_key, get_ip_from_request, hash_plaintext_sha256
+from socialserver.util.auth import verify_password_valid, generate_key, get_ip_from_request, hash_plaintext_sha256, \
+    check_totp_valid, TotpInvalidException, TotpExpendedException
 from flask import request
 from datetime import datetime
 
@@ -29,7 +30,7 @@ class LegacyAuthentication(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str, required=True)
         parser.add_argument('password', type=str, required=True)
-        parser.add_argument('totp', type=str, required=False)  # TODO: this needs to be re-implemented!
+        parser.add_argument('totp', type=str, required=False, default=None)  # TODO: this needs to be re-implemented!
 
         args = parser.parse_args()
 
@@ -46,9 +47,12 @@ class LegacyAuthentication(Resource):
             return {"err": LegacyErrorCodes.PASSWORD_DAMAGED.value}, 401
 
         if user.totp is not None:
-            # TODO: need to do this. it'll be here by release,
-            # but I haven't written anything for it yet. stub for now.
-            return {"err": LegacyErrorCodes.TOTP_REQUIRED.value}, 401
+            if args['totp'] == "" or args['totp'] is None:
+                return {"err": LegacyErrorCodes.TOTP_REQUIRED.value}, 401
+            try:
+                check_totp_valid(args['totp'], user)
+            except TotpInvalidException or TotpExpendedException:
+                return {"err": LegacyErrorCodes.TOTP_INCORRECT.value}, 401
 
         secret = generate_key()
 

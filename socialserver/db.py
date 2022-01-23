@@ -77,14 +77,18 @@ def define_entities(db_object):
 
         @property
         def totp_enabled(self):
-            return self.totp is not None
+            return self.totp is not None and self.totp.confirmed
 
     class Totp(db_object.Entity):
-        user = orm.Required('User')
+        # here as a reverse attribute
+        user = orm.Optional('User')
         secret = orm.Required(str)
+        # a code will only be used if it's actually confirmed
+        confirmed = orm.Required(bool)
         # used for replay attack prevention.
         # optional since it might not always be populated.
         last_used_code = orm.Optional(str)
+        creation_time = orm.Required(datetime.datetime)
 
     class UserSession(db_object.Entity):
         # data collection is for security purposes.

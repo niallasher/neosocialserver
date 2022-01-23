@@ -17,6 +17,7 @@ from socialserver.api.v3.post import Post
 from socialserver.api.v3.image import Image, NewImage
 from socialserver.api.v3.block import Block
 from socialserver.api.v3.follow import Follow
+from socialserver.api.v3.two_factor import TwoFactorAuthentication, TwoFactorAuthenticationVerification
 # API legacy (v1/v2, it's confusing!)
 from socialserver.api.legacy.like import LegacyLike
 from socialserver.api.legacy.bio import LegacyUserBio
@@ -40,6 +41,7 @@ from socialserver.api.legacy.privileged_ops.admin_usermod import LegacyAdminUser
 from socialserver.api.legacy.privileged_ops.admin_delete_user import LegacyAdminDeleteUser
 from socialserver.api.legacy.privileged_ops.admin_delete_post import LegacyAdminDeletePost
 from socialserver.api.legacy.modqueue import LegacyModQueue
+from socialserver.api.legacy.two_factor import LegacyTwoFactor
 
 TOTP_REPLAY_PREVENTION_ENABLED = config.auth.totp.replay_prevention_enabled
 LESS_SECURE_PASSWORD_CHANGE_ENABLED = config.legacy_api_interface.enable_less_secure_password_change
@@ -65,6 +67,8 @@ def create_app():
     api.add_resource(UserSession, '/api/v3/user/session')
     api.add_resource(UserSessionList, '/api/v3/user/session/list')
     api.add_resource(UsernameAvailable, '/api/v3/user/name_available')
+    api.add_resource(TwoFactorAuthentication, "/api/v3/user/2fa")
+    api.add_resource(TwoFactorAuthenticationVerification, "/api/v3/user/2fa/verify")
 
     api.add_resource(Post, '/api/v3/post/single')
     api.add_resource(PostFeed, '/api/v3/feed/posts')
@@ -108,5 +112,6 @@ def create_app():
         api.add_resource(LegacyModQueue, "/api/v1/modqueue")
         api.add_resource(LegacyCommentLike, "/api/v2/comments/like")
         api.add_resource(LegacyAllDeauth, "/api/v2/user/deauth")
+        api.add_resource(LegacyTwoFactor, "/api/v2/user/twofactor")
 
     return application
