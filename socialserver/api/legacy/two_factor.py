@@ -89,12 +89,17 @@ class LegacyTwoFactor(Resource):
                    }, 201
 
         if action == 'remove':
-            totp = user.totp
-            user.totp = None
-            totp.delete()
-            return {}, 201
+            if user.totp is not None:
+                totp = user.totp
+                user.totp = None
+                totp.delete()
+                return {}, 201
+            return {}, 400
 
         if action == "confirm":
+            # fail out if the user doesn't have a totp, or already has an active one
+            if user.totp is None or user.totp.confirmed is True:
+                return {"err": LegacyErrorCodes.TOTP_INCORRECT.value}
             auth = pyotp.TOTP(user.totp.secret)
             if auth.verify(args['totp']):
                 user.totp.confirmed = True
