@@ -7,7 +7,7 @@ from socialserver.constants import LegacyErrorCodes
 from pony.orm import commit, db_session
 from urllib.parse import quote
 from socialserver.db import db
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class LegacyTwoFactor(Resource):
@@ -99,7 +99,11 @@ class LegacyTwoFactor(Resource):
         if action == "confirm":
             # fail out if the user doesn't have a totp, or already has an active one
             if user.totp is None or user.totp.confirmed is True:
-                return {"err": LegacyErrorCodes.TOTP_INCORRECT.value}
+                return {"err": LegacyErrorCodes.TOTP_INCORRECT.value}, 401
+            # in this case, the TOTP has expired. Legacy client only handles TOTP_INCORRECT here, so that's what
+            # we have to send back to fail somewhat gracefully.
+            if datetime.now() > user.totp.creation_time + timedelta(seconds=config.auth.totp.unconfirmed_expiry_time):
+                return {"err": LegacyErrorCodes.TOTP_INCORRECT.value}, 401
             auth = pyotp.TOTP(user.totp.secret)
             if auth.verify(args['totp']):
                 user.totp.confirmed = True

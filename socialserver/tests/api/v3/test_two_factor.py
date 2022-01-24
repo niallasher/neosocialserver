@@ -3,6 +3,7 @@ from socialserver.constants import ErrorCodes
 from socialserver.util.config import config
 import pyotp
 import requests
+from time import sleep
 
 
 def test_add_totp_to_account(test_db, server_address):
@@ -347,3 +348,35 @@ def test_login_totp_enabled_no_totp_code(test_db, server_address):
                       })
     assert r.status_code == 400
     assert r.json()['error'] == ErrorCodes.TOTP_REQUIRED.value
+
+
+def test_try_verify_totp_expired(test_db, server_address):
+    # immediate expiry for unconfirmed totp
+    config.auth.totp.unconfirmed_expiry_time = 0
+
+    r = requests.post(f"{server_address}/api/v3/user/2fa",
+                      json={
+                          "password": test_db.password
+                      },
+                      headers={
+                          "Authorization": f"bearer {test_db.access_token}"
+                      })
+    assert r.status_code == 201
+    secret = r.json()['secret']
+    totp_object = pyotp.TOTP(secret)
+    totp_now = totp_object.now()
+
+    r = requests.post(f"{server_address}/api/v3/user/2fa/verify",
+                      json={
+                          "totp": totp_now
+                      },
+                      headers={
+                          "Authorization": f"bearer {test_db.access_token}"
+                      })
+
+    assert r.status_code == 400
+    assert r.json()['error'] == ErrorCodes.TOTP_NOT_ACTIVE.value
+
+    # back to something sane
+    # TODO: reset config properly between tests! Right now they all share one.
+    config.auth.totp.unconfirmed_expiry_time = 300

@@ -5,7 +5,7 @@ from socialserver.util.auth import auth_reqd, get_user_from_auth_header, check_t
 from pony.orm import db_session, commit
 from socialserver.constants import ErrorCodes
 from socialserver.util.config import config
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class TwoFactorAuthentication(Resource):
@@ -115,6 +115,9 @@ class TwoFactorAuthenticationVerification(Resource):
 
         if user.totp is not None and user.totp.confirmed:
             return {"error": ErrorCodes.TOTP_ALREADY_ACTIVE.value}, 400
+
+        if datetime.now() > user.totp.creation_time + timedelta(seconds=config.auth.totp.unconfirmed_expiry_time):
+            return {"error": ErrorCodes.TOTP_NOT_ACTIVE.value}, 400
 
         try:
             check_totp_valid(args['totp'], user)
