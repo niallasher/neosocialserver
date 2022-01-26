@@ -1,7 +1,7 @@
+# noinspection PyUnresolvedReferences
 from socialserver.util.test import test_db, server_address, create_user_session_with_request
 import pyotp
 import requests
-from urllib import parse
 from random import randint
 from socialserver.constants import LegacyErrorCodes
 from socialserver.util.config import config

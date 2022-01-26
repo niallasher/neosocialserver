@@ -1,9 +1,9 @@
+# noinspection PyUnresolvedReferences
 from socialserver.util.test import test_db, server_address, create_user_session_with_request
 from socialserver.constants import ErrorCodes
 from socialserver.util.config import config
 import pyotp
 import requests
-from time import sleep
 
 
 def test_add_totp_to_account(test_db, server_address):

@@ -1,3 +1,4 @@
+# noinspection PyUnresolvedReferences
 from socialserver.util.test import test_db, create_post_with_request, create_user_with_request, \
     create_user_session_with_request, server_address
 import requests
@@ -11,7 +12,7 @@ def test_like_post_legacy(test_db, server_address):
                           "post_id": post_id
                       })
     assert r.status_code == 201
-    assert r.json()['postIsLiked'] == True
+    assert r.json()['postIsLiked'] is True
 
 
 def test_like_post_invalid_id_legacy(test_db, server_address):
@@ -37,7 +38,7 @@ def test_unlike_post_legacy(test_db, server_address):
                           "post_id": post_id
                       })
     assert r.status_code == 201
-    assert r.json()['postIsLiked'] == False
+    assert r.json()['postIsLiked'] is False
 
     # not much point in yet another test for unlike with invalid id; it's the exact same
     # endpoint anyway!

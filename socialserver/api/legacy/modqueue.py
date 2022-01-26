@@ -19,7 +19,7 @@ class LegacyModQueue(Resource):
         args = parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args['session_token'])
-        if not True in [user.is_moderator, user.is_admin]:
+        if True not in [user.is_moderator, user.is_admin]:
             return {"err": LegacyErrorCodes.INSUFFICIENT_PERMISSIONS_TO_ACCESS_MODQUEUE.value}, 401
 
         post = db.Post.get(id=args['post_id'])
@@ -41,7 +41,7 @@ class LegacyModQueue(Resource):
         args = parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args['session_token'])
-        if not True in [user.is_moderator, user.is_admin]:
+        if True not in [user.is_moderator, user.is_admin]:
             return {"err": LegacyErrorCodes.INSUFFICIENT_PERMISSIONS_TO_ACCESS_MODQUEUE.value}, 401
 
         post = db.Post.get(id=args['post_id'])
@@ -62,12 +62,12 @@ class LegacyModQueue(Resource):
         args = parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args['session_token'])
-        if not True in [user.is_moderator, user.is_admin]:
+        if True not in [user.is_moderator, user.is_admin]:
             return {"err": LegacyErrorCodes.INSUFFICIENT_PERMISSIONS_TO_ACCESS_MODQUEUE.value}, 401
 
-        posts = select((p) for p in db.Post
-                       if p.under_moderation is True).order_by(desc(db.Post.id)).limit(args['count'],
-                                                                                       offset=args['offset'])
+        posts = select(post for post in db.Post
+                       if post.under_moderation is True).order_by(desc(db.Post.id)).limit(args['count'],
+                                                                                          offset=args['offset'])
         post_ids = []
         for post in posts:
             post_ids.append(post.id)

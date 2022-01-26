@@ -1,5 +1,4 @@
 from types import SimpleNamespace
-from copy import copy
 
 """
     dict_to_simple_namespace

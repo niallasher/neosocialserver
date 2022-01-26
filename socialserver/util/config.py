@@ -185,7 +185,7 @@ def _test_config(current_config: SimpleNamespace, schema: SimpleNamespace) -> No
 
 
 def _load_toml(toml_string: str) -> SimpleNamespace:
-    dt = toml.loads(toml_string)
+    dt = dict(toml.loads(toml_string))
     return dict_to_simple_namespace(dt)
 
 

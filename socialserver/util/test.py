@@ -4,9 +4,6 @@ import requests
 from os import getenv
 from socialserver.db import create_test_db
 from pony.orm import db_session
-import magic
-from json import dumps
-from base64 import urlsafe_b64encode
 from socialserver.static.test_data.test_image import TEST_IMAGE_B64
 from socialserver.util.namespace import dict_to_simple_namespace
 

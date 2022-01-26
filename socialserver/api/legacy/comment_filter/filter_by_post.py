@@ -23,9 +23,9 @@ class LegacyCommentFilterByPost(Resource):
         if post is None:
             return {}, 404
 
-        comment_query = select((c) for c in db.Comment
-                               if c.post == post).order_by(desc(db.Comment.id)).limit(args['count'],
-                                                                                      offset=args['offset'])
+        comment_query = select(comment for comment in db.Comment
+                               if comment.post == post).order_by(desc(db.Comment.id)).limit(args['count'],
+                                                                                            offset=args['offset'])
         comment_ids = []
         for comment in comment_query:
             comment_ids.append(comment.id)

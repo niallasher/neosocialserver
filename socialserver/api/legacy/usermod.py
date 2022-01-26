@@ -1,4 +1,3 @@
-from socialserver.util.test import test_db, create_post_with_request, server_address
 from socialserver.util.auth import get_user_object_from_token_or_abort, generate_salt, hash_password
 from socialserver.util.image import check_image_exists
 from socialserver.util.config import config
@@ -6,7 +5,7 @@ from socialserver.constants import REGEX_USERNAME_VALID, MAX_PASSWORD_LEN, MIN_P
 from socialserver.db import db
 import re
 from flask_restful import Resource, reqparse
-from pony.orm import db_session, commit
+from pony.orm import db_session
 
 LESS_SECURE_PASSWORD_CHANGE_ENABLED = config.legacy_api_interface.enable_less_secure_password_change
 

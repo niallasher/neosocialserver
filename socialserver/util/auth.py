@@ -241,10 +241,10 @@ def check_totp_valid(totp: int, user_obj) -> None:
     if config.auth.totp.replay_prevention_enabled:
         # if both conditions are satisfied, then the code must have already been used,
         # so we don't accept it!
-        if totp == user_obj.totp.last_used_code and auth.verify(user_obj.totp.last_used_code):
+        if totp == user_obj.totp.last_used_code and auth.verify(str(user_obj.totp.last_used_code)):
             raise TotpExpendedException
 
-    if not auth.verify(totp):
+    if not auth.verify(str(totp)):
         raise TotpInvalidException
 
     user_obj.totp.last_used_code = totp

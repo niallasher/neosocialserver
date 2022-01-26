@@ -42,7 +42,7 @@ class LegacyAdminUserMod(Resource):
             if user.is_moderator:
                 user.account_attributes.remove(AccountAttributes.MODERATOR.value)
             else:
-                user.account_attributes.append((AccountAttributes.MODERATOR.value))
+                user.account_attributes.append(AccountAttributes.MODERATOR.value)
             return {}, 201
 
         # yep, you're seeing that right.

@@ -1,8 +1,8 @@
 from flask_restful import Resource, reqparse
-from socialserver.db import db
 from socialserver.util.auth import verify_password_valid, get_user_object_from_token_or_abort
 from socialserver.constants import LegacyErrorCodes
-from pony.orm import db_session, select
+from pony.orm import db_session
+from socialserver.db import db
 
 
 # removes all sessions from a user

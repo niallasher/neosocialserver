@@ -5,7 +5,6 @@ from socialserver.constants import BIO_MAX_LEN, COMMENT_MAX_LEN, DISPLAY_NAME_MA
 from socialserver.util.config import config, CONFIG_PATH
 from pony.orm import OperationalError
 from socialserver.util.output import console
-from rich.markdown import Markdown
 
 
 # these are used when define_entities
@@ -134,6 +133,7 @@ def define_entities(db_object):
             # returns a list.
             images = []
             for i in self.image_ids:
+                # noinspection PyUnresolvedAttributeReference
                 i_db = db.Image.get(id=i)
                 if i_db is not None:
                     images.append(i_db)
@@ -177,9 +177,6 @@ def define_entities(db_object):
         associated_profile_pics = orm.Set('User', reverse='profile_pic')
         associated_header_pics = orm.Set('User', reverse='header_pic')
         associated_posts = orm.Set('Post', reverse='images')
-
-        # SHA256 hash of the original file, for later adaption
-        # original_hash = orm.Required(str)
 
         @property
         def is_orphan(self):
@@ -264,11 +261,7 @@ def create_test_db():
 
 
 def _bind_to_config_specified_db(db_object):
-    # TODO: improve database support. list of pony supported databases:
-    # https://docs.ponyorm.org/database.html#binding-the-database-object-to-a-specific-database
-    # I think only sqlite, postgres, and mariadb will be supported, since Cockroach is commercial,
-    # and I don't want to touch Oracle Database with a 10 foot pole for fear of Larry Ellison showing
-    # up in my room at midnight and demanding money
+    # TODO: MariaDB support, once I actually set it up for testing
     if config.database.connector == 'sqlite':
         db_object.bind('sqlite', config.database.filename, create_db=True)
     elif config.database.connector == 'postgres':

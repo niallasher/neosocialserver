@@ -1,7 +1,7 @@
+# noinspection PyUnresolvedReferences
 from socialserver.util.test import test_db, server_address
 import requests
-from pony.orm import db_session
-from socialserver.constants import LegacyErrorCodes, BIO_MAX_LEN, DISPLAY_NAME_MAX_LEN, MAX_PASSWORD_LEN
+from socialserver.constants import LegacyErrorCodes, MAX_PASSWORD_LEN
 from secrets import token_urlsafe
 
 

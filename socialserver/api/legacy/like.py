@@ -34,8 +34,8 @@ class LegacyLike(Resource):
         else:
             existing_like.delete()
 
-        like_count = select(l for l in db.PostLike
-                            if l.post == post).count()
+        like_count = select(like for like in db.PostLike
+                            if like.post == post).count()
 
         return {
                    "postIsLiked": existing_like is None,

@@ -1,11 +1,10 @@
-from socialserver.util.auth import check_totp_valid, verify_password_valid, get_user_object_from_token_or_abort, \
+from socialserver.util.auth import verify_password_valid, get_user_object_from_token_or_abort, \
     generate_totp_secret
 import pyotp
 from socialserver.util.config import config
 from flask_restful import Resource, reqparse
 from socialserver.constants import LegacyErrorCodes
 from pony.orm import commit, db_session
-from urllib.parse import quote
 from socialserver.db import db
 from datetime import datetime, timedelta
 
@@ -40,7 +39,7 @@ class LegacyTwoFactor(Resource):
 
         if action == 'add':
 
-            if user.totp is not None and user.totp.confirmed == True:
+            if user.totp is not None and user.totp.confirmed is True:
                 return {"err": LegacyErrorCodes.TOTP_ALREADY_ADDED.value}, 400
 
         elif action == 'remove':

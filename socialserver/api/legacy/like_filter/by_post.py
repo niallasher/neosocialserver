@@ -28,8 +28,9 @@ class LegacyLikeFilterByPost(Resource):
             return {}, 404
 
         like_ids = []
-        likes = select(l for l in db.PostLike
-                       if l.post == post).order_by(desc(db.PostLike.id)).limit(args['count'], offset=args['offset'])[:]
+        likes = select(like for like in db.PostLike
+                       if like.post == post).order_by(desc(db.PostLike.id)).limit(args['count'],
+                                                                                  offset=args['offset'])[:]
         for like in likes:
             like_ids.append(like.id)
 

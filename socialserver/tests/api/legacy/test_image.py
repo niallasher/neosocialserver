@@ -1,3 +1,4 @@
+# noinspection PyUnresolvedReferences
 from socialserver.util.test import test_db, server_address, image_data_url
 import requests
 

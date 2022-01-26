@@ -8,6 +8,7 @@ SHOULD_RETURN_LEGACY_VERSION_STRING = config.legacy_api_interface.report_legacy_
 
 class LegacyInfo(Resource):
 
+    # noinspection PyMethodMayBeStatic
     def get(self):
         return {
                    "inviteOnly": False,

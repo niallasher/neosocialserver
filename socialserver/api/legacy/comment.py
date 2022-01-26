@@ -2,7 +2,7 @@ from flask_restful import Resource, reqparse
 from socialserver.util.auth import get_user_object_from_token_or_abort
 from pony.orm import db_session, select
 from socialserver.db import db
-from socialserver.util.image import check_image_exists, get_image_data_url_legacy
+from socialserver.util.image import get_image_data_url_legacy
 from socialserver.constants import ImageTypes, COMMENT_MAX_LEN
 from datetime import datetime
 
@@ -33,8 +33,8 @@ class LegacyComment(Resource):
         if user.profile_pic is not None:
             avatar_data = get_image_data_url_legacy(user.profile_pic.identifier, ImageTypes.PROFILE_PICTURE)
 
-        like_count = select(l for l in db.CommentLike
-                            if l.comment == comment).count()
+        like_count = select(like for like in db.CommentLike
+                            if like.comment == comment).count()
 
         user_has_liked_comment = db.CommentLike.get(user=user, comment=comment) is not None
 
@@ -142,8 +142,8 @@ class LegacyCommentLike(Resource):
             comment=comment
         )
 
-        current_like_count = select(l for l in db.CommentLike
-                                    if l.comment == comment).count(0)
+        current_like_count = select(like for like in db.CommentLike
+                                    if like.comment == comment).count(0)
 
         if existing_like is None:
             db.CommentLike(

@@ -1,6 +1,7 @@
-import requests
+# noinspection PyUnresolvedReferences
 from socialserver.util.test import create_user_with_request, follow_user_with_request, server_address, \
     test_db, create_user_session_with_request
+import requests
 
 
 def test_get_following_legacy(test_db, server_address):
@@ -43,7 +44,7 @@ def test_get_following_invalid_username(test_db, server_address):
     assert r.status_code == 404
 
 
-def test_get_followers_invalid_username(test_db, server_address):
+def test_get_followers_invalid_usernames(test_db, server_address):
     usernames = ['test2', 'test3', 'test4', 'test5']
     # create & follow a few of accounts
     for username in usernames:

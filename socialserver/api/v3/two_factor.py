@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse
 from socialserver.db import db
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header, check_totp_valid, verify_password_valid, \
-    generate_totp_secret, TotpInvalidException, TotpExpendedException
+    generate_totp_secret, TotpInvalidException
 from pony.orm import db_session, commit
 from socialserver.constants import ErrorCodes
 from socialserver.util.config import config

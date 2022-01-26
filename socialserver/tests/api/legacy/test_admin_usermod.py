@@ -1,3 +1,4 @@
+# noinspection PyUnresolvedReferences
 from socialserver.util.test import test_db, set_user_attributes_db, create_user_with_request, server_address
 from socialserver.constants import AccountAttributes, LegacyErrorCodes, LegacyAdminUserModTypes
 import requests
@@ -28,7 +29,7 @@ def test_toggle_verification_status_on_user_legacy(test_db, server_address):
                          "username": "test2"
                      })
 
-    assert r.json()['isVerified'] == True
+    assert r.json()['isVerified'] is True
     assert r.status_code == 200
 
     # now undo it!
@@ -47,7 +48,7 @@ def test_toggle_verification_status_on_user_legacy(test_db, server_address):
                          "session_token": test_db.access_token,
                          "username": "test2"
                      })
-    assert r.json()['isVerified'] == False
+    assert r.json()['isVerified'] is False
     assert r.status_code == 200
 
 
@@ -76,7 +77,7 @@ def test_toggle_moderation_status_on_user_legacy(test_db, server_address):
                          "username": "test2"
                      })
 
-    assert r.json()['isModerator'] == True
+    assert r.json()['isModerator'] is True
     assert r.status_code == 200
 
     # now undo it!
@@ -95,7 +96,7 @@ def test_toggle_moderation_status_on_user_legacy(test_db, server_address):
                          "session_token": test_db.access_token,
                          "username": "test2"
                      })
-    assert r.json()['isModerator'] == False
+    assert r.json()['isModerator'] is False
     assert r.status_code == 200
 
 

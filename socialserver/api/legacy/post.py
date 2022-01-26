@@ -2,7 +2,7 @@ from socialserver.db import db
 from flask_restful import Resource, reqparse
 from socialserver.util.auth import get_user_object_from_token_or_abort
 from socialserver.util.config import config
-from socialserver.util.image import get_image_data_url_legacy, check_image_exists
+from socialserver.util.image import get_image_data_url_legacy
 from socialserver.constants import LegacyErrorCodes, ImageTypes, MAX_FEED_GET_COUNT, POST_MAX_LEN, REGEX_HASHTAG
 import re
 from pony.orm import db_session, select, desc

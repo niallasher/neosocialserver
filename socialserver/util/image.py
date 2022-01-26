@@ -283,8 +283,8 @@ def _verify_image_package(image_package):
 """
 
 
-def check_image_exists(id: str):
-    return db.Image.get(identifier=id) is not None
+def check_image_exists(identifier: str):
+    return db.Image.get(identifier=identifier) is not None
 
 
 """

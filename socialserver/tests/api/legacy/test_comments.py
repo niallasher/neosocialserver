@@ -1,3 +1,4 @@
+# noinspection PyUnresolvedReferences
 from socialserver.util.test import test_db, server_address, create_user_with_request, create_post_with_request
 import requests
 
@@ -156,7 +157,7 @@ def test_like_comment_legacy(test_db, server_address):
                           "comment_id": 1
                       })
     assert r.status_code == 201
-    assert r.json()['commentLiked'] == True
+    assert r.json()['commentLiked'] is True
 
     # get the comment like count, just to make sure!
     r = requests.get(f"{server_address}/api/v1/comments",
@@ -188,7 +189,7 @@ def test_unlike_comment_legacy(test_db, server_address):
                           "comment_id": 1
                       })
     assert r.status_code == 201
-    assert r.json()['commentLiked'] == True
+    assert r.json()['commentLiked'] is True
 
     # i do not like it anymore :(
     r = requests.post(f"{server_address}/api/v2/comments/like",
@@ -197,7 +198,7 @@ def test_unlike_comment_legacy(test_db, server_address):
                           "comment_id": 1
                       })
     assert r.status_code == 201
-    assert r.json()['commentLiked'] == False
+    assert r.json()['commentLiked'] is False
 
     # get the comment like count, just to make sure!
     r = requests.get(f"{server_address}/api/v1/comments",

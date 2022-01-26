@@ -1,4 +1,4 @@
-from os import rmdir, remove, path, mkdir
+from os import remove, path, mkdir
 from socialserver.util.output import console
 from socialserver import application
 from werkzeug.serving import make_server
