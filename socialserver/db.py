@@ -2,7 +2,10 @@ from pony import orm
 import datetime
 from socialserver.constants import BIO_MAX_LEN, COMMENT_MAX_LEN, DISPLAY_NAME_MAX_LEN, \
     REPORT_SUPPLEMENTARY_INFO_MAX_LEN, TAG_MAX_LEN, USERNAME_MAX_LEN, AccountAttributes
-from socialserver.util.config import config
+from socialserver.util.config import config, CONFIG_PATH
+from pony.orm import OperationalError
+from socialserver.util.output import console
+from rich.markdown import Markdown
 
 
 # these are used when define_entities
@@ -267,13 +270,25 @@ def _bind_to_config_specified_db(db_object):
     # and I don't want to touch Oracle Database with a 10 foot pole for fear of Larry Ellison showing
     # up in my room at midnight and demanding money
     if config.database.connector == 'sqlite':
-        db_object.bind('sqlite', config.database.address, create_db=True)
+        db_object.bind('sqlite', config.database.filename, create_db=True)
     elif config.database.connector == 'postgres':
-        # TODO: add postgres support back in
-        # FIXME: this isn't even the right syntax for this I don't think. fix this soon.
-        db_object.bind('postgres', config.database.address)
+        try:
+            db_object.bind(provider='postgres',
+                           user=config.database.username,
+                           password=config.database.password,
+                           host=config.database.host,
+                           database=config.database.database_name)
+        except OperationalError:
+            console.log("[bold red]Couldn't connect to database!")
+            console.print(f"[bold]Please check the configuration file, located at {CONFIG_PATH}!")
+            exit()
     else:
-        raise ValueError("Invalid connector specified in config file.")
+        console.log(f"[bold red]Invalid database connector specified in {CONFIG_PATH}")
+        console.print(f"[bold]Please check the configuration file, located at {CONFIG_PATH}!")
+        console.print(f"[bold]Valid connectors:")
+        console.print("- [bold] postgres")
+        console.print("- [bold] sqlite")
+        exit()
     db_object.generate_mapping(create_tables=True)
 
 

@@ -45,8 +45,13 @@ enable_landing_page = true
 # supported connectors right now:
 # sqlite, postgres
 connector = "sqlite"
-address = "{FILE_ROOT}/socialserver.db"
-
+# filename is only used for sqlite connections
+filename = "{FILE_ROOT}/socialserver.db"
+# the following fields are only used for postgres connections.
+username = ""
+password = ""
+database_name = ""
+host = ""
 
 [media.images]
 # this quality will be applied to 
@@ -131,6 +136,7 @@ enable_less_secure_password_change = false
 """
 
 
+# FIXME: this doesn't actually work since removing attrdict, but I want to replace it anyway. Will do soon.
 def _test_config(current_config: SimpleNamespace, schema: SimpleNamespace) -> None:
     # Data isn't validated, just structure, so feel free to use a loaded
     # copy of DEFAULT_CONFIG as your schema.
