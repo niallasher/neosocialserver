@@ -114,6 +114,7 @@ def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -
     monkeypatch.setattr("socialserver.api.v3.two_factor.db", db)
     monkeypatch.setattr("socialserver.api.v3.user_session.db", db)
     monkeypatch.setattr("socialserver.api.v3.username_available.db", db)
+    monkeypatch.setattr("socialserver.api.v3.user_password_change.db", db)
     # legacy api
     monkeypatch.setattr("socialserver.api.legacy.user.db", db)
     monkeypatch.setattr("socialserver.api.legacy.comment_filter.filter_by_post.db", db)

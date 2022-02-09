@@ -18,6 +18,7 @@ from socialserver.api.v3.image import Image, NewImage
 from socialserver.api.v3.block import Block
 from socialserver.api.v3.follow import Follow
 from socialserver.api.v3.two_factor import TwoFactorAuthentication, TwoFactorAuthenticationVerification
+from socialserver.api.v3.user_password_change import UserPasswordChange
 # API legacy (v1/v2, it's confusing!)
 from socialserver.api.legacy.like import LegacyLike
 from socialserver.api.legacy.bio import LegacyUserBio
@@ -63,6 +64,7 @@ def create_app():
     api.add_resource(ServerInfo, '/api/v3/server/info')
 
     api.add_resource(User, '/api/v3/user')
+    api.add_resource(UserPasswordChange, "/api/v3/user/password")
     api.add_resource(UserInfo, '/api/v3/user/info')
     api.add_resource(UserSession, '/api/v3/user/session')
     api.add_resource(UserSessionList, '/api/v3/user/session/list')
