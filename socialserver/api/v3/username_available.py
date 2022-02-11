@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from socialserver.constants import REGEX_USERNAME_VALID, ErrorCodes
 from socialserver.db import db
 from pony.orm import db_session

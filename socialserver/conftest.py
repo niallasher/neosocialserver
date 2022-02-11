@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from os import remove, path, mkdir
 from socialserver.util.output import console
 from socialserver import application

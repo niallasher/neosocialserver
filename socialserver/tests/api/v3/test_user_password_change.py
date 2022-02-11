@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from socialserver.util.test import test_db, server_address, create_user_with_request
 from socialserver.constants import MIN_PASSWORD_LEN, MAX_PASSWORD_LEN, ErrorCodes
 import requests

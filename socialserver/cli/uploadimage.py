@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from os import path
 from json import dumps
 from base64 import urlsafe_b64encode

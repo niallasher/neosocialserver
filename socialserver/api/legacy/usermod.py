@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from socialserver.util.auth import get_user_object_from_token_or_abort, generate_salt, hash_password
 from socialserver.util.image import check_image_exists
 from socialserver.util.config import config

@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 # noinspection PyUnresolvedReferences
 from socialserver.util.test import server_address, test_db, create_post_with_request, create_user_with_request, \
     create_user_session_with_request, set_user_attributes_db

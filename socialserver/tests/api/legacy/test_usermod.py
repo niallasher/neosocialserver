@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 # noinspection PyUnresolvedReferences
 from socialserver.util.test import test_db, create_post_with_request, server_address, image_data_url
 from socialserver.constants import DISPLAY_NAME_MAX_LEN

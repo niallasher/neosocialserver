@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from flask_restful import Resource, reqparse
 from socialserver.db import db
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header, check_totp_valid, verify_password_valid, \

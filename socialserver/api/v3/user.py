@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from datetime import datetime
 import re
 from socialserver.db import db

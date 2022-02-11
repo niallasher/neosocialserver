@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 import click
 from socialserver import application
 from socialserver.cli.mkuser import mk_user_interactive

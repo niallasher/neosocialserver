@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from datetime import datetime
 from typing import List
 from flask_restful import Resource, reqparse

@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from socialserver.util.auth import verify_password_valid, get_user_object_from_token_or_abort, \
     generate_totp_secret
 import pyotp

@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from flask_restful import Resource, reqparse
 from socialserver.constants import MAX_FEED_GET_COUNT, ErrorCodes
 from socialserver.db import db

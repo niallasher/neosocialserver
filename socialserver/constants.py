@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from enum import Enum
 
 # semver spec.

@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from socialserver.db import db
 from pony.orm import db_session, select, desc
 from socialserver.util.auth import get_user_object_from_token_or_abort

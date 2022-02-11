@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from flask_restful import Resource, reqparse
 from socialserver.util.auth import verify_password_valid, get_user_object_from_token_or_abort
 from socialserver.constants import LegacyErrorCodes

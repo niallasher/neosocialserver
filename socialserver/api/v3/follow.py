@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from datetime import datetime
 from flask_restful import Resource, reqparse
 from socialserver.db import db

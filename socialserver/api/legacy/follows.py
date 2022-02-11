@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from flask_restful import Resource, reqparse
 from socialserver.db import db
 from pony.orm import db_session

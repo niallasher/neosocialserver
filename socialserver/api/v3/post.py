@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from datetime import datetime
 import re
 from flask_restful import Resource, reqparse

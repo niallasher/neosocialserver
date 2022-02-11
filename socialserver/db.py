@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from pony import orm
 import datetime
 from socialserver.constants import BIO_MAX_LEN, COMMENT_MAX_LEN, DISPLAY_NAME_MAX_LEN, \

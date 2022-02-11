@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from flask.helpers import send_file
 from os import path
 from socialserver.constants import MAX_PIXEL_RATIO, ErrorCodes, ImageTypes

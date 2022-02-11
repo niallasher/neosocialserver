@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 import datetime
 import json.decoder
 import re

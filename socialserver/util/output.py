@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from rich.console import Console
 from rich.traceback import install as install_traceback_handler
 

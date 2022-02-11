@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 # pycharm isn't detecting fixture usage, so we're
 # disabling PyUnresolvedReferences for the import.
 # noinspection PyUnresolvedReferences

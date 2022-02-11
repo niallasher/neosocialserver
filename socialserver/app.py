@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from flask import Flask
 from flask.templating import render_template
 from flask_restful import Api

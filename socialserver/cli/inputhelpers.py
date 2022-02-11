@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 AFFIRMATIVE_RESPONSES = ['y', 'yes']
 NEGATIVE_RESPONSES = ['n', 'no']
 

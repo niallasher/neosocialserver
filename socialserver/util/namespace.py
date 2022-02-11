@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from types import SimpleNamespace
 
 """

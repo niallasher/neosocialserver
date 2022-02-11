@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from flask_restful import Resource
 from socialserver.constants import SERVER_VERSION
 from socialserver.util.config import config

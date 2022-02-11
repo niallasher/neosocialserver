@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 # noinspection PyUnresolvedReferences
 from socialserver.util.test import test_db, server_address, create_user_session_with_request
 import pyotp

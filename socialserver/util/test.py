@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 import pony.orm
 import pytest
 import requests

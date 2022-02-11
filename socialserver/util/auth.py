@@ -1,3 +1,5 @@
+#  Copyright (c) Niall Asher 2022
+
 from functools import wraps
 from types import SimpleNamespace
 import argon2
