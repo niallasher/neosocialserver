@@ -68,6 +68,11 @@ enabled = true
 # signups, and approve or deny them
 # before they are allowed in
 approval_required = false
+# if true, any accounts in the approval queue will
+# be automatically approved on the next launch after
+# the approval requirement is disabled. if false, the
+# accounts will be left in the queue.
+auto_approve_when_approval_disabled = false
 
 [auth.totp]
 # good for security, however the old server didn't implement it.
