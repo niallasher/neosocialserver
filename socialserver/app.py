@@ -8,6 +8,7 @@ from flask_cors import CORS
 # it sets up traceback pretty printing when it's imported!
 from socialserver.util.output import console
 from socialserver.util.config import config
+from socialserver.maintenance import maintenance
 # API Version 3
 from socialserver.api.v3.report import Report
 from socialserver.api.v3.info import ServerInfo
@@ -117,5 +118,8 @@ def create_app():
         api.add_resource(LegacyCommentLike, "/api/v2/comments/like")
         api.add_resource(LegacyAllDeauth, "/api/v2/user/deauth")
         api.add_resource(LegacyTwoFactor, "/api/v2/user/twofactor")
+
+    # run startup maintenance
+    maintenance()
 
     return application
