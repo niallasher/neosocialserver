@@ -102,7 +102,7 @@ class Report(Resource):
             active=True,
             reporter=reporting_user_db,
             post=post_to_be_reported,
-            creation_time=datetime.now(),
+            creation_time=datetime.utcnow(),
             report_reason=post_report_reasons,
             supplementary_info=args['supplemental_info'] if args['supplemental_info'] is not None else ""
         )

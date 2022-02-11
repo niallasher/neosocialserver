@@ -74,7 +74,7 @@ class TwoFactorAuthentication(Resource):
         totp = db.Totp(
             secret=secret,
             confirmed=False,
-            creation_time=datetime.now()
+            creation_time=datetime.utcnow()
         )
 
         # make sure the totp is committed to the database
@@ -116,7 +116,7 @@ class TwoFactorAuthenticationVerification(Resource):
         if user.totp is not None and user.totp.confirmed:
             return {"error": ErrorCodes.TOTP_ALREADY_ACTIVE.value}, 400
 
-        if datetime.now() > user.totp.creation_time + timedelta(seconds=config.auth.totp.unconfirmed_expiry_time):
+        if datetime.utcnow() > user.totp.creation_time + timedelta(seconds=config.auth.totp.unconfirmed_expiry_time):
             return {"error": ErrorCodes.TOTP_NOT_ACTIVE.value}, 400
 
         try:

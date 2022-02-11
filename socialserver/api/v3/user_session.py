@@ -29,7 +29,7 @@ class UserSession(Resource):
                     "current_ip": get_ip_from_request(),
                     "creation_ip": session.creation_ip,
                     "creation_time": session.creation_time.timestamp(),
-                    "current_server_time": datetime.now().timestamp(),
+                    "current_server_time": datetime.utcnow().timestamp(),
                     "last_access_time": session.last_access_time.timestamp(),
                     "user_agent": session.user_agent
                 },
@@ -77,8 +77,8 @@ class UserSession(Resource):
             user=user,
             access_token_hash=secret.hash,
             creation_ip=get_ip_from_request(),
-            creation_time=datetime.now(),
-            last_access_time=datetime.now(),
+            creation_time=datetime.utcnow(),
+            last_access_time=datetime.utcnow(),
             user_agent=request.headers.get('User-Agent')
         )
 

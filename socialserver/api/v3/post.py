@@ -72,7 +72,7 @@ class Post(Resource):
         for tag_name in tags:
             existing_tag = db.Hashtag.get(name=tag_name)
             if existing_tag is None:
-                tag = db.Hashtag(creation_time=datetime.now(),
+                tag = db.Hashtag(creation_time=datetime.utcnow(),
                                  name=tag_name)
             else:
                 tag = existing_tag
@@ -81,7 +81,7 @@ class Post(Resource):
         new_post = db.Post(
             under_moderation=False,
             user=user,
-            creation_time=datetime.now(),
+            creation_time=datetime.utcnow(),
             text=text_content,
             images=images,
             image_ids=image_ids,

@@ -60,8 +60,8 @@ class LegacyAuthentication(Resource):
             user=user,
             access_token_hash=secret.hash,
             creation_ip=get_ip_from_request(),
-            creation_time=datetime.now(),
-            last_access_time=datetime.now(),
+            creation_time=datetime.utcnow(),
+            last_access_time=datetime.utcnow(),
             user_agent=request.headers.get("User-Agent")
         )
 

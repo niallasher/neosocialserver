@@ -156,7 +156,7 @@ class LegacyUser(Resource):
             username=args['username'],
             password_hash=password,
             password_salt=salt,
-            creation_time=datetime.now(),
+            creation_time=datetime.utcnow(),
             # legacy accounts are currently defined as those
             # migrated from the old service, due to possible changes
             # any new account should be indistinguishable regardless

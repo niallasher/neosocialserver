@@ -55,7 +55,7 @@ def mk_user_interactive():
     new_user = db.User(
         username=username,
         display_name=display_name,
-        creation_time=datetime.now(),
+        creation_time=datetime.utcnow(),
         is_legacy_account=False,
         password_hash=pwh,
         password_salt=salt,

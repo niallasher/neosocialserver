@@ -89,7 +89,7 @@ class LegacyComment(Resource):
             user=user,
             post=post,
             text=comment_text,
-            creation_time=datetime.now()
+            creation_time=datetime.utcnow()
         )
 
         return {}, 201
@@ -149,7 +149,7 @@ class LegacyCommentLike(Resource):
             db.CommentLike(
                 user=user,
                 comment=comment,
-                creation_time=datetime.now()
+                creation_time=datetime.utcnow()
             )
             return {
                        "commentLiked": True,

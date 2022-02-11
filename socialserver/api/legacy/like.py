@@ -29,7 +29,7 @@ class LegacyLike(Resource):
             db.PostLike(
                 user=user,
                 post=post,
-                creation_time=datetime.now()
+                creation_time=datetime.utcnow()
             )
         else:
             existing_like.delete()

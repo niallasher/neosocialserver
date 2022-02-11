@@ -75,7 +75,7 @@ class LegacyTwoFactor(Resource):
             totp = db.Totp(
                 secret=secret,
                 confirmed=False,
-                creation_time=datetime.now()
+                creation_time=datetime.utcnow()
             )
             commit()
             user.totp = totp
@@ -101,7 +101,8 @@ class LegacyTwoFactor(Resource):
                 return {"err": LegacyErrorCodes.TOTP_INCORRECT.value}, 401
             # in this case, the TOTP has expired. Legacy client only handles TOTP_INCORRECT here, so that's what
             # we have to send back to fail somewhat gracefully.
-            if datetime.now() > user.totp.creation_time + timedelta(seconds=config.auth.totp.unconfirmed_expiry_time):
+            if datetime.utcnow() > user.totp.creation_time + timedelta(
+                    seconds=config.auth.totp.unconfirmed_expiry_time):
                 return {"err": LegacyErrorCodes.TOTP_INCORRECT.value}, 401
             auth = pyotp.TOTP(user.totp.secret)
             if auth.verify(args['totp']):

@@ -98,7 +98,7 @@ class User(Resource):
             username=args['username'],
             password_hash=password,
             password_salt=salt,
-            creation_time=datetime.now(),
+            creation_time=datetime.utcnow(),
             is_legacy_account=False,
             account_attributes=[],
             bio=args['bio'] if args['bio'] is not None else "",

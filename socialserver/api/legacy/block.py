@@ -36,7 +36,7 @@ class LegacyBlock(Resource):
         db.Block(
             user=user,
             blocking=user_to_block,
-            creation_time=datetime.now()
+            creation_time=datetime.utcnow()
         )
 
         return {

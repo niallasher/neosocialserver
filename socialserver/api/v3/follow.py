@@ -35,7 +35,7 @@ class Follow(Resource):
         db.Follow(
             user=requesting_user_db,
             following=user_to_follow,
-            creation_time=datetime.now()
+            creation_time=datetime.utcnow()
         )
 
         return {}, 201

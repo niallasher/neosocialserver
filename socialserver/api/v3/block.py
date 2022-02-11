@@ -35,7 +35,7 @@ class Block(Resource):
         db.Block(
             user=requesting_user_db,
             blocking=user_to_follow,
-            creation_time=datetime.now()
+            creation_time=datetime.utcnow()
         )
 
         return {}, 201

@@ -197,7 +197,7 @@ def commit_image_to_db(identifier: str, userid: int) -> None or int:
         print("Could not commit to DB: user id does not exist!")
     else:
         entry = db.Image(
-            creation_time=datetime.datetime.now(),
+            creation_time=datetime.datetime.utcnow(),
             identifier=identifier,
             uploader=db.User.get(id=userid)
         )
