@@ -77,7 +77,6 @@ class User(Resource):
             return {"error": ErrorCodes.USERNAME_INVALID.value}, 400
 
         existing_user = db.User.get(username=args['username'])
-        print(existing_user)
         if existing_user is not None:
             return {"error": ErrorCodes.USERNAME_TAKEN.value}, 400
 
@@ -170,8 +169,6 @@ class User(Resource):
         parser.add_argument('password', type=str, required=True)
         args = parser.parse_args()
 
-        print(db.select("select * from User"))
-        print(db.select("select * from UserSession"))
 
         requesting_user = get_user_from_auth_header()
 

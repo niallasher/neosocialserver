@@ -46,7 +46,6 @@ class Post(Resource):
         image_ids = []
         if args['images'] is not None:
             referenced_images = args['images']
-            print(referenced_images)
             # we don't want people making giant
             # image galleries in a post. !! SHOULD ALSO
             # BE ENFORCED CLIENT SIDE FOR UX !!

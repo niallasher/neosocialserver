@@ -13,6 +13,7 @@ import PIL
 from PIL import Image, ImageOps
 from pony.orm import commit, db_session
 from socialserver.util.config import config
+from socialserver.util.output import console
 from socialserver.db import db
 from socialserver.constants import ImageTypes, MAX_PIXEL_RATIO, MAX_IMAGE_SIZE_GALLERY_PREVIEW, \
     MAX_IMAGE_SIZE_POST_PREVIEW, MAX_IMAGE_SIZE_POST, MAX_IMAGE_SIZE_PROFILE_PICTURE, \
@@ -20,7 +21,6 @@ from socialserver.constants import ImageTypes, MAX_PIXEL_RATIO, MAX_IMAGE_SIZE_G
 from secrets import token_urlsafe
 from json import loads
 from copy import copy
-from rich import print
 import magic
 from typing import Tuple
 
@@ -34,7 +34,7 @@ IMAGE_QUALITY = config.media.images.quality
 # if it doesn't, create it
 if not path.exists(IMAGE_DIR):
     makedirs(IMAGE_DIR)
-    print(f"Created image storage directory, {IMAGE_DIR}")
+    console.log(f"Created image storage directory, {IMAGE_DIR}")
 
 """
     save_imageset_to_disk
@@ -196,7 +196,7 @@ def convert_data_url_to_image(data_url: str) -> PIL.Image:
 def commit_image_to_db(identifier: str, userid: int) -> None or int:
     uploader = db.User.get(id=userid)
     if uploader is None:
-        print("Could not commit to DB: user id does not exist!")
+        console.log("[bold red]Could not commit to DB: user id does not exist!")
     else:
         entry = db.Image(
             creation_time=datetime.datetime.utcnow(),
