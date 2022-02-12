@@ -2,6 +2,7 @@
 
 from os import remove, path, mkdir
 from socialserver.util.output import console
+from socialserver.util.config import config
 from socialserver import application
 from werkzeug.serving import make_server
 from threading import Thread
@@ -27,6 +28,7 @@ class TestingServer(Thread):
 
 
 def pytest_sessionstart():
+    config.auth.registration.approval_required = False
     if not path.exists("/tmp/socialserver_image_testing"):
         mkdir("/tmp/socialserver_image_testing")
     # start a copy of the flask server in a background
