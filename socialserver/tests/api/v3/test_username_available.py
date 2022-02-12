@@ -7,7 +7,7 @@ import requests
 
 
 def test_username_available_name_taken(test_db, server_address):
-    r = requests.get(f"{server_address}/api/v3/user/name_available",
+    r = requests.get(f"{server_address}/api/v3/usernameAvailable",
                      json={
                          "username": test_db.username
                      })
@@ -17,7 +17,7 @@ def test_username_available_name_taken(test_db, server_address):
 
 
 def test_username_available_name_not_taken(test_db, server_address):
-    r = requests.get(f"{server_address}/api/v3/user/name_available",
+    r = requests.get(f"{server_address}/api/v3/usernameAvailable",
                      json={
                          "username": "username"
                      })
@@ -27,7 +27,7 @@ def test_username_available_name_not_taken(test_db, server_address):
 
 
 def test_username_available_username_invalid(test_db, server_address):
-    r = requests.get(f"{server_address}/api/v3/user/name_available",
+    r = requests.get(f"{server_address}/api/v3/usernameAvailable",
                      json={
                          "username": "invalid username"
                      })
@@ -37,6 +37,6 @@ def test_username_available_username_invalid(test_db, server_address):
 
 
 def test_username_available_missing_data(test_db, server_address):
-    r = requests.get(f"{server_address}/api/v3/user/name_available", json={})
+    r = requests.get(f"{server_address}/api/v3/usernameAvailable", json={})
 
     assert r.status_code == 400

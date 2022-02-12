@@ -132,7 +132,7 @@ def test_approve_user(test_db, server_address):
     assert len(r.json()['users']) == 0
 
     # make sure the user still exists
-    r = requests.get(f"{server_address}/api/v3/user/name_available",
+    r = requests.get(f"{server_address}/api/v3/usernameAvailable",
                      json={
                          "username": "user2"
                      })
@@ -190,7 +190,7 @@ def test_reject_user(test_db, server_address):
     assert len(r.json()['users']) == 0
 
     # make sure the user still exists
-    r = requests.get(f"{server_address}/api/v3/user/name_available",
+    r = requests.get(f"{server_address}/api/v3/usernameAvailable",
                      json={
                          "username": "user22"
                      })
