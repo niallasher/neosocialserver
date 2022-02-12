@@ -55,7 +55,7 @@ class UserSession(Resource):
             return {'error': ErrorCodes.INCORRECT_PASSWORD.value}, 401
 
         if config.auth.registration.approval_required:
-            if user.approved is not True:
+            if user.account_approved is not True:
                 return {"error": ErrorCodes.ACCOUNT_NOT_APPROVED.value}, 401
 
         # if the user has totp, and hasn't specified one, send back an error
