@@ -157,6 +157,7 @@ class ErrorCodes(Enum):
     TOTP_EXPENDED = 51
     USER_NOT_ADMIN = 52
     INVALID_SORT_TYPE = 53
+    USER_ALREADY_APPROVED = 54
 
 
 """

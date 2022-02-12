@@ -41,7 +41,7 @@ class UserApprovals(Resource):
             unapproved_users = unapproved_users.filter(lambda user: args['filter'].strip() in user.username)
 
         # we limit down here, since you can't filter or sort a query once it's been limited in ponyorm.
-        # why this is, I don't know, but I'd assume theres a good reason for it.
+        # why this is, I don't know, but I'd assume there's a good reason for it.
         unapproved_users = unapproved_users.limit(args['count'], offset=args['offset'])
 
         users_formatted = []
@@ -59,3 +59,39 @@ class UserApprovals(Resource):
                    },
                    "users": users_formatted
                }, 201
+
+    @db_session
+    @admin_reqd
+    # only a partial mod to a resource, so it's a patch request.
+    def patch(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("username", type=str, required=True)
+        args = parser.parse_args()
+
+        user = db.User.get(username=args['username'])
+        if user is None:
+            return {"error": ErrorCodes.USERNAME_NOT_FOUND.value}, 404
+
+        if user.account_approved:
+            return {"error": ErrorCodes.USER_ALREADY_APPROVED.value}, 400
+
+        user.account_approved = True
+        return {}, 200
+
+    @db_session
+    @admin_reqd
+    # obliterate a user completely (aka reject them, deleting the unapproved account)
+    def delete(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("username", type=str, required=True)
+        args = parser.parse_args()
+
+        user = db.User.get(username=args['username'])
+        if user is None:
+            return {"error": ErrorCodes.USERNAME_NOT_FOUND.value}, 404
+
+        if user.account_approved:
+            return {"error": ErrorCodes.USER_ALREADY_APPROVED.value}, 400
+
+        user.delete()
+        return {}, 200
