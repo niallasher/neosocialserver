@@ -58,7 +58,7 @@ class UserApprovals(Resource):
                        "reached_end": len(users_formatted) < args['count']
                    },
                    "users": users_formatted
-               }, 201
+               }, 200
 
     @db_session
     @admin_reqd
