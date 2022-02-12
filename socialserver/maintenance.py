@@ -15,9 +15,9 @@ from pony.orm import select, db_session
 def _approve_all_queued_user_creation_requests():
     console.log("[bold]Auto approving users stuck in queue; approval_required changed to false!")
     unapproved_users = select(user for user in db.User
-                              if user.approval_required is True)
+                              if user.account_approved is False)
     for user in unapproved_users:
-        user.approval_required = True
+        user.account_approved = True
     console.log(f"[bold]Approved {len(unapproved_users)} users!")
 
 

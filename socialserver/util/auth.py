@@ -10,7 +10,7 @@ from secrets import token_urlsafe
 from pony.orm import db_session
 from socialserver.db import db
 from flask import abort, request, make_response, jsonify
-from socialserver.constants import ErrorCodes, LegacyErrorCodes
+from socialserver.constants import ErrorCodes, LegacyErrorCodes, AccountAttributes
 from socialserver.util.config import config
 import pyotp
 
@@ -195,6 +195,45 @@ def auth_reqd(f):
                 make_response(jsonify(
                     error=ErrorCodes.TOKEN_INVALID.value
                 ), 401))
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+
+"""
+    admin_reqd
+    
+    checks that the given auth token is an admin account,
+    and rejects it otherwise. used in place of auth_reqd.
+"""
+
+
+def admin_reqd(f):
+    @wraps(f)
+    @db_session
+    def decorated_function(*args, **kwargs):
+        headers = request.headers
+        headers.get("Authorization") or abort(
+            make_response(jsonify(
+                error=ErrorCodes.AUTHORIZATION_HEADER_NOT_PRESENT.value
+            ), 401))
+        # The auth header is in this form: Bearer <token>
+        # we just want <token>, and since there are no spaces in
+        # the token format anyway, it's pretty easy to parse.
+        auth_token = headers.get("Authorization").split(" ")[1]
+        existing_entry = db.UserSession.get(
+            access_token_hash=hash_plaintext_sha256(auth_token))
+        if existing_entry is None:
+            abort(
+                make_response(jsonify(
+                    error=ErrorCodes.TOKEN_INVALID.value
+                ), 401))
+        if AccountAttributes.ADMIN.value not in existing_entry.user.account_attributes:
+            abort(
+                make_response(jsonify(
+                    error=ErrorCodes.USER_NOT_ADMIN.value
+                ), 401)
+            )
         return f(*args, **kwargs)
 
     return decorated_function

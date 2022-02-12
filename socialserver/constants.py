@@ -155,6 +155,8 @@ class ErrorCodes(Enum):
     TOTP_ALREADY_ACTIVE = 49
     TOTP_NOT_ACTIVE = 50
     TOTP_EXPENDED = 51
+    USER_NOT_ADMIN = 52
+    INVALID_SORT_TYPE = 53
 
 
 """
@@ -263,6 +265,19 @@ class ImageTypes(Enum):
     PROFILE_PICTURE_LARGE = "prof-pic-l"
     HEADER = "header"
     ORIGINAL = "orig"
+
+
+"""
+  ApprovalSortTypes
+  A list of sort types for the user approval queue
+"""
+
+
+class ApprovalSortTypes(Enum):
+    CREATION_TIME_ASCENDING = 1
+    CREATION_TIME_DESCENDING = 2
+    USERNAME_ALPHABETICAL = 3
+    DISPLAY_NAME_ALPHABETICAL = 4
 
 
 """

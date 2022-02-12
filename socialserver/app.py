@@ -22,6 +22,8 @@ from socialserver.api.v3.block import Block
 from socialserver.api.v3.follow import Follow
 from socialserver.api.v3.two_factor import TwoFactorAuthentication, TwoFactorAuthenticationVerification
 from socialserver.api.v3.user_password_change import UserPasswordChange
+# API Version 3 Admin stuff
+from socialserver.api.v3.admin.user_approvals import UserApprovals
 # API legacy (v1/v2, it's confusing!)
 from socialserver.api.legacy.like import LegacyLike
 from socialserver.api.legacy.bio import LegacyUserBio
@@ -85,6 +87,8 @@ def create_app():
     api.add_resource(Block, '/api/v3/block/user')
 
     api.add_resource(Report, '/api/v3/report/post')
+
+    api.add_resource(UserApprovals, '/api/v3/admin/userApprovals')
 
     if config.legacy_api_interface.enable:
         console.print("[bold red]Legacy interface enabled!\nThis might reduce security.")
