@@ -17,12 +17,14 @@ from socialserver.util.output import console
 from socialserver.db import db
 from socialserver.constants import ImageTypes, MAX_PIXEL_RATIO, MAX_IMAGE_SIZE_GALLERY_PREVIEW, \
     MAX_IMAGE_SIZE_POST_PREVIEW, MAX_IMAGE_SIZE_POST, MAX_IMAGE_SIZE_PROFILE_PICTURE, \
-    MAX_IMAGE_SIZE_PROFILE_PICTURE_LARGE, ImageSupportedMimeTypes
+    MAX_IMAGE_SIZE_PROFILE_PICTURE_LARGE, ImageSupportedMimeTypes, BLURHASH_X_COMPONENTS, BLURHASH_Y_COMPONENTS
 from secrets import token_urlsafe
 from json import loads
 from copy import copy
 import magic
 from typing import Tuple
+import blurhash
+from io import BytesIO
 
 IMAGE_DIR = config.media.images.storage_dir
 # where straight uploaded images are stored.
@@ -193,7 +195,7 @@ def convert_data_url_to_image(data_url: str) -> PIL.Image:
 
 
 @db_session
-def commit_image_to_db(identifier: str, userid: int) -> None or int:
+def commit_image_to_db(identifier: str, userid: int, blur_hash: str) -> None or int:
     uploader = db.User.get(id=userid)
     if uploader is None:
         console.log("[bold red]Could not commit to DB: user id does not exist!")
@@ -201,7 +203,8 @@ def commit_image_to_db(identifier: str, userid: int) -> None or int:
         entry = db.Image(
             creation_time=datetime.datetime.utcnow(),
             identifier=identifier,
-            uploader=db.User.get(id=userid)
+            uploader=db.User.get(id=userid),
+            blur_hash=blur_hash
         )
         commit()
         return entry.id
@@ -312,6 +315,20 @@ def get_image_data_url_legacy(identifier: str, image_type: ImageTypes) -> str:
 
 
 """
+    generate_blur_hash
+    Generate a blur hash from a given image
+"""
+
+
+def generate_blur_hash(image: Image) -> str:
+    im = copy(image)
+    buffer = BytesIO()
+    im.save(buffer, format="jpeg")
+    blur_hash = blurhash.encode(buffer, BLURHASH_X_COMPONENTS, BLURHASH_Y_COMPONENTS)
+    return blur_hash
+
+
+"""
     handle_upload
     Take a JSON string (read notes.md, #images) containing b64 images, and process it.
     Will save it, store a db entry, and return
@@ -373,7 +390,7 @@ def handle_upload(image_package: str, userid: int) -> SimpleNamespace:
     }
 
     save_images_to_disk(images, access_id)
-    entry = commit_image_to_db(access_id, userid)
+    entry = commit_image_to_db(access_id, userid, generate_blur_hash(image))
     return SimpleNamespace(
         id=entry,
         identifier=access_id
