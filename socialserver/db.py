@@ -175,10 +175,10 @@ def define_entities(db_object):
         creation_time = orm.Required(datetime.datetime)
         # uuid used to retrieve the image from storage
         identifier = orm.Required(str)
-        # upload_hash = orm.Required(str)
         associated_profile_pics = orm.Set('User', reverse='profile_pic')
         associated_header_pics = orm.Set('User', reverse='header_pic')
         associated_posts = orm.Set('Post', reverse='images')
+        blur_hash = orm.Required(str)
 
         @property
         def is_orphan(self):

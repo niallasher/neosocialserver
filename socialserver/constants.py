@@ -358,3 +358,11 @@ ImageSupportedMimeTypes = [
 REGEX_USERNAME_VALID = r"^[a-z0-9_]{1," + USERNAME_MAX_LEN.__str__() + r"}$"
 # split out hashtags
 REGEX_HASHTAG = r"#[a-zA-Z0-9]{1,12}"
+
+"""
+    Values for BlurHash encoding
+    Each must be >= 1 and <= 9
+"""
+
+BLURHASH_X_COMPONENTS = 4
+BLURHASH_Y_COMPONENTS = 3
