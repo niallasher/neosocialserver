@@ -282,6 +282,17 @@ class ApprovalSortTypes(Enum):
 
 
 """
+    CommentFeedSortTypes
+    A list of sort types for the comment feed. Might include post feeds eventually too.
+"""
+
+
+class CommentFeedSortTypes(Enum):
+    CREATION_TIME_DESCENDING = 0
+    LIKE_COUNT = 1
+
+
+"""
   UserModificationOptions
   A list of user options that can be modified using
   only a token. Authentication requires active

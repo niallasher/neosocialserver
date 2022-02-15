@@ -22,6 +22,7 @@ from socialserver.api.v3.block import Block
 from socialserver.api.v3.follow import Follow
 from socialserver.api.v3.two_factor import TwoFactorAuthentication, TwoFactorAuthenticationVerification
 from socialserver.api.v3.user_password_change import UserPasswordChange
+from socialserver.api.v3.comment_feed import CommentFeed
 # API Version 3 Admin stuff
 from socialserver.api.v3.admin.user_approvals import UserApprovals
 # API legacy (v1/v2, it's confusing!)
@@ -79,6 +80,8 @@ def create_app():
 
     api.add_resource(Post, '/api/v3/post/single')
     api.add_resource(PostFeed, '/api/v3/feed/posts')
+
+    api.add_resource(CommentFeed, '/api/v3/feed/comments')
 
     api.add_resource(Image, '/api/v3/image/<imageid>')
     api.add_resource(NewImage, '/api/v3/image')
