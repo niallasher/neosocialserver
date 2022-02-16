@@ -35,7 +35,7 @@ from socialserver.api.legacy.post import LegacyPost
 from socialserver.api.legacy.authentication import LegacyAuthentication
 from socialserver.api.legacy.info import LegacyInfo
 from socialserver.api.legacy.comment_filter.filter_by_post import LegacyCommentFilterByPost
-from socialserver.api.legacy.image import LegacyImageV1
+from socialserver.api.legacy.image import LegacyImage
 from socialserver.api.legacy.post_filter.by_user import LegacyPostFilterByUser
 from socialserver.api.legacy.like_filter.by_post import LegacyLikeFilterByPost
 from socialserver.api.legacy.follower_list import LegacyFollower
@@ -107,7 +107,7 @@ def create_app():
         api.add_resource(LegacyInfo, '/api/v1/info')
         api.add_resource(LegacyUsermod, '/api/v1/usermod')
         api.add_resource(LegacyAuthentication, "/api/v1/auth")
-        api.add_resource(LegacyImageV1, "/api/v1/images")
+        api.add_resource(LegacyImage, "/api/v1/images")
         api.add_resource(LegacyUserFollows, "/api/v1/followers/userFollows")
         api.add_resource(LegacyUserBio, "/api/v1/users/bio")
         api.add_resource(LegacyUserFollowing, "/api/v1/followers/followsUser")

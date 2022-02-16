@@ -7,7 +7,7 @@ from flask_restful import reqparse, Resource
 from json import dumps
 
 
-class LegacyImageV1(Resource):
+class LegacyImage(Resource):
 
     @db_session
     def post(self):
