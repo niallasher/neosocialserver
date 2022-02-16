@@ -125,12 +125,25 @@ class Post(Resource):
 
         post_images = []
         for image in wanted_post.get_images:
-            post_images.append(image.identifier)
+            post_images.append(
+                {
+                    "identifier": image.identifier,
+                    "blur_hash": image.blur_hash
+                }
+            )
 
         user_has_liked_post = db.PostLike.get(user=user,
                                               post=wanted_post) is not None
 
         user_owns_post = wanted_post.user == user
+
+        pfp_identifier = None
+        pfp_blur_hash = None
+
+        if wanted_post.user.profile_pic is not None:
+            pfp = wanted_post.user.profile_pic
+            pfp_identifier = pfp.identifier
+            pfp_blur_hash = pfp.blur_hash
 
         return {
                    "post": {
@@ -145,8 +158,10 @@ class Post(Resource):
                        "display_name": wanted_post.user.display_name,
                        "username": wanted_post.user.username,
                        "verified": wanted_post.user.is_verified,
-                       "profile_picture": (wanted_post.user.profile_pic.identifier
-                                           if wanted_post.user.has_profile_picture else None),
+                       "profile_picture": {
+                           "identifier": pfp_identifier,
+                           "blur_hash": pfp_blur_hash
+                       },
                        "liked_post": user_has_liked_post,
                        "own_post": user_owns_post
                    },

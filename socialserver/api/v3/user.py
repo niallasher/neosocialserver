@@ -26,14 +26,18 @@ class UserInfo(Resource):
         if wanted_user is None:
             return {"error": ErrorCodes.USERNAME_NOT_FOUND.value}, 404
 
-        pfp = None
-        header = None
+        pfp_identifier = None
+        pfp_blur_hash = None
+        header_identifier = None
+        header_blur_hash = None
 
         if wanted_user.profile_pic is not None:
-            pfp = wanted_user.profile_pic.identifier
+            pfp_identifier = wanted_user.profile_pic.identifier
+            pfp_blur_hash = wanted_user.profile_pic.blur_hash
 
         if wanted_user.header_pic is not None:
-            header = wanted_user.header_pic.identifier
+            header_identifier = wanted_user.header_pic.identifier
+            header_blur_hash = wanted_user.header_pic.blur_hash
 
         return {
                    "username": wanted_user.username,
@@ -43,8 +47,14 @@ class UserInfo(Resource):
                    "bio": wanted_user.bio,
                    "follower_count": wanted_user.followers.count(),
                    "following_count": wanted_user.following.count(),
-                   "profile_picture": pfp,
-                   "header": header
+                   "profile_picture": {
+                       "identifier": pfp_identifier,
+                       "blur_hash": pfp_blur_hash
+                   },
+                   "header": {
+                       "identifier": header_identifier,
+                       "blur_hash": header_blur_hash
+                   }
                }, 200
 
 
@@ -168,7 +178,6 @@ class User(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('password', type=str, required=True)
         args = parser.parse_args()
-
 
         requesting_user = get_user_from_auth_header()
 
