@@ -47,6 +47,15 @@ class CommentFeed(Resource):
 
         comments_formatted = []
         for comment in comments:
+
+            pfp_identifier = None
+            pfp_blur_hash = None
+
+            if comment.user.profile_picture is not None:
+                pfp = comment.user.profile_picture
+                pfp_identifier = pfp.identifier
+                pfp_blur_hash = pfp.blur_hash
+
             comments_formatted.append({
                 "comment": {
                     "id": comment.id,
@@ -57,14 +66,18 @@ class CommentFeed(Resource):
                 "user": {
                     "display_name": comment.user.display_name,
                     "username": comment.user.username,
+                    "profile_picture": {
+                        "identifier": pfp_identifier,
+                        "blur_hash": pfp_blur_hash
+                    },
                     "attributes": comment.user.account_attributes,
                     "own_comment": comment.user == requesting_user_db
                 }
             })
 
         return {
-            "meta": {
-                "reached_end": len(comments_formatted) < args['count']
-            },
-            "comments": comments_formatted
-        }
+                   "meta": {
+                       "reached_end": len(comments_formatted) < args['count']
+                   },
+                   "comments": comments_formatted
+               }, 200
