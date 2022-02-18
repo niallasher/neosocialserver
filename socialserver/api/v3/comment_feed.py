@@ -43,7 +43,7 @@ class CommentFeed(Resource):
         else:
             return {"error": ErrorCodes.INVALID_SORT_TYPE.value}, 400
 
-        comments.limit(args['count'], offset=args['offset'])
+        comments = comments.limit(args['count'], offset=args['offset'])
 
         comments_formatted = []
         for comment in comments:
@@ -51,8 +51,8 @@ class CommentFeed(Resource):
             pfp_identifier = None
             pfp_blur_hash = None
 
-            if comment.user.profile_picture is not None:
-                pfp = comment.user.profile_picture
+            if comment.user.profile_pic is not None:
+                pfp = comment.user.profile_pic
                 pfp_identifier = pfp.identifier
                 pfp_blur_hash = pfp.blur_hash
 
@@ -71,7 +71,8 @@ class CommentFeed(Resource):
                         "blur_hash": pfp_blur_hash
                     },
                     "attributes": comment.user.account_attributes,
-                    "own_comment": comment.user == requesting_user_db
+                    "own_comment": comment.user == requesting_user_db,
+                    "likes_comment": db.CommentLike.get(user=requesting_user_db, comment=comment) is not None
                 }
             })
 
