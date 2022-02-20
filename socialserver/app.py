@@ -78,6 +78,8 @@ def create_app():
     api.add_resource(UsernameAvailable, '/api/v3/usernameAvailable')
     api.add_resource(TwoFactorAuthentication, "/api/v3/user/2fa")
     api.add_resource(TwoFactorAuthenticationVerification, "/api/v3/user/2fa/verify")
+    api.add_resource(Follow, '/api/v3/user/follow')
+    api.add_resource(Block, '/api/v3/user/block')
 
     api.add_resource(Post, '/api/v3/post/single')
     api.add_resource(PostFeed, '/api/v3/posts/feed')
@@ -87,9 +89,6 @@ def create_app():
 
     api.add_resource(Image, '/api/v3/image/<imageid>')
     api.add_resource(NewImage, '/api/v3/image')
-
-    api.add_resource(Follow, '/api/v3/follow/user')
-    api.add_resource(Block, '/api/v3/block/user')
 
     api.add_resource(Report, '/api/v3/report/post')
 
