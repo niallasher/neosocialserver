@@ -10,6 +10,7 @@ from socialserver.util.output import console
 from socialserver.util.config import config
 from socialserver.maintenance import maintenance
 # API Version 3
+from socialserver.api.v3.comment import Comment
 from socialserver.api.v3.report import Report
 from socialserver.api.v3.info import ServerInfo
 from socialserver.api.v3.user_session import UserSession, UserSessionList
@@ -82,6 +83,7 @@ def create_app():
     api.add_resource(PostFeed, '/api/v3/feed/posts')
 
     api.add_resource(CommentFeed, '/api/v3/feed/comments')
+    api.add_resource(Comment, '/api/v3/comments')
 
     api.add_resource(Image, '/api/v3/image/<imageid>')
     api.add_resource(NewImage, '/api/v3/image')
