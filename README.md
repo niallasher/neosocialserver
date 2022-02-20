@@ -46,6 +46,8 @@ The test suite is written using pytest. Just run ```pytest socialserver``` from 
 
 ### What currently works?
 
+This list will probably lag a lot because I never remember to update it.
+
 #### Via /api/v3
 
 - Creating a user
@@ -60,6 +62,10 @@ The test suite is written using pytest. Just run ```pytest socialserver``` from 
 - Post feed
 - Post feed from users you follow
 - Post feed from specific set of usernames
+- Two factor authentication
+- Listing comments (can't make them yet lol)
+- Account approvals
+- Probably some other stuff.
 
 ### Via legacy API
 
