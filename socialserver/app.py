@@ -81,16 +81,15 @@ def create_app():
     api.add_resource(Follow, '/api/v3/user/follow')
     api.add_resource(Block, '/api/v3/user/block')
 
-    api.add_resource(Post, '/api/v3/post/single')
+    api.add_resource(Post, '/api/v3/posts/single')
     api.add_resource(PostFeed, '/api/v3/posts/feed')
+    api.add_resource(Report, '/api/v3/posts/report')
 
     api.add_resource(CommentFeed, '/api/v3/comments/feed')
     api.add_resource(Comment, '/api/v3/comments')
 
     api.add_resource(Image, '/api/v3/image/<imageid>')
     api.add_resource(NewImage, '/api/v3/image')
-
-    api.add_resource(Report, '/api/v3/report/post')
 
     api.add_resource(UserApprovals, '/api/v3/admin/userApprovals')
 
