@@ -80,9 +80,9 @@ def create_app():
     api.add_resource(TwoFactorAuthenticationVerification, "/api/v3/user/2fa/verify")
 
     api.add_resource(Post, '/api/v3/post/single')
-    api.add_resource(PostFeed, '/api/v3/feed/posts')
+    api.add_resource(PostFeed, '/api/v3/posts/feed')
 
-    api.add_resource(CommentFeed, '/api/v3/feed/comments')
+    api.add_resource(CommentFeed, '/api/v3/comments/feed')
     api.add_resource(Comment, '/api/v3/comments')
 
     api.add_resource(Image, '/api/v3/image/<imageid>')
