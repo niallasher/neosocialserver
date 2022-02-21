@@ -161,6 +161,7 @@ def create_comment_with_request(access_token: str, post_id: int, text_content="c
                       headers={
                           "Authorization": f"bearer {access_token}"
                       })
+    assert r.status_code == 201
     return r.json()['id']
 
 
@@ -214,7 +215,7 @@ def create_user_session_with_request(serveraddress, username, password):
 
 
 def create_post_with_request(serveraddress, auth_token, text_content="Test Post"):
-    r = requests.post(f"{serveraddress}/api/v3/post/single",
+    r = requests.post(f"{serveraddress}/api/v3/posts/single",
                       json={
                           "text_content": text_content
                       },
@@ -233,7 +234,7 @@ def create_post_with_request(serveraddress, auth_token, text_content="Test Post"
 
 
 def follow_user_with_request(serveraddress: str, auth_token: str, username: str):
-    r = requests.post(f"{serveraddress}/api/v3/follow/user",
+    r = requests.post(f"{serveraddress}/api/v3/user/follow",
                       json={
                           "username": username
                       },

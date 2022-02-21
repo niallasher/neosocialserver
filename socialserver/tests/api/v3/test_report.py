@@ -21,7 +21,7 @@ def test_create_report(test_db, server_address):
                                        auth_token=at_two,
                                        text_content="valid opinion that I disagree with")
 
-    r = requests.post(f"{server_address}/api/v3/report/post",
+    r = requests.post(f"{server_address}/api/v3/posts/report",
                       json={
                           "report_reason": [ReportReasons.DISCRIMINATION.value],
                           "supplemental_info": "test data test data",
@@ -38,7 +38,7 @@ def test_try_create_report_own_post(test_db, server_address):
     post_id = create_post_with_request(server_address,
                                        auth_token=test_db.access_token)
 
-    r = requests.post(f"{server_address}/api/v3/report/post",
+    r = requests.post(f"{server_address}/api/v3/posts/report",
                       json={
                           "report_reason": [ReportReasons.DISCRIMINATION.value],
                           "supplemental_info": "test data test data",
@@ -56,7 +56,7 @@ def test_create_report_missing_args(test_db, server_address):
                              test_db.access_token,
                              text_content="valid opinion that I disagree with")
 
-    r = requests.post(f"{server_address}/api/v3/report/post",
+    r = requests.post(f"{server_address}/api/v3/posts/report",
                       json={},
                       headers={
                           "Authorization": f"Bearer {test_db.access_token}"
@@ -79,7 +79,7 @@ def test_get_report_from_post_id(test_db, server_address):
                                        at_two,
                                        text_content="post")
 
-    assert requests.post(f"{server_address}/api/v3/report/post",
+    assert requests.post(f"{server_address}/api/v3/posts/report",
                          json={
                              "report_reason": [ReportReasons.ILLEGAL_CONTENT.value],
                              "supplemental_info": "i don't like this post very much, so it's bad",
@@ -89,7 +89,7 @@ def test_get_report_from_post_id(test_db, server_address):
                              "Authorization": f"Bearer {test_db.access_token}"
                          }).status_code == 201
 
-    r = requests.get(f"{server_address}/api/v3/report/post",
+    r = requests.get(f"{server_address}/api/v3/posts/report",
 
                      json={
                          "post_id": post_id

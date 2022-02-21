@@ -48,7 +48,7 @@ def test_get_following_invalid_username(test_db, server_address):
 
 def test_get_followers_invalid_usernames(test_db, server_address):
     usernames = ['test2', 'test3', 'test4', 'test5']
-    # create & follow a few of accounts
+    # create & follow a few accounts
     for username in usernames:
         create_user_with_request(server_address, username=username)
         # password is the default!
