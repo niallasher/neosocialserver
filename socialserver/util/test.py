@@ -118,6 +118,8 @@ def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -
     monkeypatch.setattr("socialserver.api.v3.username_available.db", db)
     monkeypatch.setattr("socialserver.api.v3.user_password_change.db", db)
     monkeypatch.setattr("socialserver.api.v3.admin.user_approvals.db", db)
+    monkeypatch.setattr("socialserver.api.v3.comment.db", db)
+    monkeypatch.setattr("socialserver.api.v3.comment_feed.db", db)
     # legacy api
     monkeypatch.setattr("socialserver.api.legacy.user.db", db)
     monkeypatch.setattr("socialserver.api.legacy.comment_filter.filter_by_post.db", db)
@@ -143,7 +145,24 @@ def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -
 
 
 """
+    create_comment_with_request
+    
+    creates a comment on a given postID via API v3
 """
+
+
+def create_comment_with_request(access_token: str, post_id: int, text_content="comment"):
+    server_address = get_server_address()
+    r = requests.post(f"{server_address}/api/v3/comments",
+                      json={
+                          "post_id": post_id,
+                          "text_content": text_content
+                      },
+                      headers={
+                          "Authorization": f"bearer {access_token}"
+                      })
+    return r.json()['id']
+
 
 """
     create_user_with_request
