@@ -71,12 +71,13 @@ def create_app():
 
     api.add_resource(ServerInfo, '/api/v3/server/info')
 
+    api.add_resource(UsernameAvailable, '/api/v3/username/available')
+
     api.add_resource(User, '/api/v3/user')
     api.add_resource(UserPasswordChange, "/api/v3/user/password")
     api.add_resource(UserInfo, '/api/v3/user/info')
     api.add_resource(UserSession, '/api/v3/user/session')
     api.add_resource(UserSessionList, '/api/v3/user/session/list')
-    api.add_resource(UsernameAvailable, '/api/v3/usernameAvailable')
     api.add_resource(TwoFactorAuthentication, "/api/v3/user/2fa")
     api.add_resource(TwoFactorAuthenticationVerification, "/api/v3/user/2fa/verify")
     api.add_resource(Follow, '/api/v3/user/follow')
