@@ -91,6 +91,7 @@ class RegistrationType(Enum):
 """
 
 
+# TODO: clean up these. all not found errors should be generic OBJECT_NOT_FOUND or smth!
 class ErrorCodes(Enum):
     PASSWORD_DAMAGED = 1
     TOTP_REQUIRED = 2
@@ -162,6 +163,8 @@ class ErrorCodes(Enum):
     COMMENT_TOO_SHORT = 56
     COMMENT_NOT_FOUND = 57
     OBJECT_NOT_OWNED_BY_USER = 58
+    OBJECT_NOT_LIKED = 59
+    OBJECT_ALREADY_LIKED = 60
 
 
 """

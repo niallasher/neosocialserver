@@ -120,6 +120,7 @@ def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -
     monkeypatch.setattr("socialserver.api.v3.admin.user_approvals.db", db)
     monkeypatch.setattr("socialserver.api.v3.comment.db", db)
     monkeypatch.setattr("socialserver.api.v3.comment_feed.db", db)
+    monkeypatch.setattr("socialserver.api.v3.comment_like.db", db)
     # legacy api
     monkeypatch.setattr("socialserver.api.legacy.user.db", db)
     monkeypatch.setattr("socialserver.api.legacy.comment_filter.filter_by_post.db", db)
