@@ -9,7 +9,7 @@ from secrets import token_urlsafe
 
 
 def test_get_post_feed_legacy(test_db, server_address):
-    post_id = create_post_with_request(server_address, auth_token=test_db.access_token, text_content="test")
+    post_id = create_post_with_request(auth_token=test_db.access_token, text_content="test")
     r = requests.get(f"{server_address}/api/v1/posts",
                      json={
                          "session_token": test_db.access_token,
@@ -22,7 +22,7 @@ def test_get_post_feed_legacy(test_db, server_address):
 
 
 def test_get_post_feed_count_too_high_legacy(test_db, server_address):
-    post_id = create_post_with_request(server_address, auth_token=test_db.access_token, text_content="test")
+    post_id = create_post_with_request(auth_token=test_db.access_token, text_content="test")
     r = requests.get(f"{server_address}/api/v1/posts",
                      json={
                          "session_token": test_db.access_token,
@@ -33,7 +33,7 @@ def test_get_post_feed_count_too_high_legacy(test_db, server_address):
 
 
 def test_get_post_feed_count_missing_args_legacy(test_db, server_address):
-    post_id = create_post_with_request(server_address, auth_token=test_db.access_token, text_content="test")
+    post_id = create_post_with_request(auth_token=test_db.access_token, text_content="test")
     r = requests.get(f"{server_address}/api/v1/posts",
                      json={
                          "session_token": test_db.access_token,
@@ -42,7 +42,7 @@ def test_get_post_feed_count_missing_args_legacy(test_db, server_address):
 
 
 def test_get_post_individual_legacy(test_db, server_address):
-    post_id = create_post_with_request(server_address, auth_token=test_db.access_token, text_content="test")
+    post_id = create_post_with_request(auth_token=test_db.access_token, text_content="test")
     r = requests.get(f"{server_address}/api/v1/posts",
                      json={
                          "session_token": test_db.access_token,
@@ -53,7 +53,7 @@ def test_get_post_individual_legacy(test_db, server_address):
 
 
 def test_get_post_individual_invalid_id_legacy(test_db, server_address):
-    post_id = create_post_with_request(server_address, auth_token=test_db.access_token, text_content="test")
+    post_id = create_post_with_request(auth_token=test_db.access_token, text_content="test")
     r = requests.get(f"{server_address}/api/v1/posts",
                      json={
                          "session_token": test_db.access_token,
@@ -103,7 +103,7 @@ def test_create_post_missing_args_legacy(test_db, server_address):
 
 def test_delete_post_legacy(test_db, server_address):
     # create a post so that we can actually delete it :)
-    post_id = create_post_with_request(server_address, test_db.access_token)
+    post_id = create_post_with_request(test_db.access_token)
 
     r = requests.delete(f"{server_address}/api/v1/posts",
                         json={
@@ -116,7 +116,7 @@ def test_delete_post_legacy(test_db, server_address):
 
 def test_delete_post_missing_args_legacy(test_db, server_address):
     # create a post so that we can actually delete it :)
-    post_id = create_post_with_request(server_address, test_db.access_token)
+    post_id = create_post_with_request(test_db.access_token)
 
     r = requests.delete(f"{server_address}/api/v1/posts",
                         json={
@@ -140,10 +140,10 @@ def test_delete_post_invalid_id_legacy(test_db, server_address):
 
 
 def test_try_delete_other_users_post_legacy(test_db, server_address):
-    create_user_with_request(server_address, username="other_user", password="password")
-    user_token = create_user_session_with_request(server_address, username="other_user", password="password")
+    create_user_with_request(username="other_user", password="password")
+    user_token = create_user_session_with_request(username="other_user", password="password")
     # create a post under the other user!
-    post_id = create_post_with_request(server_address, user_token)
+    post_id = create_post_with_request(user_token)
 
     r = requests.delete(f"{server_address}/api/v1/posts",
                         json={
@@ -155,7 +155,7 @@ def test_try_delete_other_users_post_legacy(test_db, server_address):
 
 
 def test_delete_post_invalid_token_legacy(test_db, server_address):
-    post_id = create_post_with_request(server_address, test_db.access_token)
+    post_id = create_post_with_request(test_db.access_token)
 
     r = requests.delete(f"{server_address}/api/v1/posts",
                         json={

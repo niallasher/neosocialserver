@@ -7,7 +7,7 @@ import requests
 
 
 def test_follow_user(test_db, server_address):
-    create_user_with_request(server_address, username="user2")
+    create_user_with_request(username="user2")
     r = requests.post(f"{server_address}/api/v3/user/follow",
                       json={
                           "username": "user2"
@@ -19,8 +19,8 @@ def test_follow_user(test_db, server_address):
 
 
 def test_follow_user_already_followed(test_db, server_address):
-    create_user_with_request(server_address, username="user2")
-    follow_user_with_request(server_address, test_db.access_token, username="user2")
+    create_user_with_request(username="user2")
+    follow_user_with_request(test_db.access_token, username="user2")
     r = requests.post(f"{server_address}/api/v3/user/follow",
                       json={
                           "username": "user2"
@@ -33,8 +33,8 @@ def test_follow_user_already_followed(test_db, server_address):
 
 
 def test_unfollow_user(test_db, server_address):
-    create_user_with_request(server_address, username="user2")
-    follow_user_with_request(server_address, test_db.access_token, username="user2")
+    create_user_with_request(username="user2")
+    follow_user_with_request(test_db.access_token, username="user2")
     r = requests.delete(fr"{server_address}/api/v3/user/follow",
                         json={
                             "username": "user2"
@@ -46,7 +46,7 @@ def test_unfollow_user(test_db, server_address):
 
 
 def test_unfollow_user_not_followed(test_db, server_address):
-    create_user_with_request(server_address, username="user2")
+    create_user_with_request(username="user2")
     r = requests.delete(f"{server_address}/api/v3/user/follow",
                         json={
                             "username": "user2"
@@ -83,7 +83,7 @@ def test_try_follow_non_existent_user(test_db, server_address):
 
 
 def test_follow_user_invalid_token(test_db, server_address):
-    create_user_with_request(server_address, username="user1")
+    create_user_with_request(username="user1")
     r = requests.post(f"{server_address}/api/v3/user/follow",
                       json={
                           "username": "user1"

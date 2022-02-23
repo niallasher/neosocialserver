@@ -42,10 +42,10 @@ def test_add_post_modqueue_legacy(test_db, server_address):
                            test_db.username,
                            [AccountAttributes.MODERATOR.value])
 
-    create_user_with_request(server_address, username="test2", password="password")
-    user_session = create_user_session_with_request(server_address, username="test2", password="password")
+    create_user_with_request(username="test2", password="password")
+    user_session = create_user_session_with_request(username="test2", password="password")
 
-    post_id = create_post_with_request(server_address, user_session, text_content="bad opinion.")
+    post_id = create_post_with_request(user_session, text_content="bad opinion.")
 
     # add the post to the modqueue
     r = requests.post(f"{server_address}/api/v1/modqueue",
@@ -70,10 +70,10 @@ def test_add_post_modqueue_legacy(test_db, server_address):
 
 
 def test_add_post_not_mod_or_admin_modqueue_legacy(test_db, server_address):
-    create_user_with_request(server_address, username="test2", password="password")
-    user_session = create_user_session_with_request(server_address, username="test2", password="password")
+    create_user_with_request(username="test2", password="password")
+    user_session = create_user_session_with_request(username="test2", password="password")
 
-    post_id = create_post_with_request(server_address, user_session, text_content="bad opinion.")
+    post_id = create_post_with_request(user_session, text_content="bad opinion.")
 
     # add the post to the modqueue
     r = requests.post(f"{server_address}/api/v1/modqueue",
@@ -92,10 +92,10 @@ def test_queued_post_not_visible_modqueue_legacy(test_db, server_address):
                            test_db.username,
                            [AccountAttributes.MODERATOR.value])
 
-    create_user_with_request(server_address, username="test2", password="password")
-    user_session = create_user_session_with_request(server_address, username="test2", password="password")
+    create_user_with_request(username="test2", password="password")
+    user_session = create_user_session_with_request(username="test2", password="password")
 
-    post_id = create_post_with_request(server_address, user_session, text_content="bad opinion.")
+    post_id = create_post_with_request(user_session, text_content="bad opinion.")
 
     # add the post to the modqueue
     r = requests.post(f"{server_address}/api/v1/modqueue",
@@ -125,10 +125,10 @@ def test_remove_post_from_modqueue_legacy(test_db, server_address):
                            test_db.username,
                            [AccountAttributes.MODERATOR.value])
 
-    create_user_with_request(server_address, username="test2", password="password")
-    user_session = create_user_session_with_request(server_address, username="test2", password="password")
+    create_user_with_request(username="test2", password="password")
+    user_session = create_user_session_with_request(username="test2", password="password")
 
-    post_id = create_post_with_request(server_address, user_session, text_content="bad opinion.")
+    post_id = create_post_with_request(user_session, text_content="bad opinion.")
 
     # add the post to the modqueue
     r = requests.post(f"{server_address}/api/v1/modqueue",
@@ -166,10 +166,10 @@ def test_remove_post_not_mod_or_admin_from_modqueue_legacy(test_db, server_addre
                            test_db.username,
                            [AccountAttributes.MODERATOR.value])
 
-    create_user_with_request(server_address, username="test2", password="password")
-    user_session = create_user_session_with_request(server_address, username="test2", password="password")
+    create_user_with_request(username="test2", password="password")
+    user_session = create_user_session_with_request(username="test2", password="password")
 
-    post_id = create_post_with_request(server_address, user_session, text_content="bad opinion.")
+    post_id = create_post_with_request(user_session, text_content="bad opinion.")
 
     # add the post to the modqueue
     r = requests.post(f"{server_address}/api/v1/modqueue",
@@ -214,10 +214,10 @@ def test_try_get_moderated_post_legacy(test_db, server_address):
                            test_db.username,
                            [AccountAttributes.MODERATOR.value])
 
-    create_user_with_request(server_address, username="test2", password="password")
-    user_session = create_user_session_with_request(server_address, username="test2", password="password")
+    create_user_with_request(username="test2", password="password")
+    user_session = create_user_session_with_request(username="test2", password="password")
 
-    post_id = create_post_with_request(server_address, user_session, text_content="bad opinion.")
+    post_id = create_post_with_request(user_session, text_content="bad opinion.")
 
     # add the post to the modqueue
     r = requests.post(f"{server_address}/api/v1/modqueue",
@@ -245,10 +245,10 @@ def test_try_get_moderated_post_not_mod_or_admin_legacy(test_db, server_address)
                            test_db.username,
                            [AccountAttributes.MODERATOR.value])
 
-    create_user_with_request(server_address, username="test2", password="password")
-    user_session = create_user_session_with_request(server_address, username="test2", password="password")
+    create_user_with_request(username="test2", password="password")
+    user_session = create_user_session_with_request(username="test2", password="password")
 
-    post_id = create_post_with_request(server_address, user_session, text_content="bad opinion.")
+    post_id = create_post_with_request(user_session, text_content="bad opinion.")
 
     # add the post to the modqueue
     r = requests.post(f"{server_address}/api/v1/modqueue",

@@ -13,9 +13,9 @@ def test_delete_post_admin_legacy(test_db, server_address):
                            test_db.username,
                            [AccountAttributes.ADMIN.value])
 
-    create_user_with_request(server_address, username="test2", password="password")
-    session_token = create_user_session_with_request(server_address, username="test2", password="password")
-    post_id = create_post_with_request(server_address, session_token)
+    create_user_with_request(username="test2", password="password")
+    session_token = create_user_session_with_request(username="test2", password="password")
+    post_id = create_post_with_request(session_token)
 
     r = requests.delete(f"{server_address}/api/v1/admin/postdel",
                         json={
@@ -37,9 +37,9 @@ def test_delete_post_admin_legacy(test_db, server_address):
 
 
 def test_delete_post_user_not_admin_admin_legacy(test_db, server_address):
-    create_user_with_request(server_address, username="test2", password="password")
-    session_token = create_user_session_with_request(server_address, username="test2", password="password")
-    post_id = create_post_with_request(server_address, session_token)
+    create_user_with_request(username="test2", password="password")
+    session_token = create_user_session_with_request(username="test2", password="password")
+    post_id = create_post_with_request(session_token)
 
     r = requests.delete(f"{server_address}/api/v1/admin/postdel",
                         json={

@@ -10,8 +10,8 @@ def test_get_following_legacy(test_db, server_address):
     usernames = ['test2', 'test3', 'test4', 'test5']
     # create & follow a few of accounts
     for username in usernames:
-        create_user_with_request(server_address, username=username)
-        follow_user_with_request(server_address, test_db.access_token, username)
+        create_user_with_request(username=username)
+        follow_user_with_request(test_db.access_token, username)
 
     r = requests.get(f"{server_address}/api/v1/followers/userFollows",
                      json={
@@ -50,10 +50,10 @@ def test_get_followers_invalid_usernames(test_db, server_address):
     usernames = ['test2', 'test3', 'test4', 'test5']
     # create & follow a few accounts
     for username in usernames:
-        create_user_with_request(server_address, username=username)
+        create_user_with_request(username=username)
         # password is the default!
-        token = create_user_session_with_request(server_address, username=username, password="password")
-        follow_user_with_request(server_address, token, test_db.username)
+        token = create_user_session_with_request(username=username, password="password")
+        follow_user_with_request(token, test_db.username)
 
     r = requests.get(f"{server_address}/api/v1/followers/followsUser",
                      json={

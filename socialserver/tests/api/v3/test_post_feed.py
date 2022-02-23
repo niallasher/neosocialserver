@@ -48,8 +48,7 @@ def test_get_all_feed_get_count_too_high(test_db, server_address):
 def test_get_all_feed_less_than_count_posts(test_db, server_address):
     # range excludes last number, so this is actually 14.
     for i in range(1, 15):
-        create_post_with_request(server_address,
-                                 test_db.access_token)
+        create_post_with_request(test_db.access_token)
     r = requests.get(f'{server_address}/api/v3/posts/feed',
                      json={
                          "count": 15,
@@ -65,8 +64,7 @@ def test_get_all_feed_less_than_count_posts(test_db, server_address):
 
 def test_get_all_feed_more_than_count_posts(test_db, server_address):
     for i in range(1, 30):
-        create_post_with_request(server_address,
-                                 test_db.access_token)
+        create_post_with_request(test_db.access_token)
 
     r = requests.get(f'{server_address}/api/v3/posts/feed',
                      json={
@@ -85,14 +83,14 @@ def test_get_all_feed_more_than_count_posts(test_db, server_address):
 def test_get_posts_from_specific_usernames(test_db, server_address):
     # create a post from user test, so we can check if it's been
     # filtered ok later
-    create_post_with_request(server_address, test_db.access_token)
-    create_user_with_request(server_address, username="user1", password="password", display_name="user1")
-    create_user_with_request(server_address, username="user2", password="password", display_name="user2")
-    at_user_one = create_user_session_with_request(server_address, username="user1", password="password")
-    at_user_two = create_user_session_with_request(server_address, username="user2", password="password")
+    create_post_with_request(test_db.access_token)
+    create_user_with_request(username="user1", password="password", display_name="user1")
+    create_user_with_request(username="user2", password="password", display_name="user2")
+    at_user_one = create_user_session_with_request(username="user1", password="password")
+    at_user_two = create_user_session_with_request(username="user2", password="password")
 
-    create_post_with_request(server_address, auth_token=at_user_one)
-    create_post_with_request(server_address, auth_token=at_user_two)
+    create_post_with_request(auth_token=at_user_one)
+    create_post_with_request(auth_token=at_user_two)
 
     r = requests.get(f"{server_address}/api/v3/posts/feed",
                      json={
@@ -112,22 +110,22 @@ def test_get_posts_from_specific_usernames(test_db, server_address):
 def test_get_posts_from_followed_accounts(test_db, server_address):
     # create a post from user test, so we can check if it's been
     # filtered ok later
-    create_post_with_request(server_address, test_db.access_token)
-    create_user_with_request(server_address, username="user1", password="password", display_name="user1")
-    create_user_with_request(server_address, username="user2", password="password", display_name="user2")
-    create_user_with_request(server_address, username="user3", password="password", display_name="user3")
+    create_post_with_request(test_db.access_token)
+    create_user_with_request(username="user1", password="password", display_name="user1")
+    create_user_with_request(username="user2", password="password", display_name="user2")
+    create_user_with_request(username="user3", password="password", display_name="user3")
 
-    follow_user_with_request(server_address, test_db.access_token, "user1")
-    follow_user_with_request(server_address, test_db.access_token, "user2")
+    follow_user_with_request(test_db.access_token, "user1")
+    follow_user_with_request(test_db.access_token, "user2")
 
-    at_user_one = create_user_session_with_request(server_address, username="user1", password="password")
-    at_user_two = create_user_session_with_request(server_address, username="user2", password="password")
-    at_user_three = create_user_session_with_request(server_address, username="user3", password="password")
+    at_user_one = create_user_session_with_request(username="user1", password="password")
+    at_user_two = create_user_session_with_request(username="user2", password="password")
+    at_user_three = create_user_session_with_request(username="user3", password="password")
 
-    create_post_with_request(server_address, auth_token=at_user_one)
-    create_post_with_request(server_address, auth_token=at_user_two)
+    create_post_with_request(auth_token=at_user_one)
+    create_post_with_request(auth_token=at_user_two)
     # we don't want this one to show up; we're not following user3
-    create_post_with_request(server_address, auth_token=at_user_three)
+    create_post_with_request(auth_token=at_user_three)
 
     r = requests.get(f"{server_address}/api/v3/posts/feed",
                      json={

@@ -11,8 +11,7 @@ def test_user_deauth_legacy(test_db, server_address):
     # create some sessions
     for i in range(0, 10):
         sessions.append(
-            create_user_session_with_request(server_address,
-                                             username=test_db.username,
+            create_user_session_with_request(username=test_db.username,
                                              password=test_db.password))
 
     # revoke all sessions
@@ -40,8 +39,7 @@ def test_user_deauth_invalid_password_legacy(test_db, server_address):
     # create some sessions
     for i in range(0, 10):
         sessions.append(
-            create_user_session_with_request(server_address,
-                                             username=test_db.username,
+            create_user_session_with_request(username=test_db.username,
                                              password=test_db.password))
 
     # attempt to revoke all sessions (should fail!)

@@ -12,7 +12,7 @@ def test_toggle_verification_status_on_user_legacy(test_db, server_address):
                            username="test",
                            attributes=[AccountAttributes.ADMIN.value])
 
-    create_user_with_request(server_address, username="test2", password="password")
+    create_user_with_request(username="test2", password="password")
 
     # verify the user
     r = requests.post(f"{server_address}/api/v1/admin/usermod",
@@ -60,7 +60,7 @@ def test_toggle_moderation_status_on_user_legacy(test_db, server_address):
                            username="test",
                            attributes=[AccountAttributes.ADMIN.value])
 
-    create_user_with_request(server_address, username="test2", password="password")
+    create_user_with_request(username="test2", password="password")
 
     # verify the user
     r = requests.post(f"{server_address}/api/v1/admin/usermod",

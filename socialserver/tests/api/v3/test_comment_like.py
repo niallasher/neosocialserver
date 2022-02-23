@@ -7,7 +7,7 @@ from socialserver.constants import ErrorCodes
 
 
 def test_like_comment(test_db, server_address):
-    post_id = create_post_with_request(server_address, test_db.access_token)
+    post_id = create_post_with_request(test_db.access_token)
     comment_id = create_comment_with_request(test_db.access_token, post_id)
 
     r = requests.post(f"{server_address}/api/v3/comments/like",
@@ -23,7 +23,7 @@ def test_like_comment(test_db, server_address):
 
 
 def test_like_comment_already_liked(test_db, server_address):
-    post_id = create_post_with_request(server_address, test_db.access_token)
+    post_id = create_post_with_request(test_db.access_token)
     comment_id = create_comment_with_request(test_db.access_token, post_id)
 
     r = requests.post(f"{server_address}/api/v3/comments/like",
@@ -49,7 +49,7 @@ def test_like_comment_already_liked(test_db, server_address):
 
 
 def test_unlike_comment(test_db, server_address):
-    post_id = create_post_with_request(server_address, test_db.access_token)
+    post_id = create_post_with_request(test_db.access_token)
     comment_id = create_comment_with_request(test_db.access_token, post_id)
 
     r = requests.post(f"{server_address}/api/v3/comments/like",
@@ -77,7 +77,7 @@ def test_unlike_comment(test_db, server_address):
 
 
 def test_unlike_comment_not_liked(test_db, server_address):
-    post_id = create_post_with_request(server_address, test_db.access_token)
+    post_id = create_post_with_request(test_db.access_token)
     comment_id = create_comment_with_request(test_db.access_token, post_id)
 
     r = requests.delete(f"{server_address}/api/v3/comments/like",

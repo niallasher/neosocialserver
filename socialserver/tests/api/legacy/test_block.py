@@ -8,9 +8,9 @@ import requests
 
 def test_block_user_legacy(test_db, server_address):
     # create somebody to get angry at
-    create_user_with_request(server_address, username="test2", password="password")
-    test2_session_token = create_user_session_with_request(server_address, username="test2", password="password")
-    post_id = create_post_with_request(server_address, auth_token=test2_session_token,
+    create_user_with_request(username="test2", password="password")
+    test2_session_token = create_user_session_with_request(username="test2", password="password")
+    post_id = create_post_with_request(auth_token=test2_session_token,
                                        text_content="bad opinion i disagree with")
     # now block them
     r = requests.post(f"{server_address}/api/v1/block",
@@ -34,9 +34,9 @@ def test_block_user_legacy(test_db, server_address):
 
 def test_unblock_user_legacy(test_db, server_address):
     # create somebody to get angry at
-    create_user_with_request(server_address, username="test2", password="password")
-    test2_session_token = create_user_session_with_request(server_address, username="test2", password="password")
-    post_id = create_post_with_request(server_address, auth_token=test2_session_token,
+    create_user_with_request(username="test2", password="password")
+    test2_session_token = create_user_session_with_request(username="test2", password="password")
+    post_id = create_post_with_request(auth_token=test2_session_token,
                                        text_content="bad opinion i disagree with")
     # now block them
     r = requests.post(f"{server_address}/api/v1/block",
@@ -76,7 +76,7 @@ def test_get_block_list_no_blocked_users_legacy(test_db, server_address):
 
 
 def test_get_block_list_legacy(test_db, server_address):
-    create_user_with_request(server_address, username="test2")
+    create_user_with_request(username="test2")
     # block the above bastard
     r = requests.post(f"{server_address}/api/v1/block",
                       json={

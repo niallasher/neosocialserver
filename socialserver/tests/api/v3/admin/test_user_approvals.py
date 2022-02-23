@@ -12,7 +12,7 @@ def test_get_user_approvals(test_db, server_address):
     # make sure new accounts need to verify
     config.auth.registration.approval_required = True
 
-    create_user_with_request(server_address, "user2", "password", "User2")
+    create_user_with_request("user2", "password", "User2")
 
     r = requests.get(f"{server_address}/api/v3/admin/userApprovals",
                      json={
@@ -60,10 +60,10 @@ def test_get_user_approvals_filtered(test_db, server_address):
     # make sure new accounts need to verify
     config.auth.registration.approval_required = True
 
-    create_user_with_request(server_address, "user2", "password", "User2")
-    create_user_with_request(server_address, "xuser3", "password", "User2")
-    create_user_with_request(server_address, "xuser4", "password", "User2")
-    create_user_with_request(server_address, "xuser5", "password", "User2")
+    create_user_with_request("user2", "password", "User2")
+    create_user_with_request("xuser3", "password", "User2")
+    create_user_with_request("xuser4", "password", "User2")
+    create_user_with_request("xuser5", "password", "User2")
 
     r = requests.get(f"{server_address}/api/v3/admin/userApprovals",
                      json={
@@ -91,7 +91,9 @@ def test_approve_user(test_db, server_address):
     # make sure new accounts need to verify
     config.auth.registration.approval_required = True
 
-    create_user_with_request(server_address, "user2", "password", "User2")
+    create_user_with_request(username="user2",
+                             password="password",
+                             display_name="User2")
 
     r = requests.get(f"{server_address}/api/v3/admin/userApprovals",
                      json={
@@ -132,10 +134,11 @@ def test_approve_user(test_db, server_address):
     assert len(r.json()['users']) == 0
 
     # make sure the user still exists
-    r = requests.get(f"{server_address}/api/v3/usernameAvailable",
+    r = requests.get(f"{server_address}/api/v3/username/available",
                      json={
                          "username": "user2"
                      })
+
     assert r.status_code == 200
     assert r.json() is False
 
@@ -149,7 +152,7 @@ def test_reject_user(test_db, server_address):
     # make sure new accounts need to verify
     config.auth.registration.approval_required = True
 
-    create_user_with_request(server_address, "user2", "password", "User2")
+    create_user_with_request("user2", "password", "User2")
 
     r = requests.get(f"{server_address}/api/v3/admin/userApprovals",
                      json={
@@ -190,7 +193,7 @@ def test_reject_user(test_db, server_address):
     assert len(r.json()['users']) == 0
 
     # make sure the user still exists
-    r = requests.get(f"{server_address}/api/v3/usernameAvailable",
+    r = requests.get(f"{server_address}/api/v3/username/available",
                      json={
                          "username": "user22"
                      })

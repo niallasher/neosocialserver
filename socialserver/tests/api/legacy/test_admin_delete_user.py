@@ -13,7 +13,7 @@ def test_delete_user_admin_legacy(test_db, server_address):
                            test_db.username,
                            [AccountAttributes.ADMIN.value])
     # create a user to unfairly obliterate
-    create_user_with_request(server_address, username="unwitting_victim", password="password")
+    create_user_with_request(username="unwitting_victim", password="password")
     # destroy the aforementioned user with extreme prejudice
     r = requests.delete(f"{server_address}/api/v1/admin/userdel",
                         json={
@@ -33,7 +33,7 @@ def test_delete_user_admin_legacy(test_db, server_address):
 
 def test_delete_user_admin_insufficient_perms_legacy(test_db, server_address):
     # create a user to unfairly obliterate
-    create_user_with_request(server_address, username="unwitting_victim", password="password")
+    create_user_with_request(username="unwitting_victim", password="password")
     # attempt to destroy the aforementioned user with extreme prejudice
     r = requests.delete(f"{server_address}/api/v1/admin/userdel",
                         json={
@@ -75,7 +75,7 @@ def test_delete_user_admin_invalid_password_legacy(test_db, server_address):
                            test_db.username,
                            [AccountAttributes.ADMIN.value])
     # create a user to unfairly obliterate
-    create_user_with_request(server_address, username="unwitting_victim", password="password")
+    create_user_with_request(username="unwitting_victim", password="password")
     # destroy the aforementioned user with literally no prejudice
     r = requests.delete(f"{server_address}/api/v1/admin/userdel",
                         json={
@@ -101,7 +101,7 @@ def test_attempt_delete_other_admin_admin_legacy(test_db, server_address):
                            [AccountAttributes.ADMIN.value])
     # create a user to unfairly obliterate, (except this time they're an admin)
     # (is it obvious these tests are copied and pasted with some comment alterations?)
-    create_user_with_request(server_address, username="unwitting_victim", password="password")
+    create_user_with_request(username="unwitting_victim", password="password")
     set_user_attributes_db(test_db.db,
                            "unwitting_victim",
                            [AccountAttributes.ADMIN.value])

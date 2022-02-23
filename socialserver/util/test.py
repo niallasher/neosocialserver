@@ -23,12 +23,10 @@ UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.3
 def test_db(monkeypatch):
     test_db = create_test_db()
     monkeypatch_api_db(pytest.MonkeyPatch(), test_db)
-    create_user_with_request(get_server_address(),
-                             username="test",
+    create_user_with_request(username="test",
                              password="password",
                              display_name="test")
-    access_token = create_user_session_with_request(get_server_address(),
-                                                    username="test",
+    access_token = create_user_session_with_request(username="test",
                                                     password="password")
     return dict_to_simple_namespace({
         "db": test_db,
@@ -173,8 +171,9 @@ def create_comment_with_request(access_token: str, post_id: int, text_content="c
 """
 
 
-def create_user_with_request(serveraddress, username="username", password="password", display_name="name"):
-    r = requests.post(f"{serveraddress}/api/v3/user",
+def create_user_with_request(username="username", password="password", display_name="name"):
+    server_address = get_server_address()
+    r = requests.post(f"{server_address}/api/v3/user",
                       json={
                           "display_name": display_name,
                           "username": username,
@@ -195,8 +194,9 @@ def create_user_with_request(serveraddress, username="username", password="passw
 """
 
 
-def create_user_session_with_request(serveraddress, username, password):
-    r = requests.post(f"{serveraddress}/api/v3/user/session",
+def create_user_session_with_request(username: str, password: str):
+    server_address = get_server_address()
+    r = requests.post(f"{server_address}/api/v3/user/session",
                       json={
                           "username": username,
                           "password": password
@@ -215,8 +215,9 @@ def create_user_session_with_request(serveraddress, username, password):
 """
 
 
-def create_post_with_request(serveraddress, auth_token, text_content="Test Post"):
-    r = requests.post(f"{serveraddress}/api/v3/posts/single",
+def create_post_with_request(auth_token, text_content="Test Post"):
+    server_address = get_server_address()
+    r = requests.post(f"{server_address}/api/v3/posts/single",
                       json={
                           "text_content": text_content
                       },
@@ -234,8 +235,9 @@ def create_post_with_request(serveraddress, auth_token, text_content="Test Post"
 """
 
 
-def follow_user_with_request(serveraddress: str, auth_token: str, username: str):
-    r = requests.post(f"{serveraddress}/api/v3/user/follow",
+def follow_user_with_request(auth_token: str, username: str):
+    server_address = get_server_address()
+    r = requests.post(f"{server_address}/api/v3/user/follow",
                       json={
                           "username": username
                       },

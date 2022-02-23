@@ -11,7 +11,7 @@ import requests
 # TODO: Like sort testing will need to be implemented when comment likes are!
 
 def test_get_comment_feed_empty(server_address, test_db):
-    post_id = create_post_with_request(server_address, test_db.access_token)
+    post_id = create_post_with_request(test_db.access_token)
     r = requests.get(f"{server_address}/api/v3/comments/feed",
                      json={
                          "count": 10,
@@ -29,7 +29,7 @@ def test_get_comment_feed_empty(server_address, test_db):
 
 
 def test_get_comment_feed(server_address, test_db):
-    post_id = create_post_with_request(server_address, test_db.access_token)
+    post_id = create_post_with_request(test_db.access_token)
     comment_count = 15
     for i in range(0, comment_count):
         create_comment_with_request(test_db.access_token, post_id)
@@ -51,7 +51,7 @@ def test_get_comment_feed(server_address, test_db):
 
 
 def test_get_comment_feed_count_higher_than_comment_count(server_address, test_db):
-    post_id = create_post_with_request(server_address, test_db.access_token)
+    post_id = create_post_with_request(test_db.access_token)
     comment_count = 15
     for i in range(0, comment_count):
         create_comment_with_request(test_db.access_token, post_id)

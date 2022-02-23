@@ -7,7 +7,7 @@ import requests
 
 
 def test_like_post_legacy(test_db, server_address):
-    post_id = create_post_with_request(server_address, test_db.access_token)
+    post_id = create_post_with_request(test_db.access_token)
     r = requests.post(f"{server_address}/api/v1/likes",
                       json={
                           "session_token": test_db.access_token,
@@ -27,7 +27,7 @@ def test_like_post_invalid_id_legacy(test_db, server_address):
 
 
 def test_unlike_post_legacy(test_db, server_address):
-    post_id = create_post_with_request(server_address, test_db.access_token)
+    post_id = create_post_with_request(test_db.access_token)
     # create a like first, since we need one to delete one :)
     requests.post(f"{server_address}/api/v1/likes",
                   json={
@@ -47,7 +47,7 @@ def test_unlike_post_legacy(test_db, server_address):
 
 
 def test_get_like_count_no_likes_legacy(test_db, server_address):
-    post_id = create_post_with_request(server_address, test_db.access_token)
+    post_id = create_post_with_request(test_db.access_token)
     r = requests.get(f"{server_address}/api/v1/likes/byPost",
                      json={
                          "session_token": test_db.access_token,
@@ -60,7 +60,7 @@ def test_get_like_count_no_likes_legacy(test_db, server_address):
 
 
 def test_get_like_count_legacy(test_db, server_address):
-    post_id = create_post_with_request(server_address, test_db.access_token)
+    post_id = create_post_with_request(test_db.access_token)
     r = requests.post(f"{server_address}/api/v1/likes",
                       json={
                           "session_token": test_db.access_token,
@@ -78,7 +78,7 @@ def test_get_like_count_legacy(test_db, server_address):
 
 
 def test_get_like_info_legacy(test_db, server_address):
-    post_id = create_post_with_request(server_address, test_db.access_token)
+    post_id = create_post_with_request(test_db.access_token)
     # like the post
     requests.post(f"{server_address}/api/v1/likes",
                   json={

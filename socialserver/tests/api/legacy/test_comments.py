@@ -6,7 +6,7 @@ import requests
 
 
 def test_create_comment_legacy(test_db, server_address):
-    post_id = create_post_with_request(server_address, test_db.access_token,
+    post_id = create_post_with_request(test_db.access_token,
                                        text_content="post text post text")
 
     # make a comment
@@ -21,7 +21,7 @@ def test_create_comment_legacy(test_db, server_address):
 
 def test_get_comment_legacy(test_db, server_address):
     comment_text = "the quick brown fox smth smth"
-    post_id = create_post_with_request(server_address, test_db.access_token,
+    post_id = create_post_with_request(test_db.access_token,
                                        text_content="post text post text")
 
     # make a comment
@@ -47,7 +47,7 @@ def test_get_comment_legacy(test_db, server_address):
 
 def test_get_comment_feed_legacy(test_db, server_address):
     comment_text = "the quick brown fox smth smth"
-    post_id = create_post_with_request(server_address, test_db.access_token,
+    post_id = create_post_with_request(test_db.access_token,
                                        text_content="post text post text")
 
     # make a comment
@@ -74,7 +74,7 @@ def test_get_comment_feed_legacy(test_db, server_address):
 
 
 def test_get_comment_feed_empty_legacy(test_db, server_address):
-    post_id = create_post_with_request(server_address, test_db.access_token,
+    post_id = create_post_with_request(test_db.access_token,
                                        text_content="post text post text")
 
     # get the comment (fresh db, so it will always be comment id 1)
@@ -91,7 +91,7 @@ def test_get_comment_feed_empty_legacy(test_db, server_address):
 
 def test_delete_comment_legacy(test_db, server_address):
     comment_text = "the quick brown fox smth smth"
-    post_id = create_post_with_request(server_address, test_db.access_token,
+    post_id = create_post_with_request(test_db.access_token,
                                        text_content="post text post text")
 
     # make a comment
@@ -126,7 +126,7 @@ def test_delete_comment_legacy(test_db, server_address):
 
 def test_delete_comment_invalid_id_legacy(test_db, server_address):
     comment_text = "the quick brown fox smth smth"
-    post_id = create_post_with_request(server_address, test_db.access_token,
+    post_id = create_post_with_request(test_db.access_token,
                                        text_content="post text post text")
 
     # try to remove the non-existent comment
@@ -140,7 +140,7 @@ def test_delete_comment_invalid_id_legacy(test_db, server_address):
 
 
 def test_like_comment_legacy(test_db, server_address):
-    post_id = create_post_with_request(server_address, test_db.access_token,
+    post_id = create_post_with_request(test_db.access_token,
                                        text_content="post text post text")
 
     # make a comment
@@ -172,7 +172,7 @@ def test_like_comment_legacy(test_db, server_address):
 
 
 def test_unlike_comment_legacy(test_db, server_address):
-    post_id = create_post_with_request(server_address, test_db.access_token,
+    post_id = create_post_with_request(test_db.access_token,
                                        text_content="post text post text")
 
     # make a comment

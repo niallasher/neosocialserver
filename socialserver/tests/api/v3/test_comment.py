@@ -9,7 +9,7 @@ import requests
 def test_post_comment(test_db, server_address):
     comment_text = "i'm a comment look at me"
 
-    post_id = create_post_with_request(server_address, test_db.access_token)
+    post_id = create_post_with_request(test_db.access_token)
     r = requests.post(f"{server_address}/api/v3/comments",
                       json={
                           "post_id": post_id,
@@ -37,7 +37,7 @@ def test_post_comment(test_db, server_address):
 
 
 def test_post_comment_too_long(test_db, server_address):
-    post_id = create_post_with_request(server_address, test_db.access_token)
+    post_id = create_post_with_request(test_db.access_token)
     r = requests.post(f"{server_address}/api/v3/comments",
                       json={
                           "post_id": post_id,
@@ -66,7 +66,7 @@ def test_post_comment_too_long(test_db, server_address):
 
 
 def test_post_comment_too_short(test_db, server_address):
-    post_id = create_post_with_request(server_address, test_db.access_token)
+    post_id = create_post_with_request(test_db.access_token)
     r = requests.post(f"{server_address}/api/v3/comments",
                       json={
                           "post_id": post_id,
@@ -98,7 +98,7 @@ def test_delete_comment(test_db, server_address):
     comment_text = "i'm a comment look at me"
 
     # make the comment
-    post_id = create_post_with_request(server_address, test_db.access_token)
+    post_id = create_post_with_request(test_db.access_token)
     r = requests.post(f"{server_address}/api/v3/comments",
                       json={
                           "post_id": post_id,
