@@ -166,3 +166,23 @@ class Post(Resource):
                        "own_post": user_owns_post
                    },
                }, 201
+
+    @db_session
+    @auth_reqd
+    def delete(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("post_id", type=int, required=True)
+        args = parser.parse_args()
+
+        user = get_user_from_auth_header()
+
+        post = db.Post.get(id=args['post_id'])
+        if post is None:
+            return {"error": ErrorCodes.POST_NOT_FOUND.value}, 404
+
+        if not post.user == user:
+            return {"error": ErrorCodes.OBJECT_NOT_OWNED_BY_USER.value}, 401
+
+        post.delete()
+
+        return {}, 200

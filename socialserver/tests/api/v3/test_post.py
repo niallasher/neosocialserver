@@ -1,7 +1,8 @@
 #  Copyright (c) Niall Asher 2022
 
 # noinspection PyUnresolvedReferences
-from socialserver.util.test import test_db, server_address, create_post_with_request
+from socialserver.util.test import test_db, server_address, create_post_with_request, create_user_with_request, \
+    create_user_session_with_request
 from socialserver.constants import ErrorCodes
 import requests
 
@@ -102,3 +103,54 @@ def test_get_single_post_missing_args(test_db, server_address, monkeypatch):
                      })
 
     assert r.status_code == 400
+
+
+def test_delete_post(test_db, server_address, monkeypatch):
+    post_id = create_post_with_request(server_address,
+                                       test_db.access_token)
+
+    r = requests.delete(f"{server_address}/api/v3/posts/single",
+                        json={
+                            "post_id": post_id
+                        },
+                        headers={
+                            "Authorization": f"Bearer {test_db.access_token}"
+                        })
+
+    assert r.status_code == 200
+
+
+def test_delete_post_invalid_id(test_db, server_address, monkeypatch):
+    post_id = create_post_with_request(server_address,
+                                       test_db.access_token)
+
+    r = requests.delete(f"{server_address}/api/v3/posts/single",
+                        json={
+                            "post_id": 1371219381
+                        },
+                        headers={
+                            "Authorization": f"Bearer {test_db.access_token}"
+                        })
+
+    assert r.status_code == 404
+    assert r.json()['error'] == ErrorCodes.POST_NOT_FOUND.value
+
+
+def test_try_delete_post_from_other_user(test_db, server_address, monkeypatch):
+    create_user_with_request(server_address, "user2", "password")
+    access_token = create_user_session_with_request(server_address, "user2", "password")
+    # create post using the second account
+    post_id = create_post_with_request(server_address,
+                                       access_token)
+
+    # and try to delete using the first one
+    r = requests.delete(f"{server_address}/api/v3/posts/single",
+                        json={
+                            "post_id": post_id
+                        },
+                        headers={
+                            "Authorization": f"Bearer {test_db.access_token}"
+                        })
+
+    assert r.status_code == 401
+    assert r.json()['error'] == ErrorCodes.OBJECT_NOT_OWNED_BY_USER.value
