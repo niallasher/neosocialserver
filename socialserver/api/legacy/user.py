@@ -147,9 +147,6 @@ class LegacyUser(Resource):
         if existing_user is not None:
             return {"err": LegacyErrorCodes.USERNAME_TAKEN.value}, 400
 
-        # TODO: once a decision on invite only has been reached,
-        # manage invite codes here
-
         salt = generate_salt()
         password = hash_password(args['password'], salt)
 
