@@ -3,7 +3,7 @@
 # pycharm isn't detecting fixture usage, so we're
 # disabling PyUnresolvedReferences for the import.
 # noinspection PyUnresolvedReferences
-from socialserver.util.test import test_db, server_address
+from socialserver.util.test import test_db, server_address, image_data_url
 import requests
 from pony.orm import db_session
 from socialserver.constants import ErrorCodes, BIO_MAX_LEN, DISPLAY_NAME_MAX_LEN, MAX_PASSWORD_LEN
@@ -292,7 +292,7 @@ def test_get_user_info_invalid_username(test_db, server_address):
 
 
 def test_get_user_info_missing_data(test_db, server_address):
-    info_req = requests.get(f"{server_address}/api/v3/user/info",
+    info_req = requests.get(f"{server_address}/api/v3/user",
                             json={},
                             headers={
                                 "Authorization": f"Bearer {test_db.access_token}"
@@ -300,4 +300,110 @@ def test_get_user_info_missing_data(test_db, server_address):
 
     assert info_req.status_code == 400
 
-# TODO: pictures. api3 doesn't even have support for these yet, so it shouldn't be an issue
+
+def test_update_profile_pic(test_db, server_address, image_data_url):
+    # upload a new image
+    image_identifier = requests.post(f"{server_address}/api/v3/image",
+                                     json={
+                                         "original_image": image_data_url
+                                     },
+                                     headers={
+                                         "Authorization": f"Bearer {test_db.access_token}"
+                                     }).json()['identifier']
+    r = requests.patch(f"{server_address}/api/v3/user",
+                       json={
+                           "profile_pic_ref": image_identifier
+                       },
+                       headers={
+                           "Authorization": f"bearer {test_db.access_token}"
+                       })
+    assert r.status_code == 201
+    # make sure the PFP from user info matches
+    r = requests.get(f"{server_address}/api/v3/user/info",
+                     json={
+                         "username": test_db.username
+                     },
+                     headers={
+                         "Authorization": f"Bearer {test_db.access_token}"
+                     })
+    assert r.status_code == 200
+    assert r.json()['profile_picture']['identifier'] == image_identifier
+
+
+def test_update_profile_pic_invalid_ref(test_db, server_address, image_data_url):
+    image_identifier = "some_random_garbage_here_129839102"
+    r = requests.patch(f"{server_address}/api/v3/user",
+                       json={
+                           "profile_pic_ref": image_identifier
+                       },
+                       headers={
+                           "Authorization": f"bearer {test_db.access_token}"
+                       })
+    assert r.status_code == 404
+    assert r.json()['error'] == ErrorCodes.IMAGE_NOT_FOUND.value
+    # make sure the PFP from user info isn't our identifier
+    # (intentionally not checking whether its None, since I'm
+    # planning on a default PFP/header system soon!)
+    r = requests.get(f"{server_address}/api/v3/user/info",
+                     json={
+                         "username": test_db.username
+                     },
+                     headers={
+                         "Authorization": f"Bearer {test_db.access_token}"
+                     })
+    assert r.status_code == 200
+    assert r.json()['profile_picture']['identifier'] != image_identifier
+
+
+def test_update_header_pic(test_db, server_address, image_data_url):
+    # upload a new image
+    image_identifier = requests.post(f"{server_address}/api/v3/image",
+                                     json={
+                                         "original_image": image_data_url
+                                     },
+                                     headers={
+                                         "Authorization": f"Bearer {test_db.access_token}"
+                                     }).json()['identifier']
+    r = requests.patch(f"{server_address}/api/v3/user",
+                       json={
+                           "header_pic_ref": image_identifier
+                       },
+                       headers={
+                           "Authorization": f"bearer {test_db.access_token}"
+                       })
+    assert r.status_code == 201
+    # make sure the PFP from user info matches
+    r = requests.get(f"{server_address}/api/v3/user/info",
+                     json={
+                         "username": test_db.username
+                     },
+                     headers={
+                         "Authorization": f"Bearer {test_db.access_token}"
+                     })
+    assert r.status_code == 200
+    assert r.json()['header']['identifier'] == image_identifier
+
+
+def test_update_header_pic_invalid_ref(test_db, server_address, image_data_url):
+    image_identifier = "some_random_garbage_here_129839102"
+    r = requests.patch(f"{server_address}/api/v3/user",
+                       json={
+                           "header_pic_ref": image_identifier
+                       },
+                       headers={
+                           "Authorization": f"bearer {test_db.access_token}"
+                       })
+    assert r.status_code == 404
+    assert r.json()['error'] == ErrorCodes.IMAGE_NOT_FOUND.value
+    # make sure the PFP from user info isn't our identifier
+    # (intentionally not checking whether its None, since I'm
+    # planning on a default PFP/header system soon!)
+    r = requests.get(f"{server_address}/api/v3/user/info",
+                     json={
+                         "username": test_db.username
+                     },
+                     headers={
+                         "Authorization": f"Bearer {test_db.access_token}"
+                     })
+    assert r.status_code == 200
+    assert r.json()['header']['identifier'] != image_identifier
