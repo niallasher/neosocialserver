@@ -54,6 +54,7 @@ from socialserver.api.legacy.two_factor import LegacyTwoFactor
 
 TOTP_REPLAY_PREVENTION_ENABLED = config.auth.totp.replay_prevention_enabled
 LESS_SECURE_PASSWORD_CHANGE_ENABLED = config.legacy_api_interface.enable_less_secure_password_change
+LEGACY_INTERFACE_ENABLED = config.legacy_api_interface.enable
 
 
 def create_app():
@@ -67,7 +68,7 @@ def create_app():
     if config.misc.enable_landing_page:
         @application.get('/')
         def landing_page():
-            return render_template('server_landing.html')
+            return render_template('server_landing.html', legacy_interface_enabled=LEGACY_INTERFACE_ENABLED)
 
     api.add_resource(ServerInfo, '/api/v3/server/info')
 

@@ -1,0 +1,70 @@
+:root {
+  --background-color: #f7f7f7;
+  --foreground-primary: #000;
+  --foreground-secondary: rgba(0,0,0,0.65);
+  --banner-warn-background: rgba(223, 73, 73, 0.5);
+  --banner-warn-foreground: #fff;
+}
+
+html {
+  background-color: var(--background-color);
+  /* system-ui isn't always the best choice,
+     but i doubt it'll be an issue here. */
+  font-family: system-ui, sans-serif;
+  color: var(--foreground-secondary);
+}
+
+html,
+body {
+  margin: 0;
+  padding: 2px;
+}
+
+.flex-center-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logo {
+  width: 128px;
+}
+
+.main-content {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.banner {
+  border-radius: 6px;
+  background-color: var(--banner-warn-background);
+  color: var(--banner-warn-foreground);
+  text-align: center;
+  min-height: 32px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* push below content down quite a ways */
+  margin-bottom: 3rem;
+}
+
+.text-bold {
+  font-weight: 700;
+  color: var(--foreground-primary) !important;
+}
+
+.text-light {
+  font-weight: 300;
+  color: var(--foreground-secondary);
+}
+
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: #000;
+    --foreground-primary: #fff;
+    --foreground-secondary: rgba(255, 255, 255, 0.85);
+  }
+}
