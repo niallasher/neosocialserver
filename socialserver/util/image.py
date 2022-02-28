@@ -175,16 +175,14 @@ def convert_data_url_to_byte_buffer(data_url: str) -> BytesIO:
 
 
 """ 
-    convert_data_url_to_image
+    convert_buffer_to_image
     
-    Converts a data_url to a pil.Image object,
-    using convert_data_url_to_byte_buffer
+    Converts a buffer to a pil.Image object
 """
 
 
-def convert_data_url_to_image(data_url: str) -> PIL.Image:
-    binary_data = convert_data_url_to_byte_buffer(data_url)
-    image = Image.open(binary_data).convert('RGB')
+def convert_buffer_to_image(buffer: BytesIO) -> PIL.Image:
+    image = Image.open(buffer).convert('RGB')
     return image
 
 
@@ -266,14 +264,15 @@ def _verify_image_package(image_package):
         # to where the handle_image function was called.
         # they should not be caught in handle_image itself!
         raise InvalidImageException
-    original_buffer = convert_data_url_to_byte_buffer(image_package['original'])
+
+    # original_buffer = convert_data_url_to_byte_buffer(image_package['original'])
 
     # validate the mimetype of the original image
-    if not _check_buffer_mimetype(original_buffer, ImageSupportedMimeTypes):
+    if not _check_buffer_mimetype(image_package['original'], ImageSupportedMimeTypes):
         raise InvalidImageException
 
     if 'cropped' in image_package.keys():
-        if not _check_buffer_mimetype(original_buffer, ImageSupportedMimeTypes):
+        if not _check_buffer_mimetype(image_package['cropped'], ImageSupportedMimeTypes):
             raise InvalidImageException
 
     # we don't need to return anything;
@@ -341,13 +340,7 @@ def generate_blur_hash(image: Image) -> str:
 """
 
 
-def handle_upload(image_package: str, userid: int) -> SimpleNamespace:
-    # Retrieve enum value for upload type
-    # deserialize the JSON containing image data urls
-    try:
-        images = loads(image_package)
-    except json.decoder.JSONDecodeError:
-        raise InvalidImageException
+def handle_upload(images: dict, userid: int) -> SimpleNamespace:
     # check that the given data is valid.
     _verify_image_package(images)
     # if the client didn't supply a cropped image for the purpose,
@@ -356,11 +349,11 @@ def handle_upload(image_package: str, userid: int) -> SimpleNamespace:
     # due diligence.
     # tldr: unlike customer service, it's usually the client who is wrong.
     if 'cropped' not in images.keys():
-        image = convert_data_url_to_image(images['original'])
+        image = convert_buffer_to_image(images['original'])
         original_image = copy(image)
     else:
-        image = convert_data_url_to_image(images['cropped'])
-        original_image = convert_data_url_to_image(images['original'])
+        image = convert_buffer_to_image(images['cropped'])
+        original_image = convert_buffer_to_image(images['original'])
     access_id = create_random_image_identifier()
 
     # all resized images get 4 different pixel ratios, returned in an array from

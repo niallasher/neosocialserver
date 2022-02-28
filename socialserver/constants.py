@@ -165,6 +165,7 @@ class ErrorCodes(Enum):
     OBJECT_NOT_OWNED_BY_USER = 58
     OBJECT_NOT_LIKED = 59
     OBJECT_ALREADY_LIKED = 60
+    REQUEST_TOO_LARGE = 61
 
 
 """
