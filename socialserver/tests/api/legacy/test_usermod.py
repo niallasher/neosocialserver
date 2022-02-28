@@ -1,7 +1,7 @@
 #  Copyright (c) Niall Asher 2022
 
 # noinspection PyUnresolvedReferences
-from socialserver.util.test import test_db, create_post_with_request, server_address, image_data_url
+from socialserver.util.test import test_db, create_post_with_request, server_address, image_data_binary
 from socialserver.constants import DISPLAY_NAME_MAX_LEN
 from secrets import token_urlsafe
 import requests
@@ -61,10 +61,10 @@ def test_update_username_invalid_legacy(test_db, server_address):
     assert r.status_code == 400
 
 
-def test_update_avatar_legacy(test_db, server_address, image_data_url):
+def test_update_avatar_legacy(test_db, server_address, image_data_binary):
     image_identifier = requests.post(f"{server_address}/api/v3/image",
-                                     json={
-                                         "original_image": image_data_url
+                                     files={
+                                         "original_image": image_data_binary
                                      },
                                      headers={
                                          "Authorization": f"Bearer {test_db.access_token}"

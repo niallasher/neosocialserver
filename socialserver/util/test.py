@@ -1,5 +1,6 @@
 #  Copyright (c) Niall Asher 2022
 
+import re
 import pony.orm
 import pytest
 import requests
@@ -8,6 +9,8 @@ from socialserver.db import create_test_db
 from pony.orm import db_session
 from socialserver.static.test_data.test_image import TEST_IMAGE_B64
 from socialserver.util.namespace import dict_to_simple_namespace
+from base64 import urlsafe_b64decode
+from io import BytesIO
 
 UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 " \
      "Mobile/15A372 Safari/604.1 "
@@ -73,6 +76,20 @@ def server_address():
 @pytest.fixture
 def image_data_url():
     return TEST_IMAGE_B64
+
+
+"""
+    image_data_binary
+    returns a test image (binary data)
+"""
+
+
+@pytest.fixture
+def image_data_binary():
+    data_url = TEST_IMAGE_B64
+    data_url = re.sub(r'^data:image/.+;base64,', '', data_url)
+    buffer = BytesIO(urlsafe_b64decode(data_url))
+    return buffer.read()
 
 
 """
