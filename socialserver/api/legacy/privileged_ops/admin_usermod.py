@@ -29,8 +29,6 @@ class LegacyAdminUserMod(Resource):
         if user is None:
             return {}, 404
 
-        # FIXME: very weird bug; clicking verify will verify a user. they can only be unverified by clicking remove mod!
-
         # toggle verification status
         if args['modtype'] == LegacyAdminUserModTypes.VERIFICATION_STATUS.value:
             if user.is_verified:
