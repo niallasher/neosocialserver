@@ -10,6 +10,8 @@ from socialserver.db import db
 from socialserver.util.config import config
 from socialserver.util.image import handle_upload, InvalidImageException
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header
+from socialserver.util.file import max_req_size, mb_to_b
+
 from flask_restful import Resource, reqparse
 from pony.orm import db_session
 
