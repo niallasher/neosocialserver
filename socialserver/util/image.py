@@ -250,34 +250,19 @@ def _check_buffer_mimetype(buffer, mimetypes):
 
 
 """
-    _verify_image_package
+    _verify_image
         
-    verify an image package given to the function, raising an
-    InvalidImageException if it's invalid 
+    verify an image using libmagic
 """
 
 
-def _verify_image_package(image_package):
-    # the original is required no matter what!
-    if 'original' not in image_package.keys():
-        # note: these exceptions should bubble up
-        # to where the handle_image function was called.
-        # they should not be caught in handle_image itself!
+def _verify_image(image: BytesIO):
+    if not _check_buffer_mimetype(image, ImageSupportedMimeTypes):
         raise InvalidImageException
-
-    # original_buffer = convert_data_url_to_byte_buffer(image_package['original'])
-
-    # validate the mimetype of the original image
-    if not _check_buffer_mimetype(image_package['original'], ImageSupportedMimeTypes):
-        raise InvalidImageException
-
-    if 'cropped' in image_package.keys():
-        if not _check_buffer_mimetype(image_package['cropped'], ImageSupportedMimeTypes):
-            raise InvalidImageException
 
     # we don't need to return anything;
     # the exception will interrupt control
-    # flow if we have a problem. otherwise
+    # flow if we have a problem. Otherwise,
     # we just want to continue
 
 
@@ -340,27 +325,17 @@ def generate_blur_hash(image: Image) -> str:
 """
 
 
-def handle_upload(images: dict, userid: int) -> SimpleNamespace:
+def handle_upload(image: BytesIO, userid: int) -> SimpleNamespace:
     # check that the given data is valid.
-    _verify_image_package(images)
-    # if the client didn't supply a cropped image for the purpose,
-    # we'll just use the original image in its place.
-    # this is a fallback, in case of a client that doesn't do
-    # due diligence.
-    # tldr: unlike customer service, it's usually the client who is wrong.
-    if 'cropped' not in images.keys():
-        image = convert_buffer_to_image(images['original'])
-        original_image = copy(image)
-    else:
-        image = convert_buffer_to_image(images['cropped'])
-        original_image = convert_buffer_to_image(images['original'])
+    _verify_image(image)
+    image = convert_buffer_to_image(image)
     access_id = create_random_image_identifier()
 
     # all resized images get 4 different pixel ratios, returned in an array from
     # 0 to 3, where the pixel ratio is the index + 1. except for posts.
     # we always deliver them in ''full'' quality (defined by MAX_IMAGE_SIZE_POST)
     arr_gallery_preview_image = resize_image_aspect_aware(
-        original_image, MAX_IMAGE_SIZE_GALLERY_PREVIEW)
+        image, MAX_IMAGE_SIZE_GALLERY_PREVIEW)
 
     # if upload_type == ImageUploadTypes.PROFILE_PICTURE:
     arr_profilepic = resize_image_aspect_aware(
@@ -376,7 +351,7 @@ def handle_upload(images: dict, userid: int) -> SimpleNamespace:
         image, MAX_IMAGE_SIZE_POST)
 
     images = {
-        ImageTypes.ORIGINAL: [original_image],
+        ImageTypes.ORIGINAL: [image],
         ImageTypes.POST: [img_post],
         ImageTypes.POST_PREVIEW: arr_post_preview,
         ImageTypes.HEADER: arr_header,

@@ -1,7 +1,6 @@
 #  Copyright (c) Niall Asher 2022
-import base64
-import io
 
+from io import BytesIO
 from flask.helpers import send_file
 from flask import request
 from os import path
@@ -96,29 +95,16 @@ class MultipartImage(Resource):
     @db_session
     @auth_reqd
     def post(self):
-        if request.files.get("original_image") is None:
+        if request.files.get("image") is None:
             return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
 
-        image: bytes = request.files.get("original_image").read()
+        image: bytes = request.files.get("image").read()
 
         if type(image) is not bytes:
             return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
 
-        cropped_image = request.files.get("cropped_image")
-        if cropped_image is not None:
-            cropped_image = cropped_image.read()
-            if type(cropped_image) is not bytes:
-                return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
-
-        images = {
-            "original": io.BytesIO(image)
-        }
-
-        if cropped_image:
-            images['cropped'] = io.BytesIO(cropped_image)
-
         try:
-            image_info = handle_upload(images, get_user_from_auth_header().id)
+            image_info = handle_upload(BytesIO(image), get_user_from_auth_header().id)
         except InvalidImageException:
             return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
 
