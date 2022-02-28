@@ -10,7 +10,7 @@ from socialserver.db import db
 from socialserver.util.config import config
 from socialserver.util.image import handle_upload, InvalidImageException
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header
-from socialserver.util.file import max_req_size, mb_to_b
+from socialserver.util.file import max_req_size, mb_to_b, b_to_mb
 
 from flask_restful import Resource, reqparse
 from pony.orm import db_session
@@ -70,6 +70,11 @@ class NewImage(Resource):
             return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
 
         image: bytes = request.files.get("image").read()
+
+        # I think we still need this, since content length can be spoofed?
+        image_size_mb = b_to_mb(len(image))
+        if image_size_mb > IMAGE_MAX_REQ_SIZE_MB:
+            return {"error": ErrorCodes.REQUEST_TOO_LARGE.value}, 413
 
         if type(image) is not bytes:
             return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400

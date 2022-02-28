@@ -16,6 +16,16 @@ def mb_to_b(mb_count: float) -> int:
 
 
 """
+    b_to_mb
+    convert bytes to megabytes 
+"""
+
+
+def b_to_mb(b_count: int) -> float:
+    return b_count / 1e+6
+
+
+"""
     max_req_size
     decorator to discard requests above a certain size
 """
