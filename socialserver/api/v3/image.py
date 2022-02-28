@@ -1,6 +1,8 @@
 #  Copyright (c) Niall Asher 2022
+import base64
 
 from flask.helpers import send_file
+from flask import request
 from os import path
 from socialserver.constants import MAX_PIXEL_RATIO, ErrorCodes, ImageTypes
 from math import ceil
@@ -80,6 +82,32 @@ class NewImage(Resource):
         image_package = dumps(image_package_dict)
 
         # image package parsing is handled by socialserver.util.image.handle_upload!
+        try:
+            image_info = handle_upload(image_package, get_user_from_auth_header().id)
+        except InvalidImageException:
+            return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
+
+        return {"identifier": image_info.identifier}, 201
+
+
+class MultipartImage(Resource):
+
+    @db_session
+    @auth_reqd
+    def post(self):
+        if request.files.get("original_image") is None:
+            return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
+
+        image = request.files.get("original_image").read()
+        if type(image) is not bytes:
+            return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
+
+        original_image_b64 = "data:image/jpg;base64," + base64.urlsafe_b64encode(image).decode()
+
+        image_package = dumps({
+            "original": original_image_b64
+        })
+
         try:
             image_info = handle_upload(image_package, get_user_from_auth_header().id)
         except InvalidImageException:
