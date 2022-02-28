@@ -303,7 +303,6 @@ def get_image_data_url_legacy(identifier: str, image_type: ImageTypes) -> str:
     if not check_image_exists(identifier):
         raise InvalidImageException
 
-    # TODO: sort out the configuration so we can decide what pixel ratio to send to a classic client
     pixel_ratio = config.legacy_api_interface.image_pixel_ratio
     if image_type == ImageTypes.POST.value:
         # only 1x for posts, since we store them at a very high size already.
