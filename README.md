@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="socialserver/static/logo.png" style="width:64px;margin-top:12px;margin-bottom:5px;"/>
+    <img src="socialserver/static/logo256.png" style="width:64px;margin-top:12px;margin-bottom:5px;"/>
     <h1 style="margin-top:0;margin-bottom:5px;">socialserver-neo</h1>
 </div>
 

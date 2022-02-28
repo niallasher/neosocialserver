@@ -67,4 +67,9 @@ body {
     --foreground-primary: #fff;
     --foreground-secondary: rgba(255, 255, 255, 0.85);
   }
+  .logo {
+    /* mute the logo a lil bit in dark mode, since it's pretty bright.
+       could look better i guess, but works well for now */
+    filter: brightness(0.9);
+  }
 }
