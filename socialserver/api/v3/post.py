@@ -16,9 +16,6 @@ class Post(Resource):
     def post(self):
 
         parser = reqparse.RequestParser()
-        # TODO: should probably make it possible for people to post
-        # just images; socialserver 2.x didn't allow that, and people
-        # complained quite a bit!
         parser.add_argument('text_content', type=str, required=True)
         # images optional.
         parser.add_argument('images', type=str,
