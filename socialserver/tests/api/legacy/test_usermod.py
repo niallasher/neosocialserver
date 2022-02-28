@@ -64,7 +64,7 @@ def test_update_username_invalid_legacy(test_db, server_address):
 def test_update_avatar_legacy(test_db, server_address, image_data_binary):
     image_identifier = requests.post(f"{server_address}/api/v3/image",
                                      files={
-                                         "original_image": image_data_binary
+                                         "image": image_data_binary
                                      },
                                      headers={
                                          "Authorization": f"Bearer {test_db.access_token}"
