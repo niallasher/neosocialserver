@@ -18,7 +18,7 @@ from socialserver.api.v3.user import User, UserInfo
 from socialserver.api.v3.username_available import UsernameAvailable
 from socialserver.api.v3.feed import PostFeed
 from socialserver.api.v3.post import Post
-from socialserver.api.v3.image import Image, NewImage, MultipartImage
+from socialserver.api.v3.image import Image, NewImage
 from socialserver.api.v3.block import Block
 from socialserver.api.v3.follow import Follow
 from socialserver.api.v3.two_factor import TwoFactorAuthentication, TwoFactorAuthenticationVerification
@@ -94,7 +94,6 @@ def create_app():
 
     api.add_resource(Image, '/api/v3/image/<imageid>')
     api.add_resource(NewImage, '/api/v3/image')
-    api.add_resource(MultipartImage, '/api/v3/image/multipart')
 
     api.add_resource(UserApprovals, '/api/v3/admin/userApprovals')
 

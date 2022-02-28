@@ -1,10 +1,8 @@
 #  Copyright (c) Niall Asher 2022
 
 import datetime
-import json.decoder
 import re
 from base64 import urlsafe_b64decode
-from io import BytesIO
 from math import gcd
 from os import makedirs, mkdir, path
 from types import SimpleNamespace
@@ -19,7 +17,6 @@ from socialserver.constants import ImageTypes, MAX_PIXEL_RATIO, MAX_IMAGE_SIZE_G
     MAX_IMAGE_SIZE_POST_PREVIEW, MAX_IMAGE_SIZE_POST, MAX_IMAGE_SIZE_PROFILE_PICTURE, \
     MAX_IMAGE_SIZE_PROFILE_PICTURE_LARGE, ImageSupportedMimeTypes, BLURHASH_X_COMPONENTS, BLURHASH_Y_COMPONENTS
 from secrets import token_urlsafe
-from json import loads
 from copy import copy
 import magic
 from typing import Tuple

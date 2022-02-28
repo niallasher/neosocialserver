@@ -12,7 +12,6 @@ from socialserver.util.image import handle_upload, InvalidImageException
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header
 from flask_restful import Resource, reqparse
 from pony.orm import db_session
-from json import dumps
 
 IMAGE_DIR = config.media.images.storage_dir
 
@@ -58,39 +57,6 @@ class Image(Resource):
 
 
 class NewImage(Resource):
-
-    @db_session
-    @auth_reqd
-    def post(self):
-
-        parser = reqparse.RequestParser()
-        parser.add_argument("original_image", type=str, required=True)
-        parser.add_argument("cropped_image", type=str, required=False)
-        args = parser.parse_args()
-
-        # this is a bit hacky, I'll admit. I want to work further on
-        # image code soon, so I'll redo handle upload to take this stuff
-        # directly then I'd imagine.
-
-        image_package_dict = {
-            "original": args['original_image']
-        }
-
-        if args['cropped_image']:
-            image_package_dict['cropped'] = args['cropped_image']
-
-        image_package = dumps(image_package_dict)
-
-        # image package parsing is handled by socialserver.util.image.handle_upload!
-        try:
-            image_info = handle_upload(image_package, get_user_from_auth_header().id)
-        except InvalidImageException:
-            return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
-
-        return {"identifier": image_info.identifier}, 201
-
-
-class MultipartImage(Resource):
 
     @db_session
     @auth_reqd
