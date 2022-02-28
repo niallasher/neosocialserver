@@ -16,6 +16,8 @@ from flask_restful import Resource, reqparse
 from pony.orm import db_session
 
 IMAGE_DIR = config.media.images.storage_dir
+IMAGE_MAX_REQ_SIZE_MB = config.media.images.max_image_request_size_mb
+IMAGE_MAX_REQ_SIZE = mb_to_b(IMAGE_MAX_REQ_SIZE_MB)
 
 
 class Image(Resource):
@@ -60,6 +62,7 @@ class Image(Resource):
 
 class NewImage(Resource):
 
+    @max_req_size(IMAGE_MAX_REQ_SIZE)
     @db_session
     @auth_reqd
     def post(self):

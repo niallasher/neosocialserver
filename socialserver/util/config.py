@@ -62,6 +62,10 @@ host = ""
 quality = 80
 post_quality = 90
 storage_dir = "{FILE_ROOT}/media/images"
+# max size of an image upload request in megabytes. (float)
+# make sure that anything in the way of the server e.g. nginx,
+# is configured to allow a request of at least this size!
+max_image_request_size_mb = 16
 
 [auth.registration]
 enabled = true
