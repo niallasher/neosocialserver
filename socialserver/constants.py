@@ -14,6 +14,15 @@ from enum import Enum
 SERVER_VERSION = "3.0.0"
 
 """
+    Video Stuff (WIP)
+"""
+MAX_VIDEO_SIZE_MB = 50
+# we're literally just using direct play for now,
+# so keep this lean. in the future, we could use celery or smth
+# to process the video into a proper format?
+VIDEO_SUPPORTED_FORMATS = ["video/mp4"]
+
+"""
   Max string length for different user generated areas.
 """
 DISPLAY_NAME_MAX_LEN = 32
