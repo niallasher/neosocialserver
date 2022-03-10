@@ -67,6 +67,9 @@ storage_dir = "{FILE_ROOT}/media/images"
 # is configured to allow a request of at least this size!
 max_image_request_size_mb = 16
 
+[media.videos]
+storage_dir = "{FILE_ROOT}/media/videos"
+
 [auth.registration]
 enabled = true
 # if enabled, any admins will be

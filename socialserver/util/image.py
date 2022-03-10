@@ -231,14 +231,15 @@ class InvalidImageException(Exception):
 
 
 """
-    _check_buffer_mimetype
+    check_buffer_mimetype
     
     Check the file type of binary data, to ensure it matches an
     array of mimetypes. Returns true if ok, false if not.
 """
 
 
-def _check_buffer_mimetype(buffer, mimetypes):
+# TODO: if we're using this in multiple places it should be moved to socialserver.util.file!
+def check_buffer_mimetype(buffer, mimetypes):
     mimetype = magic.from_buffer(buffer.read(2048), mime=True)
     buffer.seek(0)
     if mimetype not in mimetypes:
@@ -254,7 +255,7 @@ def _check_buffer_mimetype(buffer, mimetypes):
 
 
 def _verify_image(image: BytesIO):
-    if not _check_buffer_mimetype(image, ImageSupportedMimeTypes):
+    if not check_buffer_mimetype(image, ImageSupportedMimeTypes):
         raise InvalidImageException
 
     # we don't need to return anything;

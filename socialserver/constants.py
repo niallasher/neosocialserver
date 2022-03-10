@@ -20,7 +20,7 @@ MAX_VIDEO_SIZE_MB = 50
 # we're literally just using direct play for now,
 # so keep this lean. in the future, we could use celery or smth
 # to process the video into a proper format?
-VIDEO_SUPPORTED_FORMATS = ["video/mp4"]
+VIDEO_SUPPORTED_FORMATS = ["video/mp4", "video/quicktime"]
 
 """
   Max string length for different user generated areas.
@@ -175,6 +175,8 @@ class ErrorCodes(Enum):
     OBJECT_NOT_LIKED = 59
     OBJECT_ALREADY_LIKED = 60
     REQUEST_TOO_LARGE = 61
+    INVALID_VIDEO = 62
+    OBJECT_NOT_FOUND = 63
 
 
 """
