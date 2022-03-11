@@ -44,6 +44,7 @@ def define_entities(db_object):
         profile_pic = orm.Optional("Image")
         header_pic = orm.Optional("Image")
         uploaded_images = orm.Set("Image", reverse="uploader")
+        uploaded_videos = orm.Set("Video", reverse="owner")
         # deleting user should leave reports intact
         submitted_reports = orm.Set("PostReport", cascade_delete=False)
         associated_api_keys = orm.Set("ApiKey", cascade_delete=True)
@@ -121,6 +122,9 @@ def define_entities(db_object):
         # this is the useful one instead, since it retains
         # the proper ordering, and can be indexed etc.
         image_ids = orm.Optional(orm.IntArray)
+        # need to look into; a post can have photos *OR* videos.
+        # can this be enforced with this schema?
+        video = orm.Optional('Video')
         comments = orm.Set('Comment', cascade_delete=True)
         likes = orm.Set('PostLike', cascade_delete=True)
         hashtags = orm.Set('Hashtag')
@@ -178,12 +182,13 @@ def define_entities(db_object):
         associated_profile_pics = orm.Set('User', reverse='profile_pic')
         associated_header_pics = orm.Set('User', reverse='header_pic')
         associated_posts = orm.Set('Post', reverse='images')
+        associated_thumbnails = orm.Set('Video', reverse="thumbnail")
         blur_hash = orm.Required(str)
 
         @property
         def is_orphan(self):
             return len(self.associated_posts) == 0 and len(self.associated_profile_pics) == 0 \
-                   and len(self.associated_header_pics) == 0
+                   and len(self.associated_header_pics) and len(self.associated_thumbnails) == 0
 
     class Hashtag(db_object.Entity):
         creation_time = orm.Required(datetime.datetime)
@@ -233,6 +238,17 @@ def define_entities(db_object):
         # and practically impossible to build a lookup table for
         key_hash = orm.Required(str)
         permissions = orm.Required(orm.IntArray)  # constants.ApiKeyPermissions
+
+    class Video(db_object.Entity):
+        owner = orm.Required('User')
+        creation_time = orm.Required(datetime.datetime)
+        # for both video and thumbnail.
+        identifier = orm.Required(str)
+        associated_posts = orm.Set('Post', reverse="video")
+        thumbnail = orm.Required('Image', reverse="associated_thumbnails")
+        # this probably won't be implemented for a while, but
+        # if we start transcoding, this will become important.
+        processed = orm.Required(bool)
 
 
 """

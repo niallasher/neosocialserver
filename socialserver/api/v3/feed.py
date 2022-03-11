@@ -1,7 +1,7 @@
 #  Copyright (c) Niall Asher 2022
 
 from flask_restful import Resource, reqparse
-from socialserver.constants import MAX_FEED_GET_COUNT, ErrorCodes
+from socialserver.constants import MAX_FEED_GET_COUNT, ErrorCodes, PostAdditionalContentTypes
 from socialserver.db import db
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header
 from pony.orm import db_session
@@ -88,9 +88,27 @@ class PostFeed(Resource):
 
             user_owns_post = post.user == requesting_user_db
 
-            post_images = []
-            for image in post.get_images:
-                post_images.append(image.identifier)
+            additional_content_type = PostAdditionalContentTypes.NONE.value
+            additional_content = []
+
+            post_images = post.get_images
+            video = post.video
+
+            # images override anything else, since you can only have 1 additional content type. (for now)
+            if len(post_images) >= 1:
+                additional_content_type = PostAdditionalContentTypes.IMAGES.value
+                for image in post_images:
+                    additional_content.append({
+                        "identifier": image.identifier,
+                        "blurhash": image.blur_hash
+                    })
+            elif video is not None:
+                additional_content_type = PostAdditionalContentTypes.VIDEO.value
+                additional_content.append({
+                    "identifier": video.identifier,
+                    "thumbnail_identifier": video.thumbnail.identifier,
+                    "thumbnail_blurhash": video.thumbnail.blur_hash
+                })
 
             posts.append(
                 {
@@ -100,7 +118,8 @@ class PostFeed(Resource):
                         "creation_date": post.creation_time.timestamp(),
                         "like_count": len(post.likes),
                         "comment_count": len(post.comments),
-                        "images": post_images
+                        "additional_content_type": additional_content_type,
+                        "additional_content": additional_content
                     },
                     "user": {
                         "display_name": post.user.display_name,

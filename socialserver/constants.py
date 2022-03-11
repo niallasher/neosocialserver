@@ -1,6 +1,10 @@
 #  Copyright (c) Niall Asher 2022
 
 from enum import Enum
+from os import path
+
+# root directory of the module where-ever it happens to be running.
+ROOT_DIR = path.dirname(path.abspath(__file__))
 
 # semver spec.
 # major/minor/patch.
@@ -12,6 +16,15 @@ from enum import Enum
 # even if they change the current api, AS LONG
 # AS THEY DO NOT BREAK CLIENT COMPATIBILITY!
 SERVER_VERSION = "3.0.0"
+
+"""
+    Video Stuff (WIP)
+"""
+MAX_VIDEO_SIZE_MB = 50
+# we're literally just using direct play for now,
+# so keep this lean. in the future, we could use celery or smth
+# to process the video into a proper format?
+VIDEO_SUPPORTED_FORMATS = ["video/mp4", "video/quicktime"]
 
 """
   Max string length for different user generated areas.
@@ -165,6 +178,9 @@ class ErrorCodes(Enum):
     OBJECT_NOT_OWNED_BY_USER = 58
     OBJECT_NOT_LIKED = 59
     OBJECT_ALREADY_LIKED = 60
+    REQUEST_TOO_LARGE = 61
+    INVALID_VIDEO = 62
+    OBJECT_NOT_FOUND = 63
 
 
 """
@@ -373,3 +389,15 @@ REGEX_HASHTAG = r"#[a-zA-Z0-9]{1,12}"
 
 BLURHASH_X_COMPONENTS = 4
 BLURHASH_Y_COMPONENTS = 3
+
+"""
+    post media types, to send to the client.
+    e.g. images, videos etc.
+"""
+
+
+class PostAdditionalContentTypes(Enum):
+    NONE = 0
+    IMAGES = 1
+    VIDEO = 2
+    POLL = 3

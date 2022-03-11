@@ -1,6 +1,8 @@
 #  Copyright (c) Niall Asher 2022
 
+from io import BytesIO
 from flask.helpers import send_file
+from flask import request
 from os import path
 from socialserver.constants import MAX_PIXEL_RATIO, ErrorCodes, ImageTypes
 from math import ceil
@@ -8,11 +10,14 @@ from socialserver.db import db
 from socialserver.util.config import config
 from socialserver.util.image import handle_upload, InvalidImageException
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header
+from socialserver.util.file import max_req_size, mb_to_b, b_to_mb
+
 from flask_restful import Resource, reqparse
 from pony.orm import db_session
-from json import dumps
 
 IMAGE_DIR = config.media.images.storage_dir
+IMAGE_MAX_REQ_SIZE_MB = config.media.images.max_image_request_size_mb
+IMAGE_MAX_REQ_SIZE = mb_to_b(IMAGE_MAX_REQ_SIZE_MB)
 
 
 class Image(Resource):
@@ -57,31 +62,25 @@ class Image(Resource):
 
 class NewImage(Resource):
 
+    @max_req_size(IMAGE_MAX_REQ_SIZE)
     @db_session
     @auth_reqd
     def post(self):
+        if request.files.get("image") is None:
+            return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
 
-        parser = reqparse.RequestParser()
-        parser.add_argument("original_image", type=str, required=True)
-        parser.add_argument("cropped_image", type=str, required=False)
-        args = parser.parse_args()
+        image: bytes = request.files.get("image").read()
 
-        # this is a bit hacky, I'll admit. I want to work further on
-        # image code soon, so I'll redo handle upload to take this stuff
-        # directly then I'd imagine.
+        # I think we still need this, since content length can be spoofed?
+        image_size_mb = b_to_mb(len(image))
+        if image_size_mb > IMAGE_MAX_REQ_SIZE_MB:
+            return {"error": ErrorCodes.REQUEST_TOO_LARGE.value}, 413
 
-        image_package_dict = {
-            "original": args['original_image']
-        }
+        if type(image) is not bytes:
+            return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
 
-        if args['cropped_image']:
-            image_package_dict['cropped'] = args['cropped_image']
-
-        image_package = dumps(image_package_dict)
-
-        # image package parsing is handled by socialserver.util.image.handle_upload!
         try:
-            image_info = handle_upload(image_package, get_user_from_auth_header().id)
+            image_info = handle_upload(BytesIO(image), get_user_from_auth_header().id)
         except InvalidImageException:
             return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
 

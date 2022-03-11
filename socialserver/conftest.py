@@ -29,8 +29,9 @@ class TestingServer(Thread):
 
 def pytest_sessionstart():
     config.auth.registration.approval_required = False
-    if not path.exists("/tmp/socialserver_image_testing"):
-        mkdir("/tmp/socialserver_image_testing")
+    reqd_paths = ["/tmp/socialserver_image_testing", "/tmp/socialserver_video_testing"]
+    for reqd_path in reqd_paths:
+        path.exists(reqd_path) or mkdir(reqd_path)
     # start a copy of the flask server in a background
     # thread, so we can test against it.
     application_thread.start()
@@ -38,6 +39,8 @@ def pytest_sessionstart():
 
 
 def pytest_sessionfinish():
+    # TODO: remove old test images & videos etc.,
+    # rather then just leaving it to the OS
     application_thread.kill()
     remove('/tmp/test.db')
 

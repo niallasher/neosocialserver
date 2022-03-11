@@ -1,10 +1,8 @@
 #  Copyright (c) Niall Asher 2022
 
 import datetime
-import json.decoder
 import re
 from base64 import urlsafe_b64decode
-from io import BytesIO
 from math import gcd
 from os import makedirs, mkdir, path
 from types import SimpleNamespace
@@ -19,7 +17,6 @@ from socialserver.constants import ImageTypes, MAX_PIXEL_RATIO, MAX_IMAGE_SIZE_G
     MAX_IMAGE_SIZE_POST_PREVIEW, MAX_IMAGE_SIZE_POST, MAX_IMAGE_SIZE_PROFILE_PICTURE, \
     MAX_IMAGE_SIZE_PROFILE_PICTURE_LARGE, ImageSupportedMimeTypes, BLURHASH_X_COMPONENTS, BLURHASH_Y_COMPONENTS
 from secrets import token_urlsafe
-from json import loads
 from copy import copy
 import magic
 from typing import Tuple
@@ -175,16 +172,14 @@ def convert_data_url_to_byte_buffer(data_url: str) -> BytesIO:
 
 
 """ 
-    convert_data_url_to_image
+    convert_buffer_to_image
     
-    Converts a data_url to a pil.Image object,
-    using convert_data_url_to_byte_buffer
+    Converts a buffer to a pil.Image object
 """
 
 
-def convert_data_url_to_image(data_url: str) -> PIL.Image:
-    binary_data = convert_data_url_to_byte_buffer(data_url)
-    image = Image.open(binary_data).convert('RGB')
+def convert_buffer_to_image(buffer: BytesIO) -> PIL.Image:
+    image = Image.open(buffer).convert('RGB')
     return image
 
 
@@ -236,14 +231,15 @@ class InvalidImageException(Exception):
 
 
 """
-    _check_buffer_mimetype
+    check_buffer_mimetype
     
     Check the file type of binary data, to ensure it matches an
     array of mimetypes. Returns true if ok, false if not.
 """
 
 
-def _check_buffer_mimetype(buffer, mimetypes):
+# TODO: if we're using this in multiple places it should be moved to socialserver.util.file!
+def check_buffer_mimetype(buffer, mimetypes):
     mimetype = magic.from_buffer(buffer.read(2048), mime=True)
     buffer.seek(0)
     if mimetype not in mimetypes:
@@ -252,33 +248,19 @@ def _check_buffer_mimetype(buffer, mimetypes):
 
 
 """
-    _verify_image_package
+    _verify_image
         
-    verify an image package given to the function, raising an
-    InvalidImageException if it's invalid 
+    verify an image using libmagic
 """
 
 
-def _verify_image_package(image_package):
-    # the original is required no matter what!
-    if 'original' not in image_package.keys():
-        # note: these exceptions should bubble up
-        # to where the handle_image function was called.
-        # they should not be caught in handle_image itself!
+def _verify_image(image: BytesIO):
+    if not check_buffer_mimetype(image, ImageSupportedMimeTypes):
         raise InvalidImageException
-    original_buffer = convert_data_url_to_byte_buffer(image_package['original'])
-
-    # validate the mimetype of the original image
-    if not _check_buffer_mimetype(original_buffer, ImageSupportedMimeTypes):
-        raise InvalidImageException
-
-    if 'cropped' in image_package.keys():
-        if not _check_buffer_mimetype(original_buffer, ImageSupportedMimeTypes):
-            raise InvalidImageException
 
     # we don't need to return anything;
     # the exception will interrupt control
-    # flow if we have a problem. otherwise
+    # flow if we have a problem. Otherwise,
     # we just want to continue
 
 
@@ -341,33 +323,17 @@ def generate_blur_hash(image: Image) -> str:
 """
 
 
-def handle_upload(image_package: str, userid: int) -> SimpleNamespace:
-    # Retrieve enum value for upload type
-    # deserialize the JSON containing image data urls
-    try:
-        images = loads(image_package)
-    except json.decoder.JSONDecodeError:
-        raise InvalidImageException
+def handle_upload(image: BytesIO, userid: int) -> SimpleNamespace:
     # check that the given data is valid.
-    _verify_image_package(images)
-    # if the client didn't supply a cropped image for the purpose,
-    # we'll just use the original image in its place.
-    # this is a fallback, in case of a client that doesn't do
-    # due diligence.
-    # tldr: unlike customer service, it's usually the client who is wrong.
-    if 'cropped' not in images.keys():
-        image = convert_data_url_to_image(images['original'])
-        original_image = copy(image)
-    else:
-        image = convert_data_url_to_image(images['cropped'])
-        original_image = convert_data_url_to_image(images['original'])
+    _verify_image(image)
+    image = convert_buffer_to_image(image)
     access_id = create_random_image_identifier()
 
     # all resized images get 4 different pixel ratios, returned in an array from
     # 0 to 3, where the pixel ratio is the index + 1. except for posts.
     # we always deliver them in ''full'' quality (defined by MAX_IMAGE_SIZE_POST)
     arr_gallery_preview_image = resize_image_aspect_aware(
-        original_image, MAX_IMAGE_SIZE_GALLERY_PREVIEW)
+        image, MAX_IMAGE_SIZE_GALLERY_PREVIEW)
 
     # if upload_type == ImageUploadTypes.PROFILE_PICTURE:
     arr_profilepic = resize_image_aspect_aware(
@@ -383,7 +349,7 @@ def handle_upload(image_package: str, userid: int) -> SimpleNamespace:
         image, MAX_IMAGE_SIZE_POST)
 
     images = {
-        ImageTypes.ORIGINAL: [original_image],
+        ImageTypes.ORIGINAL: [image],
         ImageTypes.POST: [img_post],
         ImageTypes.POST_PREVIEW: arr_post_preview,
         ImageTypes.HEADER: arr_header,

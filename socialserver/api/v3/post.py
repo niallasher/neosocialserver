@@ -5,7 +5,8 @@ import re
 from flask_restful import Resource, reqparse
 from socialserver.db import db
 from pony.orm import db_session, commit
-from socialserver.constants import MAX_IMAGES_PER_POST, POST_MAX_LEN, REGEX_HASHTAG, ErrorCodes
+from socialserver.constants import MAX_IMAGES_PER_POST, POST_MAX_LEN, REGEX_HASHTAG, ErrorCodes, \
+    PostAdditionalContentTypes
 from socialserver.util.auth import get_user_from_auth_header, auth_reqd
 
 
@@ -17,9 +18,10 @@ class Post(Resource):
 
         parser = reqparse.RequestParser()
         parser.add_argument('text_content', type=str, required=True)
-        # images optional.
+        # images & videos optional
         parser.add_argument('images', type=str,
                             required=False, action="append")
+        parser.add_argument('video', type=str, required=False)
         args = parser.parse_args()
 
         user = get_user_from_auth_header()
@@ -36,12 +38,16 @@ class Post(Resource):
         # them for UX purposes!
         text_content = text_content.replace('\n', '')
 
+        additional_content = PostAdditionalContentTypes.NONE.value
         # images is just used for relationship purposes, and might be removed soon?
         # this is due to it being a set (in db), and therefore not being indexable,
         # and not keeping it's order
-        images = []
+        images = None
+        video = None
         image_ids = []
+
         if args['images'] is not None:
+            images = []
             referenced_images = args['images']
             # we don't want people making giant
             # image galleries in a post. !! SHOULD ALSO
@@ -56,6 +62,11 @@ class Post(Resource):
                     return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404
                 images.append(image)
                 image_ids.append(image.id)
+        elif args['video'] is not None:
+            video = db.Video.get(identifier=args['video'])
+            if video is None:
+                return {"error": ErrorCodes.OBJECT_NOT_FOUND.value}, 404
+            video = args['video']
 
         # checking for hashtags in the post content
         # hashtags can be 1 to 12 chars long and only alphanumeric.
@@ -81,9 +92,14 @@ class Post(Resource):
             user=user,
             creation_time=datetime.utcnow(),
             text=text_content,
-            images=images,
-            image_ids=image_ids,
             hashtags=db_tags)
+
+        if images is not None:
+            new_post.images = images
+            new_post.image_ids = image_ids
+
+        if video is not None:
+            new_post.video = db.Video.get(identifier=video)
 
         # we commit earlier than normal, so we
         # can return the ID before the function ends
@@ -120,14 +136,27 @@ class Post(Resource):
         if wanted_post.user in user.blocked_users:
             return {"error": ErrorCodes.USER_BLOCKED.value}, 400
 
-        post_images = []
-        for image in wanted_post.get_images:
-            post_images.append(
-                {
+        additional_content_type = PostAdditionalContentTypes.NONE.value
+        additional_content = []
+
+        post_images = wanted_post.get_images
+        video = wanted_post.video
+
+        # images override anything else, since you can only have 1 additional content type. (for now)
+        if len(post_images) >= 1:
+            additional_content_type = PostAdditionalContentTypes.IMAGES.value
+            for image in post_images:
+                additional_content.append({
                     "identifier": image.identifier,
-                    "blur_hash": image.blur_hash
-                }
-            )
+                    "blurhash": image.blur_hash
+                })
+        elif video is not None:
+            additional_content_type = PostAdditionalContentTypes.VIDEO.value
+            additional_content.append({
+                "identifier": video.identifier,
+                "thumbnail_identifier": video.thumbnail.identifier,
+                "thumbnail_blurhash": video.thumbnail.blur_hash
+            })
 
         user_has_liked_post = db.PostLike.get(user=user,
                                               post=wanted_post) is not None
@@ -149,7 +178,8 @@ class Post(Resource):
                        "creation_date": wanted_post.creation_time.timestamp(),
                        "like_count": len(wanted_post.likes),
                        "comment_count": len(wanted_post.comments),
-                       "images": post_images
+                       "additional_content_type": additional_content_type,
+                       "additional_content": additional_content
                    },
                    "user": {
                        "display_name": wanted_post.user.display_name,

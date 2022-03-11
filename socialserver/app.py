@@ -25,6 +25,7 @@ from socialserver.api.v3.two_factor import TwoFactorAuthentication, TwoFactorAut
 from socialserver.api.v3.user_password_change import UserPasswordChange
 from socialserver.api.v3.comment_feed import CommentFeed
 from socialserver.api.v3.comment_like import CommentLike
+from socialserver.api.v3.video import NewVideo, Video
 # API Version 3 Admin stuff
 from socialserver.api.v3.admin.user_approvals import UserApprovals
 # API legacy (v1/v2, it's confusing!)
@@ -94,6 +95,9 @@ def create_app():
 
     api.add_resource(Image, '/api/v3/image/<imageid>')
     api.add_resource(NewImage, '/api/v3/image')
+
+    api.add_resource(Video, '/api/v3/videos/<videoid>')
+    api.add_resource(NewVideo, '/api/v3/videos')
 
     api.add_resource(UserApprovals, '/api/v3/admin/userApprovals')
 

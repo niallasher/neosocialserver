@@ -1,13 +1,17 @@
 #  Copyright (c) Niall Asher 2022
 
+import re
 import pony.orm
 import pytest
 import requests
 from os import getenv
 from socialserver.db import create_test_db
 from pony.orm import db_session
-from socialserver.static.test_data.test_image import TEST_IMAGE_B64
+from socialserver.tests.test_data.test_image import TEST_IMAGE_B64
 from socialserver.util.namespace import dict_to_simple_namespace
+from socialserver.constants import ROOT_DIR
+from base64 import urlsafe_b64decode
+from io import BytesIO
 
 UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 " \
      "Mobile/15A372 Safari/604.1 "
@@ -76,6 +80,32 @@ def image_data_url():
 
 
 """
+    image_data_binary
+    returns a test image (binary data)
+"""
+
+
+@pytest.fixture
+def image_data_binary():
+    data_url = TEST_IMAGE_B64
+    data_url = re.sub(r'^data:image/.+;base64,', '', data_url)
+    buffer = BytesIO(urlsafe_b64decode(data_url))
+    return buffer.read()
+
+
+"""
+    video_data_binary
+    returns a test video (binary data)
+"""
+
+
+@pytest.fixture
+def video_data_binary():
+    with open(f"{ROOT_DIR}/tests/test_data/test_video.mp4", "rb") as video_file:
+        return video_file.read()
+
+
+"""
     get_server_address
     
     returns an server address for the testing server,
@@ -102,8 +132,11 @@ def get_server_address():
 def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -> None:
     monkeypatch.setattr("socialserver.util.image.IMAGE_DIR", "/tmp/socialserver_image_testing")
     monkeypatch.setattr("socialserver.api.v3.image.IMAGE_DIR", "/tmp/socialserver_image_testing")
+    monkeypatch.setattr("socialserver.util.video.VIDEO_DIR", "/tmp/socialserver_video_testing")
+    monkeypatch.setattr("socialserver.api.v3.video.VIDEO_DIR", "/tmp/socialserver_video_testing")
     monkeypatch.setattr("socialserver.util.auth.db", db)
     monkeypatch.setattr("socialserver.util.image.db", db)
+    monkeypatch.setattr("socialserver.util.video.db", db)
     monkeypatch.setattr("socialserver.api.v3.block.db", db)
     monkeypatch.setattr("socialserver.api.v3.feed.db", db)
     monkeypatch.setattr("socialserver.api.v3.follow.db", db)
@@ -119,6 +152,7 @@ def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -
     monkeypatch.setattr("socialserver.api.v3.comment.db", db)
     monkeypatch.setattr("socialserver.api.v3.comment_feed.db", db)
     monkeypatch.setattr("socialserver.api.v3.comment_like.db", db)
+    monkeypatch.setattr("socialserver.api.v3.video.db", db)
     # legacy api
     monkeypatch.setattr("socialserver.api.legacy.user.db", db)
     monkeypatch.setattr("socialserver.api.legacy.comment_filter.filter_by_post.db", db)

@@ -3,7 +3,7 @@
 # pycharm isn't detecting fixture usage, so we're
 # disabling PyUnresolvedReferences for the import.
 # noinspection PyUnresolvedReferences
-from socialserver.util.test import test_db, server_address, image_data_url
+from socialserver.util.test import test_db, server_address, image_data_binary
 import requests
 from pony.orm import db_session
 from socialserver.constants import ErrorCodes, BIO_MAX_LEN, DISPLAY_NAME_MAX_LEN, MAX_PASSWORD_LEN
@@ -292,7 +292,7 @@ def test_get_user_info_invalid_username(test_db, server_address):
 
 
 def test_get_user_info_missing_data(test_db, server_address):
-    info_req = requests.get(f"{server_address}/api/v3/user",
+    info_req = requests.get(f"{server_address}/api/v3/user/info",
                             json={},
                             headers={
                                 "Authorization": f"Bearer {test_db.access_token}"
@@ -301,11 +301,11 @@ def test_get_user_info_missing_data(test_db, server_address):
     assert info_req.status_code == 400
 
 
-def test_update_profile_pic(test_db, server_address, image_data_url):
+def test_update_profile_pic(test_db, server_address, image_data_binary):
     # upload a new image
     image_identifier = requests.post(f"{server_address}/api/v3/image",
-                                     json={
-                                         "original_image": image_data_url
+                                     files={
+                                         "image": image_data_binary
                                      },
                                      headers={
                                          "Authorization": f"Bearer {test_db.access_token}"
@@ -330,7 +330,7 @@ def test_update_profile_pic(test_db, server_address, image_data_url):
     assert r.json()['profile_picture']['identifier'] == image_identifier
 
 
-def test_update_profile_pic_invalid_ref(test_db, server_address, image_data_url):
+def test_update_profile_pic_invalid_ref(test_db, server_address, image_data_binary):
     image_identifier = "some_random_garbage_here_129839102"
     r = requests.patch(f"{server_address}/api/v3/user",
                        json={
@@ -355,11 +355,11 @@ def test_update_profile_pic_invalid_ref(test_db, server_address, image_data_url)
     assert r.json()['profile_picture']['identifier'] != image_identifier
 
 
-def test_update_header_pic(test_db, server_address, image_data_url):
+def test_update_header_pic(test_db, server_address, image_data_binary):
     # upload a new image
     image_identifier = requests.post(f"{server_address}/api/v3/image",
-                                     json={
-                                         "original_image": image_data_url
+                                     files={
+                                         "image": image_data_binary
                                      },
                                      headers={
                                          "Authorization": f"Bearer {test_db.access_token}"
@@ -384,7 +384,7 @@ def test_update_header_pic(test_db, server_address, image_data_url):
     assert r.json()['header']['identifier'] == image_identifier
 
 
-def test_update_header_pic_invalid_ref(test_db, server_address, image_data_url):
+def test_update_header_pic_invalid_ref(test_db, server_address, image_data_binary):
     image_identifier = "some_random_garbage_here_129839102"
     r = requests.patch(f"{server_address}/api/v3/user",
                        json={
