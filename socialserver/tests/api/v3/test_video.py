@@ -27,7 +27,6 @@ def test_get_video(test_db, server_address, video_data_binary):
                                      }).json()['identifier']
     print(video_identifier)
     r = requests.get(f"{server_address}/api/v3/videos/{video_identifier}")
-    print(r.tet)
     assert r.status_code == 200
 
 
