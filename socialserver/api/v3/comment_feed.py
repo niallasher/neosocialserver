@@ -28,6 +28,9 @@ class CommentFeed(Resource):
         if post is None:
             return {"error": ErrorCodes.POST_NOT_FOUND.value}, 404
 
+        if args['count'] > MAX_FEED_GET_COUNT:
+            return {"error": ErrorCodes.FEED_GET_COUNT_TOO_HIGH.value}, 400
+
         # we don't want to show comments from blocked users
         blocks = select(b.blocking for b in db.Block
                         if b.user == requesting_user_db)

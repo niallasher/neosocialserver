@@ -1,10 +1,10 @@
 #  Copyright (c) Niall Asher 2022
 
 from socialserver.db import db
-from socialserver.util.auth import admin_reqd, get_user_from_auth_header
+from socialserver.util.auth import admin_reqd
 from flask_restful import Resource, reqparse
-from socialserver.constants import ApprovalSortTypes, ErrorCodes
-from pony.orm import db_session, select, desc, count
+from socialserver.constants import ApprovalSortTypes, ErrorCodes, MAX_FEED_GET_COUNT
+from pony.orm import db_session, select, desc
 
 
 class UserApprovals(Resource):
@@ -22,6 +22,9 @@ class UserApprovals(Resource):
         parser.add_argument('filter', type=str, required=False)
 
         args = parser.parse_args()
+
+        if args['count'] > MAX_FEED_GET_COUNT:
+            return {"error": ErrorCodes.FEED_GET_COUNT_TOO_HIGH.value}, 400
 
         unapproved_users = select(user for user in db.User
                                   if user.account_approved is False)
