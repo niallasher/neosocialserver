@@ -1,4 +1,4 @@
-#  Copyright (c) Niall Asher 2022
+#  Copyright (c) Niall Asher 2022, PostAdditionalContentTypes
 
 # noinspection PyUnresolvedReferences
 from socialserver.util.test import test_db, server_address, create_post_with_request, create_user_with_request, \

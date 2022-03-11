@@ -28,10 +28,6 @@ class Video(Resource):
         return send_file(file)
 
 
-class VideoThumbnail(Resource):
-    pass
-
-
 class NewVideo(Resource):
 
     @max_req_size(mb_to_b(MAX_VIDEO_SIZE_MB))

@@ -1,6 +1,10 @@
 #  Copyright (c) Niall Asher 2022
 
 from enum import Enum
+from os import path
+
+# root directory of the module where-ever it happens to be running.
+ROOT_DIR = path.dirname(path.abspath(__file__))
 
 # semver spec.
 # major/minor/patch.
@@ -385,3 +389,15 @@ REGEX_HASHTAG = r"#[a-zA-Z0-9]{1,12}"
 
 BLURHASH_X_COMPONENTS = 4
 BLURHASH_Y_COMPONENTS = 3
+
+"""
+    post media types, to send to the client.
+    e.g. images, videos etc.
+"""
+
+
+class PostAdditionalContentTypes(Enum):
+    NONE = 0
+    IMAGES = 1
+    VIDEO = 2
+    POLL = 3
