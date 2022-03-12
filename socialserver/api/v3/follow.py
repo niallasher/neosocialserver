@@ -9,7 +9,6 @@ from pony.orm import db_session
 
 
 class Follow(Resource):
-
     @db_session
     @auth_reqd
     def post(self):
@@ -21,15 +20,14 @@ class Follow(Resource):
 
         requesting_user_db = get_user_from_auth_header()
 
-        user_to_follow = db.User.get(username=args['username'])
+        user_to_follow = db.User.get(username=args["username"])
         if user_to_follow is None:
             return {"error": ErrorCodes.USERNAME_NOT_FOUND.value}, 404
         if user_to_follow is requesting_user_db:
             return {"error": ErrorCodes.CANNOT_FOLLOW_SELF.value}, 400
 
         existing_follow = db.Follow.get(
-            user=requesting_user_db,
-            following=user_to_follow
+            user=requesting_user_db, following=user_to_follow
         )
         if existing_follow is not None:
             return {"error": ErrorCodes.FOLLOW_ALREADY_EXISTS.value}, 400
@@ -37,7 +35,7 @@ class Follow(Resource):
         db.Follow(
             user=requesting_user_db,
             following=user_to_follow,
-            creation_time=datetime.utcnow()
+            creation_time=datetime.utcnow(),
         )
 
         return {}, 201
@@ -52,13 +50,12 @@ class Follow(Resource):
 
         requesting_user_db = get_user_from_auth_header()
 
-        user_to_unfollow = db.User.get(username=args['username'])
+        user_to_unfollow = db.User.get(username=args["username"])
         if user_to_unfollow is None:
             return {"error": ErrorCodes.USERNAME_NOT_FOUND.value}, 404
 
         existing_follow = db.Follow.get(
-            user=requesting_user_db,
-            following=user_to_unfollow
+            user=requesting_user_db, following=user_to_unfollow
         )
 
         if existing_follow is None:

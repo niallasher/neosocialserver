@@ -1,7 +1,11 @@
 #  Copyright (c) Niall Asher 2022
 
 from flask_restful import Resource, reqparse
-from socialserver.constants import MAX_FEED_GET_COUNT, ErrorCodes, PostAdditionalContentTypes
+from socialserver.constants import (
+    MAX_FEED_GET_COUNT,
+    ErrorCodes,
+    PostAdditionalContentTypes,
+)
 from socialserver.db import db
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header
 from pony.orm import db_session
@@ -9,29 +13,27 @@ from pony import orm
 
 
 class PostFeed(Resource):
-
     @db_session
     @auth_reqd
     def get(self):
 
         parser = reqparse.RequestParser()
-        parser.add_argument('count', type=int, required=True)
+        parser.add_argument("count", type=int, required=True)
         # maybe we should just assume zero if an offset isn't specified?
         # but I think it's better to be explicit about including it, as
         # otherwise I can see myself or others forgetting it, and wondering
         # why the same posts keep popping up.
-        parser.add_argument('offset', type=int, required=True)
+        parser.add_argument("offset", type=int, required=True)
         # a list of usernames. if supplied, only posts from those
         # usernames will be shown
-        parser.add_argument('username', type=str,
-                            required=False, action="append")
+        parser.add_argument("username", type=str, required=False, action="append")
         # basically shorthand for specifying every username in the request.
         # takes precedence over any usernames appended (overwrites any given
         # usernames with the follower list)
-        parser.add_argument('following_only', type=bool, required=False)
+        parser.add_argument("following_only", type=bool, required=False)
         args = parser.parse_args()
 
-        if args['count'] > MAX_FEED_GET_COUNT:
+        if args["count"] > MAX_FEED_GET_COUNT:
             return {"error": ErrorCodes.FEED_GET_COUNT_TOO_HIGH.value}, 400
 
         requesting_user_db = get_user_from_auth_header()
@@ -46,36 +48,47 @@ class PostFeed(Resource):
         # seems like pycharm doesn't see the pony object as iterable
         # it is, so we're safe to do this.
         # noinspection PyTypeChecker
-        blocks = orm.select(b.blocking for b in db.Block
-                            if b.user == requesting_user_db)[:]
+        blocks = orm.select(
+            b.blocking for b in db.Block if b.user == requesting_user_db
+        )[:]
 
         filtered = False
         filter_list = []
 
-        if args['username'] is not None:
+        if args["username"] is not None:
             filtered = True
-            filter_list = args['username']
+            filter_list = args["username"]
 
-        if args['following_only']:
+        if args["following_only"]:
             filtered = True
-            filter_list = orm.select(f.following.username
-                                     for f in requesting_user_db.following)[::]
+            filter_list = orm.select(
+                f.following.username for f in requesting_user_db.following
+            )[::]
 
         if filtered:
             # noinspection PyTypeChecker
-            query = orm.select(p for p in db.Post
-                               if p.user not in blocks and p.under_moderation is False and p.user.username
-                               in filter_list).order_by(
-                orm.desc(db.Post.creation_time)).limit(
-                args.count, offset=args.offset
-            )[::]
+            query = (
+                orm.select(
+                    p
+                    for p in db.Post
+                    if p.user not in blocks
+                    and p.under_moderation is False
+                    and p.user.username in filter_list
+                )
+                    .order_by(orm.desc(db.Post.creation_time))
+                    .limit(args.count, offset=args.offset)[::]
+            )
         else:
             # noinspection PyTypeChecker
-            query = orm.select(p for p in db.Post
-                               if p.user not in blocks and p.under_moderation is False).order_by(
-                orm.desc(db.Post.creation_time)).limit(
-                args.count, offset=args.offset
-            )[::]
+            query = (
+                orm.select(
+                    p
+                    for p in db.Post
+                    if p.user not in blocks and p.under_moderation is False
+                )
+                    .order_by(orm.desc(db.Post.creation_time))
+                    .limit(args.count, offset=args.offset)[::]
+            )
 
         # TODO: this shares a schema with the single post
         # thing, so they should be common. maybe a class
@@ -83,8 +96,9 @@ class PostFeed(Resource):
         posts = []
         for post in query:
 
-            user_has_liked_post = db.PostLike.get(user=requesting_user_db,
-                                                  post=post) is not None
+            user_has_liked_post = (
+                    db.PostLike.get(user=requesting_user_db, post=post) is not None
+            )
 
             user_owns_post = post.user == requesting_user_db
 
@@ -98,17 +112,18 @@ class PostFeed(Resource):
             if len(post_images) >= 1:
                 additional_content_type = PostAdditionalContentTypes.IMAGES.value
                 for image in post_images:
-                    additional_content.append({
-                        "identifier": image.identifier,
-                        "blurhash": image.blur_hash
-                    })
+                    additional_content.append(
+                        {"identifier": image.identifier, "blurhash": image.blur_hash}
+                    )
             elif video is not None:
                 additional_content_type = PostAdditionalContentTypes.VIDEO.value
-                additional_content.append({
-                    "identifier": video.identifier,
-                    "thumbnail_identifier": video.thumbnail.identifier,
-                    "thumbnail_blurhash": video.thumbnail.blur_hash
-                })
+                additional_content.append(
+                    {
+                        "identifier": video.identifier,
+                        "thumbnail_identifier": video.thumbnail.identifier,
+                        "thumbnail_blurhash": video.thumbnail.blur_hash,
+                    }
+                )
 
             posts.append(
                 {
@@ -119,16 +134,18 @@ class PostFeed(Resource):
                         "like_count": len(post.likes),
                         "comment_count": len(post.comments),
                         "additional_content_type": additional_content_type,
-                        "additional_content": additional_content
+                        "additional_content": additional_content,
                     },
                     "user": {
                         "display_name": post.user.display_name,
                         "username": post.user.username,
                         "verified": post.user.is_verified,
-                        "profile_picture": post.user.profile_pic.identifier if post.user.has_profile_picture else None,
+                        "profile_picture": post.user.profile_pic.identifier
+                        if post.user.has_profile_picture
+                        else None,
                         "liked_post": user_has_liked_post,
-                        "own_post": user_owns_post
-                    }
+                        "own_post": user_owns_post,
+                    },
                 }
             )
 
@@ -136,7 +153,8 @@ class PostFeed(Resource):
                    "meta": {
                        # if we have less posts left than the user
                        # asked for, we must have reached the end!
-                       "reached_end": len(posts) < args['count']
+                       "reached_end": len(posts)
+                                      < args["count"]
                    },
-                   "posts": posts
+                   "posts": posts,
                }, 201

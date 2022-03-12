@@ -7,21 +7,24 @@ from socialserver.util.auth import get_user_object_from_token_or_abort
 
 
 class LegacyUserFollows(Resource):
-
     @db_session
     def get(self):
         parser = reqparse.RequestParser()
 
-        parser.add_argument("session_token", type=str, help="Authentication Token", required=True)
-        parser.add_argument("username", type=str, help="Username to get follow list for")
+        parser.add_argument(
+            "session_token", type=str, help="Authentication Token", required=True
+        )
+        parser.add_argument(
+            "username", type=str, help="Username to get follow list for"
+        )
 
         args = parser.parse_args()
 
         r_user = get_user_object_from_token_or_abort(args["session_token"])
 
         user = r_user
-        if args['username']:
-            user = db.User.get(username=args['username'])
+        if args["username"]:
+            user = db.User.get(username=args["username"])
 
         if user is None:
             return {}, 404
@@ -35,21 +38,24 @@ class LegacyUserFollows(Resource):
 
 
 class LegacyUserFollowing(Resource):
-
     @db_session
     def get(self):
         parser = reqparse.RequestParser()
 
-        parser.add_argument("session_token", type=str, help="Authentication Token", required=True)
-        parser.add_argument("username", type=str, help="Username to get follow list for")
+        parser.add_argument(
+            "session_token", type=str, help="Authentication Token", required=True
+        )
+        parser.add_argument(
+            "username", type=str, help="Username to get follow list for"
+        )
 
         args = parser.parse_args()
 
         r_user = get_user_object_from_token_or_abort(args["session_token"])
 
         user = r_user
-        if args['username']:
-            user = db.User.get(username=args['username'])
+        if args["username"]:
+            user = db.User.get(username=args["username"])
 
         if user is None:
             return {}, 404

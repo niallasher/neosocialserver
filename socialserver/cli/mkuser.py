@@ -37,17 +37,21 @@ def mk_user_interactive():
     display_name = get_input_string("Display name: ")
     # get account attribs
     get_input_bool("User is instance admin? (y/n)") and acc_attribs.append(
-        AccountAttributes.INSTANCE_ADMIN.value)
-    get_input_bool(
-        "User is admin (y/n)? ") and acc_attribs.append(AccountAttributes.ADMIN.value)
+        AccountAttributes.INSTANCE_ADMIN.value
+    )
+    get_input_bool("User is admin (y/n)? ") and acc_attribs.append(
+        AccountAttributes.ADMIN.value
+    )
     get_input_bool("User is moderator (y/n)? ") and acc_attribs.append(
-        AccountAttributes.MODERATOR.value)
+        AccountAttributes.MODERATOR.value
+    )
     get_input_bool("User is verified (y/n)? ") and acc_attribs.append(
-        AccountAttributes.VERIFIED.value)
+        AccountAttributes.VERIFIED.value
+    )
     # get password
     while True:
         pw = getpass("Password (no echo): ")
-        if pw != '':
+        if pw != "":
             if pw == getpass("Confirm password (no echo): "):
                 break
             print("Sorry, those didn't match. Please try again.")
@@ -62,7 +66,7 @@ def mk_user_interactive():
         password_hash=pwh,
         password_salt=salt,
         account_attributes=acc_attribs,
-        account_approved=True
+        account_approved=True,
     )
 
     commit()

@@ -1,16 +1,18 @@
 #  Copyright (c) Niall Asher 2022
 
-from socialserver.db import db
 from flask_restful import Resource, reqparse
 from pony.orm import db_session
-from socialserver.db import db
 from socialserver.constants import ErrorCodes, MIN_PASSWORD_LEN, MAX_PASSWORD_LEN
-from socialserver.util.auth import verify_password_valid, auth_reqd, get_user_from_auth_header, hash_password, \
-    generate_salt
+from socialserver.util.auth import (
+    verify_password_valid,
+    auth_reqd,
+    get_user_from_auth_header,
+    hash_password,
+    generate_salt,
+)
 
 
 class UserPasswordChange(Resource):
-
     @db_session
     @auth_reqd
     # patch not post, since we're not creating a new resource.
@@ -26,9 +28,11 @@ class UserPasswordChange(Resource):
 
         user = get_user_from_auth_header()
 
-        new_password = args['new_password']
+        new_password = args["new_password"]
 
-        if not verify_password_valid(args['old_password'], user.password_salt, user.password_hash):
+        if not verify_password_valid(
+                args["old_password"], user.password_salt, user.password_hash
+        ):
             return {"error": ErrorCodes.INCORRECT_PASSWORD.value}, 401
 
         if len(new_password) > MAX_PASSWORD_LEN or len(new_password) < MIN_PASSWORD_LEN:

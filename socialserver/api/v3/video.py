@@ -16,10 +16,9 @@ VIDEO_DIR = config.media.videos.storage_dir
 
 
 class Video(Resource):
-
     @db_session
     def get(self, **kwargs):
-        video = db.Video.get(identifier=kwargs.get('videoid'))
+        video = db.Video.get(identifier=kwargs.get("videoid"))
         if video is None:
             return {"error": ErrorCodes.OBJECT_NOT_FOUND.value}, 404
 
@@ -29,7 +28,6 @@ class Video(Resource):
 
 
 class NewVideo(Resource):
-
     @max_req_size(mb_to_b(MAX_VIDEO_SIZE_MB))
     @db_session
     @auth_reqd
@@ -55,6 +53,4 @@ class NewVideo(Resource):
 
             return {"error": ErrorCodes.INVALID_VIDEO.value}, 400
 
-        return {
-                   "identifier": video_info.identifier
-               }, 201
+        return {"identifier": video_info.identifier}, 201

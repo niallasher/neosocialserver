@@ -28,28 +28,28 @@ class Image(Resource):
 
         parser = reqparse.RequestParser()
         # check out the imagetypes enum for the valid ones
-        parser.add_argument('wanted_type', type=str, required=True)
+        parser.add_argument("wanted_type", type=str, required=True)
         # this is a float since we want it to actually pass this parse
         # check, so we can round it after!
-        parser.add_argument('pixel_ratio', type=float, required=True)
+        parser.add_argument("pixel_ratio", type=float, required=True)
         args = parser.parse_args()
 
-        image = db.Image.get(identifier=kwargs.get('imageid'))
+        image = db.Image.get(identifier=kwargs.get("imageid"))
         if image is None:
             return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404
 
         try:
-            wanted_image_type = ImageTypes(args['wanted_type'])
+            wanted_image_type = ImageTypes(args["wanted_type"])
         except ValueError:
             return {"error": ErrorCodes.IMAGE_TYPE_INVALID.value}, 400
 
-        pixel_ratio = int(ceil(args['pixel_ratio']))
+        pixel_ratio = int(ceil(args["pixel_ratio"]))
         if pixel_ratio < 1:
             pixel_ratio = 1
         if pixel_ratio > MAX_PIXEL_RATIO:
             pixel_ratio = MAX_PIXEL_RATIO
 
-        if args['wanted_type'] == 'post':
+        if args["wanted_type"] == "post":
             pixel_ratio = 1
 
         file = f"{IMAGE_DIR}/{kwargs.get('imageid')}/{wanted_image_type.value}_{pixel_ratio}x.jpg"
@@ -61,7 +61,6 @@ class Image(Resource):
 
 
 class NewImage(Resource):
-
     @max_req_size(IMAGE_MAX_REQ_SIZE)
     @db_session
     @auth_reqd

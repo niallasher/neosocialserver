@@ -17,7 +17,9 @@ HOME_DIR = os.getenv("HOME")
 socialserver_root = os.getenv("SOCIALSERVER_ROOT", default=None)
 
 if socialserver_root is None:
-    console.log(f"$SOCIALSERVER_ROOT was not defined. Defaulting to {HOME_DIR}/socialserver!")
+    console.log(
+        f"$SOCIALSERVER_ROOT was not defined. Defaulting to {HOME_DIR}/socialserver!"
+    )
     FILE_ROOT = f"{HOME_DIR}/socialserver"
 else:
     console.log(f"Using root directory {socialserver_root}!")
@@ -163,7 +165,9 @@ def _test_config(current_config: SimpleNamespace, schema: SimpleNamespace) -> No
             # so we'll recurse using it as the base, with an
             # updated prefix
             if type(vars(dict_obj).get(dict_key)) is dict:
-                nested_keys = _recursive_unwrap_ns_keys(dict_obj.get(dict_key), prefix=(prefix + dict_key + "."))
+                nested_keys = _recursive_unwrap_ns_keys(
+                    dict_obj.get(dict_key), prefix=(prefix + dict_key + ".")
+                )
                 for nested_key in nested_keys:
                     keys.append(nested_key)
         return keys
@@ -182,11 +186,15 @@ def _test_config(current_config: SimpleNamespace, schema: SimpleNamespace) -> No
 
     for key in schema_config_keys:
         if key not in current_config_keys:
-            console.log(f"[bold red]Missing key in configuration file:[/bold red][italic] {key}")
+            console.log(
+                f"[bold red]Missing key in configuration file:[/bold red][italic] {key}"
+            )
             missing_keys.append(key)
 
     if len(missing_keys) >= 1:
-        console.log(":dizzy_face: The config file is missing keys! Cannot continue.", emoji=True)
+        console.log(
+            ":dizzy_face: The config file is missing keys! Cannot continue.", emoji=True
+        )
         exit(1)
 
 
@@ -212,7 +220,7 @@ def _load_toml(toml_string: str) -> SimpleNamespace:
 
 def _load_config(filename: str) -> SimpleNamespace:
     console.log(f"Trying to load configuration file from {filename}...")
-    with open(filename, 'r') as config_file:
+    with open(filename, "r") as config_file:
         config_data = config_file.read()
         config_dict = _load_toml(config_data)
 
@@ -230,7 +238,7 @@ def _load_config(filename: str) -> SimpleNamespace:
 
 
 def _create_config(filename: str, content: str) -> None:
-    with open(filename, 'w') as config_file:
+    with open(filename, "w") as config_file:
         config_file.write(content)
 
 

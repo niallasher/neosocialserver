@@ -35,10 +35,7 @@ def generate_key() -> SimpleNamespace(key=str, hash=str):
     # 32 random bytes. sufficiently secure, not too big payload-wise
     # if we send it with each request
     key = token_urlsafe(32)
-    return SimpleNamespace(
-        key=key,
-        hash=sha256(key.encode()).hexdigest()
-    )
+    return SimpleNamespace(key=key, hash=sha256(key.encode()).hexdigest())
 
 
 """
@@ -129,7 +126,8 @@ def get_username_from_token_or_abort(session_token: str) -> str or None:
     # anything calling it will already have to be wrapped in
     # one, which extends down to here.
     existing_session = db.UserSession.get(
-        access_token_hash=hash_plaintext_sha256(session_token))
+        access_token_hash=hash_plaintext_sha256(session_token)
+    )
     if existing_session is not None:
         return existing_session.user.username
     else:
@@ -146,7 +144,8 @@ def get_username_from_token_or_abort(session_token: str) -> str or None:
 # TODO: figure out how to type a pony database entity
 def get_user_object_from_token_or_abort(session_token: str):
     existing_session = db.UserSession.get(
-        access_token_hash=hash_plaintext_sha256(session_token))
+        access_token_hash=hash_plaintext_sha256(session_token)
+    )
     if existing_session is not None:
         return existing_session.user
     else:
@@ -161,7 +160,7 @@ def get_user_object_from_token_or_abort(session_token: str):
 
 
 def get_ip_from_request() -> str:
-    ip = request.headers.get('X-Forwarded-For')
+    ip = request.headers.get("X-Forwarded-For")
     if ip is None:
         ip = request.remote_addr
     return ip
@@ -181,20 +180,19 @@ def auth_reqd(f):
     def decorated_function(*args, **kwargs):
         headers = request.headers
         headers.get("Authorization") or abort(
-            make_response(jsonify(
-                error=ErrorCodes.AUTHORIZATION_HEADER_NOT_PRESENT.value
-            ), 401))
+            make_response(
+                jsonify(error=ErrorCodes.AUTHORIZATION_HEADER_NOT_PRESENT.value), 401
+            )
+        )
         # The auth header is in this form: Bearer <token>
         # we just want <token>, and since there are no spaces in
         # the token format anyway, it's pretty easy to parse.
         auth_token = headers.get("Authorization").split(" ")[1]
         existing_entry = db.UserSession.get(
-            access_token_hash=hash_plaintext_sha256(auth_token))
+            access_token_hash=hash_plaintext_sha256(auth_token)
+        )
         if existing_entry is None:
-            abort(
-                make_response(jsonify(
-                    error=ErrorCodes.TOKEN_INVALID.value
-                ), 401))
+            abort(make_response(jsonify(error=ErrorCodes.TOKEN_INVALID.value), 401))
         return f(*args, **kwargs)
 
     return decorated_function
@@ -214,26 +212,21 @@ def admin_reqd(f):
     def decorated_function(*args, **kwargs):
         headers = request.headers
         headers.get("Authorization") or abort(
-            make_response(jsonify(
-                error=ErrorCodes.AUTHORIZATION_HEADER_NOT_PRESENT.value
-            ), 401))
+            make_response(
+                jsonify(error=ErrorCodes.AUTHORIZATION_HEADER_NOT_PRESENT.value), 401
+            )
+        )
         # The auth header is in this form: Bearer <token>
         # we just want <token>, and since there are no spaces in
         # the token format anyway, it's pretty easy to parse.
         auth_token = headers.get("Authorization").split(" ")[1]
         existing_entry = db.UserSession.get(
-            access_token_hash=hash_plaintext_sha256(auth_token))
+            access_token_hash=hash_plaintext_sha256(auth_token)
+        )
         if existing_entry is None:
-            abort(
-                make_response(jsonify(
-                    error=ErrorCodes.TOKEN_INVALID.value
-                ), 401))
+            abort(make_response(jsonify(error=ErrorCodes.TOKEN_INVALID.value), 401))
         if AccountAttributes.ADMIN.value not in existing_entry.user.account_attributes:
-            abort(
-                make_response(jsonify(
-                    error=ErrorCodes.USER_NOT_ADMIN.value
-                ), 401)
-            )
+            abort(make_response(jsonify(error=ErrorCodes.USER_NOT_ADMIN.value), 401))
         return f(*args, **kwargs)
 
     return decorated_function
@@ -250,21 +243,19 @@ def admin_reqd(f):
 def get_user_from_auth_header():
     headers = request.headers
     headers.get("Authorization") or abort(
-        make_response(jsonify(
-            error=ErrorCodes.AUTHORIZATION_HEADER_NOT_PRESENT.value
-        ), 401))
+        make_response(
+            jsonify(error=ErrorCodes.AUTHORIZATION_HEADER_NOT_PRESENT.value), 401
+        )
+    )
     auth_token = headers.get("Authorization").split(" ")[1]
     existing_entry = db.UserSession.get(
-        access_token_hash=hash_plaintext_sha256(auth_token))
+        access_token_hash=hash_plaintext_sha256(auth_token)
+    )
     # this shouldn't really be needed, since the auth_reqd
     # decorator will check everything. might remove it, but
     # not having it felt kinda wrong tbqh
     if existing_entry is None:
-        abort(
-            make_response(jsonify(
-                error=ErrorCodes.TOKEN_INVALID.value
-            ), 401)
-        )
+        abort(make_response(jsonify(error=ErrorCodes.TOKEN_INVALID.value), 401))
     return existing_entry.user
 
 
@@ -282,7 +273,9 @@ def check_totp_valid(totp: int, user_obj) -> None:
     if config.auth.totp.replay_prevention_enabled:
         # if both conditions are satisfied, then the code must have already been used,
         # so we don't accept it!
-        if totp == user_obj.totp.last_used_code and auth.verify(str(user_obj.totp.last_used_code)):
+        if totp == user_obj.totp.last_used_code and auth.verify(
+                str(user_obj.totp.last_used_code)
+        ):
             raise TotpExpendedException
 
     if not auth.verify(str(totp)):

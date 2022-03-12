@@ -8,37 +8,40 @@ from socialserver.db import db
 
 
 class LegacyUserBio(Resource):
-
     @db_session
     def get(self):
         parser = reqparse.RequestParser()
 
-        parser.add_argument("session_token", type=str, required=True, help="Authentication Token")
-        parser.add_argument("username", type=str, required=False, help="Username to get")
+        parser.add_argument(
+            "session_token", type=str, required=True, help="Authentication Token"
+        )
+        parser.add_argument(
+            "username", type=str, required=False, help="Username to get"
+        )
         args = parser.parse_args()
 
-        r_user = get_user_object_from_token_or_abort(args['session_token'])
+        r_user = get_user_object_from_token_or_abort(args["session_token"])
 
         user = r_user
-        if args['username']:
-            user = db.User.get(username=args['username'])
+        if args["username"]:
+            user = db.User.get(username=args["username"])
         if user is None:
             return {}, 404
 
-        return {
-                   "bio": user.bio
-               }, 201
+        return {"bio": user.bio}, 201
 
     @db_session
     def post(self):
         parser = reqparse.RequestParser()
 
-        parser.add_argument("session_token", type=str, required=True, help="Authentication Token")
+        parser.add_argument(
+            "session_token", type=str, required=True, help="Authentication Token"
+        )
         parser.add_argument("bio", type=str)
 
         args = parser.parse_args()
 
-        user = get_user_object_from_token_or_abort(args['session_token'])
+        user = get_user_object_from_token_or_abort(args["session_token"])
 
         # we **do not** want to check if it's none:
         # legacy bio removal is done through post instead of delete.
@@ -46,6 +49,6 @@ class LegacyUserBio(Resource):
         if len(user.bio) > BIO_MAX_LEN:
             return {}, 400
 
-        user.bio = args['bio']
+        user.bio = args["bio"]
 
         return {}, 201

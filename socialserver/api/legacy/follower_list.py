@@ -8,18 +8,21 @@ from datetime import datetime
 
 
 class LegacyFollower(Resource):
-
     @db_session
     def post(self):
         parser = reqparse.RequestParser()
 
-        parser.add_argument("session_token", type=str, required=True, help="Authentication Tokens")
-        parser.add_argument("username", type=str, required=True, help="Username to follow")
+        parser.add_argument(
+            "session_token", type=str, required=True, help="Authentication Tokens"
+        )
+        parser.add_argument(
+            "username", type=str, required=True, help="Username to follow"
+        )
 
         args = parser.parse_args()
 
-        user = get_user_object_from_token_or_abort(args['session_token'])
-        user_to_follow = db.User.get(username=args['username'])
+        user = get_user_object_from_token_or_abort(args["session_token"])
+        user_to_follow = db.User.get(username=args["username"])
         if user_to_follow is None:
             return {}, 404
 
@@ -28,30 +31,24 @@ class LegacyFollower(Resource):
         if user == user_to_follow:
             return {}, 401
 
-        existing_follow = db.Follow.get(
-            user=user,
-            following=user_to_follow
-        )
+        existing_follow = db.Follow.get(user=user, following=user_to_follow)
 
-        current_follow_count = select(f for f in db.Follow
-                                      if f.following == user_to_follow).count()
+        current_follow_count = select(
+            f for f in db.Follow if f.following == user_to_follow
+        ).count()
 
         if existing_follow is not None:
             existing_follow.delete()
             return {
                        "userIsFollowed": False,
-                       "userFollowCount": current_follow_count - 1
+                       "userFollowCount": current_follow_count - 1,
                    }, 201
 
-        db.Follow(
-            user=user,
-            following=user_to_follow,
-            creation_time=datetime.utcnow()
-        )
+        db.Follow(user=user, following=user_to_follow, creation_time=datetime.utcnow())
 
         return {
                    "userIsFollowed": True,
-                   "userFollowCount": current_follow_count + 1
+                   "userFollowCount": current_follow_count + 1,
                }, 201
 
     @db_session
@@ -60,12 +57,16 @@ class LegacyFollower(Resource):
     def get(self):
         parser = reqparse.RequestParser()
 
-        parser.add_argument("session_token", type=str, required=True, help="Authentication Tokens")
-        parser.add_argument("username", type=str, required=True, help="Username to follow")
+        parser.add_argument(
+            "session_token", type=str, required=True, help="Authentication Tokens"
+        )
+        parser.add_argument(
+            "username", type=str, required=True, help="Username to follow"
+        )
 
         args = parser.parse_args()
 
-        user = get_user_object_from_token_or_abort(args['session_token'])
+        user = get_user_object_from_token_or_abort(args["session_token"])
 
         follower = db.User.get(username=args.username)
 
@@ -74,5 +75,5 @@ class LegacyFollower(Resource):
 
         return {
                    "username": follower.username,
-                   "displayName": follower.display_name
+                   "displayName": follower.display_name,
                }, 201
