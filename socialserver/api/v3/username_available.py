@@ -8,11 +8,13 @@ import re
 
 
 class UsernameAvailable(Resource):
+    def __init__(self):
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument("username", type=str, required=True)
+
     @db_session
     def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument("username", str)
-        args = parser.parse_args()
+        args = self.get_parser.parse_args()
 
         if not bool(re.match(REGEX_USERNAME_VALID, args["username"])):
             return {"error": ErrorCodes.USERNAME_INVALID.value}, 400
