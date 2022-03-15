@@ -17,6 +17,13 @@ from datetime import datetime, timedelta
 
 
 class TwoFactorAuthentication(Resource):
+    def __init__(self):
+        self.delete_parser = reqparse.RequestParser()
+        self.delete_parser.add_argument("password", type=str, required=True)
+
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument("password", type=str, required=True)
+
     @auth_reqd
     @db_session
     # return true if the user has 2FA, & it's confirmed
@@ -27,14 +34,12 @@ class TwoFactorAuthentication(Resource):
     @auth_reqd
     @db_session
     def delete(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument("password", type=str, required=True)
-        args = parser.parse_args()
+        args = self.delete_parser.parse_args()
 
         user = get_user_from_auth_header()
 
         if not verify_password_valid(
-                args["password"], user.password_salt, user.password_hash
+            args["password"], user.password_salt, user.password_hash
         ):
             return {"error": ErrorCodes.INCORRECT_PASSWORD.value}, 401
 
@@ -50,14 +55,12 @@ class TwoFactorAuthentication(Resource):
     @auth_reqd
     @db_session
     def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument("password", type=str, required=True)
-        args = parser.parse_args()
+        args = self.post_parser.parse_args()
 
         user = get_user_from_auth_header()
 
         if not verify_password_valid(
-                args["password"], user.password_salt, user.password_hash
+            args["password"], user.password_salt, user.password_hash
         ):
             return {"error": ErrorCodes.INCORRECT_PASSWORD.value}, 401
 
@@ -94,25 +97,27 @@ class TwoFactorAuthentication(Resource):
         # we just want to return the actual info they need to do so
         # ( or present any other way of adding the info )
         return {
-                   "secret": secret,
-                   "name": name,
-                   "issuer": issuer,
-                   # not implemented yet!
-                   # unconfirmed codes will be removed after this time.
-                   # not great for legacy UX, but not much can be done
-                   # about that
-                   "time_until_expiry": config.auth.totp.unconfirmed_expiry_time,
-               }, 201
+            "secret": secret,
+            "name": name,
+            "issuer": issuer,
+            # not implemented yet!
+            # unconfirmed codes will be removed after this time.
+            # not great for legacy UX, but not much can be done
+            # about that
+            "time_until_expiry": config.auth.totp.unconfirmed_expiry_time,
+        }, 201
 
 
 # it's a mouthful lol
 class TwoFactorAuthenticationVerification(Resource):
+    def __init__(self):
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument("totp", type=str, required=True)
+
     @auth_reqd
     @db_session
     def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument("totp", type=str, required=True)
-        args = parser.parse_args()
+        args = self.post_parser.parse_args()
 
         user = get_user_from_auth_header()
 
@@ -123,7 +128,7 @@ class TwoFactorAuthenticationVerification(Resource):
             return {"error": ErrorCodes.TOTP_ALREADY_ACTIVE.value}, 400
 
         if datetime.utcnow() > user.totp.creation_time + timedelta(
-                seconds=config.auth.totp.unconfirmed_expiry_time
+            seconds=config.auth.totp.unconfirmed_expiry_time
         ):
             return {"error": ErrorCodes.TOTP_NOT_ACTIVE.value}, 400
 
