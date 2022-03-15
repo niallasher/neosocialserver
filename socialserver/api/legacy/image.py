@@ -1,5 +1,4 @@
 #  Copyright (c) Niall Asher 2022
-
 from socialserver.util.image import (
     handle_upload,
     InvalidImageException,
@@ -16,14 +15,15 @@ IMAGE_MAX_REQ_SIZE = mb_to_b(IMAGE_MAX_REQ_SIZE_MB)
 
 
 class LegacyImage(Resource):
+    def __init__(self):
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument("session_token", type=str, required=True)
+        self.post_parser.add_argument("image_data", type=str, required=True)
+
     @max_req_size(IMAGE_MAX_REQ_SIZE)
     @db_session
     def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument("session_token", type=str, required=True)
-        parser.add_argument("image_data", type=str, required=True)
-
-        args = parser.parse_args()
+        args = self.post_parser.parse_args()
 
         image = convert_data_url_to_byte_buffer(args["image_data"])
         if b_to_mb(len(image.read())) > IMAGE_MAX_REQ_SIZE:
