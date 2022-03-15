@@ -9,14 +9,20 @@ from pony.orm import db_session
 
 
 class Block(Resource):
+    def __init__(self):
+
+        self.post_parser = reqparse.RequestParser()
+        # the username to block
+        self.post_parser.add_argument("username", type=str, required=True)
+
+        self.delete_parser = reqparse.RequestParser()
+        # the username to unblock
+        self.delete_parser.add_argument("username", type=str, required=True)
+
     @db_session
     @auth_reqd
     def post(self):
-
-        parser = reqparse.RequestParser()
-        # the username to block
-        parser.add_argument("username", type=str, required=True)
-        args = parser.parse_args()
+        args = self.post_parser.parse_args()
 
         requesting_user_db = get_user_from_auth_header()
 
@@ -41,10 +47,7 @@ class Block(Resource):
     @db_session
     @auth_reqd
     def delete(self):
-
-        parser = reqparse.RequestParser()
-        parser.add_argument("username", type=str, required=True)
-        args = parser.parse_args()
+        args = self.delete_parser.parse_args()
 
         requesting_user_db = get_user_from_auth_header()
 
