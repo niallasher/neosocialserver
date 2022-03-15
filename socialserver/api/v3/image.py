@@ -21,18 +21,18 @@ IMAGE_MAX_REQ_SIZE = mb_to_b(IMAGE_MAX_REQ_SIZE_MB)
 
 
 class Image(Resource):
+    def __init__(self):
+        self.get_parser = reqparse.RequestParser()
+        # check out the imagetypes enum for the valid ones
+        self.get_parser.add_argument("wanted_type", type=str, required=True)
+        # this is a float since we want it to actually pass this parse
+        # check, so we can round it after!
+        self.get_parser.add_argument("pixel_ratio", type=float, required=True)
 
     # kwargs.imageid contains the image identifier
     @db_session
     def get(self, **kwargs):
-
-        parser = reqparse.RequestParser()
-        # check out the imagetypes enum for the valid ones
-        parser.add_argument("wanted_type", type=str, required=True)
-        # this is a float since we want it to actually pass this parse
-        # check, so we can round it after!
-        parser.add_argument("pixel_ratio", type=float, required=True)
-        args = parser.parse_args()
+        args = self.get_parser.parse_args()
 
         image = db.Image.get(identifier=kwargs.get("imageid"))
         if image is None:
