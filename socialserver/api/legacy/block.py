@@ -8,18 +8,18 @@ from pony.orm import db_session
 
 
 class LegacyBlock(Resource):
-    @db_session
-    def post(self):
-        parser = reqparse.RequestParser()
-
-        parser.add_argument(
+    def __init__(self):
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument(
             "session_token", type=str, required=True, help="Authentication Token"
         )
-        parser.add_argument(
+        self.post_parser.add_argument(
             "username", type=str, required=True, help="Username to toggle block for"
         )
 
-        args = parser.parse_args()
+    @db_session
+    def post(self):
+        args = self.post_parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args["session_token"])
 
@@ -44,13 +44,15 @@ class LegacyBlock(Resource):
 # this is folded in here, since it's incredibly similar in scope.
 # it allows to get a list of blocked users.
 class LegacyUserBlocks(Resource):
-    @db_session
-    def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument(
+    def __init__(self):
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument(
             "session_token", type=str, required=True, help="Authentication Token"
         )
-        args = parser.parse_args()
+
+    @db_session
+    def get(self):
+        args = self.get_parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args["session_token"])
 
