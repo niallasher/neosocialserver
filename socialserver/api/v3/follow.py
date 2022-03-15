@@ -9,14 +9,19 @@ from pony.orm import db_session
 
 
 class Follow(Resource):
+    def __init__(self):
+        self.get_parser = reqparse.RequestParser()
+        # the username to follow
+        self.get_parser.add_argument("username", type=str, required=True)
+
+        self.delete_parser = reqparse.RequestParser()
+        # screw this guy
+        self.delete_parser.add_argument("username", type=str, required=True)
+
     @db_session
     @auth_reqd
     def post(self):
-
-        parser = reqparse.RequestParser()
-        # the username to follow
-        parser.add_argument("username", type=str, required=True)
-        args = parser.parse_args()
+        args = self.get_parser.parse_args()
 
         requesting_user_db = get_user_from_auth_header()
 
@@ -43,10 +48,7 @@ class Follow(Resource):
     @db_session
     @auth_reqd
     def delete(self):
-
-        parser = reqparse.RequestParser()
-        parser.add_argument("username", type=str, required=True)
-        args = parser.parse_args()
+        args = self.delete_parser.parse_args()
 
         requesting_user_db = get_user_from_auth_header()
 
