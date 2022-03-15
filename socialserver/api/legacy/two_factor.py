@@ -15,37 +15,38 @@ from datetime import datetime, timedelta
 
 
 class LegacyTwoFactor(Resource):
-    @db_session
-    def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument(
+    def __init__(self):
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument(
             "session_token", type=str, required=True, help="Authentication Token"
         )
 
-        args = parser.parse_args()
-
-        user = get_user_object_from_token_or_abort(args["session_token"])
-        return {"enabled": user.totp is not None and user.totp.confirmed}, 201
-
-    @db_session
-    def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument(
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument(
             "session_token", type=str, required=True, help="Authentication Token"
         )
-        parser.add_argument(
+        self.post_parser.add_argument(
             "action",
             type=str,
             required=True,
             help="Action to take (add/remove/confirm)",
         )
         # needed for removal and addition, but not confirmations
-        parser.add_argument(
+        self.post_parser.add_argument(
             "password", type=str, required=False, help="Authentication Password"
         )
-        parser.add_argument("totp", type=str, help="Code for confirmations")
+        self.post_parser.add_argument("totp", type=str, help="Code for confirmations")
 
-        args = parser.parse_args()
+    @db_session
+    def get(self):
+        args = self.get_parser.parse_args()
+
+        user = get_user_object_from_token_or_abort(args["session_token"])
+        return {"enabled": user.totp is not None and user.totp.confirmed}, 201
+
+    @db_session
+    def post(self):
+        args = self.post_parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args["session_token"])
 
@@ -61,26 +62,26 @@ class LegacyTwoFactor(Resource):
 
             if user.totp is None:
                 return {
-                           "err": LegacyErrorCodes.TOTP_NON_EXISTENT_CANNOT_CONFIRM.value
-                       }, 400
+                    "err": LegacyErrorCodes.TOTP_NON_EXISTENT_CANNOT_CONFIRM.value
+                }, 400
 
         elif action == "confirm":
 
             if user.totp is None:
                 return {
-                           "err": LegacyErrorCodes.TOTP_NON_EXISTENT_CANNOT_CONFIRM.value
-                       }, 400
+                    "err": LegacyErrorCodes.TOTP_NON_EXISTENT_CANNOT_CONFIRM.value
+                }, 400
 
         else:
 
             return {
-                       "err": LegacyErrorCodes.INVALID_ACTION_FIELD_ON_TOTP_POST_CALL.value
-                   }, 400
+                "err": LegacyErrorCodes.INVALID_ACTION_FIELD_ON_TOTP_POST_CALL.value
+            }, 400
 
         # we need to check the password on every action except confirm
         if action != "confirm":
             if not verify_password_valid(
-                    args["password"], user.password_salt, user.password_hash
+                args["password"], user.password_salt, user.password_hash
             ):
                 # this is incorrect, because the original server implementation was incorrect too.
                 # fun.
@@ -119,7 +120,7 @@ class LegacyTwoFactor(Resource):
             # in this case, the TOTP has expired. Legacy client only handles TOTP_INCORRECT here, so that's what
             # we have to send back to fail somewhat gracefully.
             if datetime.utcnow() > user.totp.creation_time + timedelta(
-                    seconds=config.auth.totp.unconfirmed_expiry_time
+                seconds=config.auth.totp.unconfirmed_expiry_time
             ):
                 return {"err": LegacyErrorCodes.TOTP_INCORRECT.value}, 401
             auth = pyotp.TOTP(user.totp.secret)
