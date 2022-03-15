@@ -10,18 +10,42 @@ from datetime import datetime
 
 
 class LegacyComment(Resource):
-    @db_session
-    def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument(
+    def __init__(self):
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument(
             "session_token", type=str, required=True, help="Authentication Token"
         )
         # legacy api shared one parser between get and post reqs, hence the help message,
         # and the lack of required=True
-        parser.add_argument(
+        self.get_parser.add_argument(
             "comment_id", type=int, help="Comment ID to get (get req only)"
         )
-        args = parser.parse_args()
+
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument(
+            "session_token", type=str, required=True, help="Authentication Token"
+        )
+        # these two were originally part of a single parser with the args in the GET function as well
+        self.post_parser.add_argument(
+            "post_id", type=int, help="Post to comment on (post req only)"
+        )
+        self.post_parser.add_argument(
+            "comment", type=str, help="Comment to post (post req only)"
+        )
+
+        self.delete_parser = reqparse.RequestParser()
+        self.delete_parser.add_argument(
+            "session_token", type=str, required=True, help="Authentication Token"
+        )
+        # yep, this help was wrong originally.
+        # yep, the help is wrong now.
+        self.delete_parser.add_argument(
+            "comment_id", type=int, help="Comment ID to get (get req only)"
+        )
+
+    @db_session
+    def get(self):
+        args = self.get_parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args["session_token"])
 
@@ -45,35 +69,24 @@ class LegacyComment(Resource):
         ).count()
 
         user_has_liked_comment = (
-                db.CommentLike.get(user=user, comment=comment) is not None
+            db.CommentLike.get(user=user, comment=comment) is not None
         )
 
         return {
-                   "username": comment.user.username,
-                   "displayName": comment.user.display_name,
-                   "comment": comment.text,
-                   "isOwnComment": is_own_comment,
-                   "avatarData": avatar_data,
-                   "userVerified": comment.user.is_verified,
-                   "likeCount": like_count,
-                   "commentLiked": user_has_liked_comment,
-               }, 201
+            "username": comment.user.username,
+            "displayName": comment.user.display_name,
+            "comment": comment.text,
+            "isOwnComment": is_own_comment,
+            "avatarData": avatar_data,
+            "userVerified": comment.user.is_verified,
+            "likeCount": like_count,
+            "commentLiked": user_has_liked_comment,
+        }, 201
 
     @db_session
     def post(self):
 
-        parser = reqparse.RequestParser()
-
-        parser.add_argument(
-            "session_token", type=str, required=True, help="Authentication Token"
-        )
-        # these two were originally part of a single parser with the args in the GET function as well
-        parser.add_argument(
-            "post_id", type=int, help="Post to comment on (post req only)"
-        )
-        parser.add_argument("comment", type=str, help="Comment to post (post req only)")
-
-        args = parser.parse_args()
+        args = self.post_parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args["session_token"])
 
@@ -97,7 +110,7 @@ class LegacyComment(Resource):
 
         if COMMENT_MAX_LEN:
             # only truncate, no fail; legacy api did this
-            comment = comment_text[0: COMMENT_MAX_LEN - 1]
+            comment = comment_text[0 : COMMENT_MAX_LEN - 1]
 
         db.Comment(
             user=user, post=post, text=comment_text, creation_time=datetime.utcnow()
@@ -107,17 +120,7 @@ class LegacyComment(Resource):
 
     @db_session
     def delete(self):
-
-        parser = reqparse.RequestParser()
-        parser.add_argument(
-            "session_token", type=str, required=True, help="Authentication Token"
-        )
-        # yep, this help was wrong originally.
-        # yep, the help is wrong now.
-        parser.add_argument(
-            "comment_id", type=int, help="Comment ID to get (get req only)"
-        )
-        args = parser.parse_args()
+        args = self.delete_parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args["session_token"])
 
@@ -137,19 +140,21 @@ class LegacyComment(Resource):
 
 # might move this one to it's own file later??
 class LegacyCommentLike(Resource):
-    @db_session
-    def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument(
+    def __init__(self):
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument(
             "session_token", type=str, required=True, help="Authentication Token"
         )
-        parser.add_argument(
+        self.post_parser.add_argument(
             "comment_id",
             type=int,
             required=True,
             help="Comment ID to toggle like state on",
         )
-        args = parser.parse_args()
+
+    @db_session
+    def post(self):
+        args = self.post_parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args["session_token"])
 
