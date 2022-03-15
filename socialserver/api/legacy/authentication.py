@@ -18,6 +18,15 @@ from datetime import datetime
 
 
 class LegacyAuthentication(Resource):
+    def __init__(self):
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument("username", type=str, required=True)
+        self.post_parser.add_argument("password", type=str, required=True)
+        self.post_parser.add_argument("totp", type=str, required=False, default=None)
+
+        self.delete_parser = reqparse.RequestParser()
+        self.delete_parser.add_argument("session_token", type=str, required=True)
+
     @staticmethod
     def get(self):
         # yep, this is intentional.
@@ -27,13 +36,7 @@ class LegacyAuthentication(Resource):
 
     @db_session
     def post(self):
-
-        parser = reqparse.RequestParser()
-        parser.add_argument("username", type=str, required=True)
-        parser.add_argument("password", type=str, required=True)
-        parser.add_argument("totp", type=str, required=False, default=None)
-
-        args = parser.parse_args()
+        args = self.post_parser.parse_args()
 
         if args.username == "" or args.password == "":
             return {}, 401
@@ -43,7 +46,7 @@ class LegacyAuthentication(Resource):
             return {"err": LegacyErrorCodes.USERNAME_NOT_FOUND.value}, 404
 
         if not verify_password_valid(
-                args["password"], user.password_salt, user.password_hash
+            args["password"], user.password_salt, user.password_hash
         ):
             # yes, this is completely the wrong error to return, however,
             # for whatever reason, this was what API v1 did.
@@ -72,11 +75,7 @@ class LegacyAuthentication(Resource):
 
     @db_session
     def delete(self):
-
-        parser = reqparse.RequestParser()
-        parser.add_argument("session_token", type=str, required=True)
-
-        args = parser.parse_args()
+        args = self.delete_parser.parse_args()
 
         access_token_hash = hash_plaintext_sha256(args["session_token"])
 
