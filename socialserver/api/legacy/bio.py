@@ -8,17 +8,25 @@ from socialserver.db import db
 
 
 class LegacyUserBio(Resource):
-    @db_session
-    def get(self):
-        parser = reqparse.RequestParser()
+    def __init__(self):
+        self.get_parser = reqparse.RequestParser()
 
-        parser.add_argument(
+        self.get_parser.add_argument(
             "session_token", type=str, required=True, help="Authentication Token"
         )
-        parser.add_argument(
+        self.get_parser.add_argument(
             "username", type=str, required=False, help="Username to get"
         )
-        args = parser.parse_args()
+
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument(
+            "session_token", type=str, required=True, help="Authentication Token"
+        )
+        self.post_parser.add_argument("bio", type=str)
+
+    @db_session
+    def get(self):
+        args = self.get_parser.parse_args()
 
         r_user = get_user_object_from_token_or_abort(args["session_token"])
 
@@ -32,14 +40,7 @@ class LegacyUserBio(Resource):
 
     @db_session
     def post(self):
-        parser = reqparse.RequestParser()
-
-        parser.add_argument(
-            "session_token", type=str, required=True, help="Authentication Token"
-        )
-        parser.add_argument("bio", type=str)
-
-        args = parser.parse_args()
+        args = self.post_parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args["session_token"])
 
