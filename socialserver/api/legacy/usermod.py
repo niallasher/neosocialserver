@@ -24,24 +24,26 @@ LESS_SECURE_PASSWORD_CHANGE_ENABLED = (
 
 
 class LegacyUsermod(Resource):
-    @db_session
-    def post(self):
-        parser = reqparse.RequestParser()
+    def __init__(self):
+        self.post_parser = reqparse.RequestParser()
 
-        parser.add_argument(
+        self.post_parser.add_argument(
             "session_token", type=str, help="Session authentication key", required=True
         )
-        parser.add_argument("username", type=str, help="New Username")
-        parser.add_argument("password", type=str, help="New Password")
-        parser.add_argument("display_name", type=str, help="New Display Name")
-        parser.add_argument(
+        self.post_parser.add_argument("username", type=str, help="New Username")
+        self.post_parser.add_argument("password", type=str, help="New Password")
+        self.post_parser.add_argument("display_name", type=str, help="New Display Name")
+        self.post_parser.add_argument(
             "avatar_hash", type=str, help="New Avatar Hash (from upload point)"
         )
-        parser.add_argument(
+        self.post_parser.add_argument(
             "header_hash", type=str, help="New Header Hash (from upload point)"
         )
 
-        args = parser.parse_args()
+    @db_session
+    def post(self):
+
+        args = self.post_parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args["session_token"])
 
