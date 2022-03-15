@@ -24,13 +24,14 @@ from socialserver.util.config import config
 
 
 class UserInfo(Resource):
+    def __init__(self):
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument("username", type=str, required=True)
+
     @db_session
     @auth_reqd
     def get(self):
-
-        parser = reqparse.RequestParser()
-        parser.add_argument("username", type=str, required=True)
-        args = parser.parse_args()
+        args = self.get_parser.parse_args()
 
         wanted_user = db.User.get(username=args["username"])
         if wanted_user is None:
@@ -50,36 +51,48 @@ class UserInfo(Resource):
             header_blur_hash = wanted_user.header_pic.blur_hash
 
         return {
-                   "username": wanted_user.username,
-                   "display_name": wanted_user.display_name,
-                   "birthday": wanted_user.birthday,
-                   "account_attributes": wanted_user.account_attributes,
-                   "bio": wanted_user.bio,
-                   "follower_count": wanted_user.followers.count(),
-                   "following_count": wanted_user.following.count(),
-                   "profile_picture": {
-                       "identifier": pfp_identifier,
-                       "blur_hash": pfp_blur_hash,
-                   },
-                   "header": {"identifier": header_identifier, "blur_hash": header_blur_hash},
-               }, 200
+            "username": wanted_user.username,
+            "display_name": wanted_user.display_name,
+            "birthday": wanted_user.birthday,
+            "account_attributes": wanted_user.account_attributes,
+            "bio": wanted_user.bio,
+            "follower_count": wanted_user.followers.count(),
+            "following_count": wanted_user.following.count(),
+            "profile_picture": {
+                "identifier": pfp_identifier,
+                "blur_hash": pfp_blur_hash,
+            },
+            "header": {"identifier": header_identifier, "blur_hash": header_blur_hash},
+        }, 200
 
 
 class User(Resource):
+    def __init__(self):
+
+        self.patch_parser = reqparse.RequestParser()
+        self.patch_parser.add_argument("display_name", type=str, required=False)
+        self.patch_parser.add_argument("username", type=str, required=False)
+        self.patch_parser.add_argument("bio", type=str, required=False)
+        self.patch_parser.add_argument("profile_pic_ref", type=str, required=False)
+        self.patch_parser.add_argument("header_pic_ref", type=str, required=False)
+
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument("display_name", type=str, required=True)
+        self.post_parser.add_argument("username", type=str, required=True)
+        self.post_parser.add_argument("password", type=str, required=True)
+        self.post_parser.add_argument("bio", type=str)
+
+        self.delete_parser = reqparse.RequestParser()
+        self.delete_parser.add_argument("password", type=str, required=True)
+
     @db_session
     def post(self):
-
-        parser = reqparse.RequestParser()
-        parser.add_argument("display_name", type=str, required=True)
-        parser.add_argument("username", type=str, required=True)
-        parser.add_argument("password", type=str, required=True)
-        parser.add_argument("bio", type=str)
         # birthday is unimplemented for now.
         # this will have to be turned into a datetime.date,
         # and there are a lot of considerations. probably
         # a feature to do *after* everything else works!
         # parser.add_argument('birthday', type=str)
-        args = parser.parse_args()
+        args = self.post_parser.parse_args()
 
         # all this validation should be done clientside,
         # but we're replicating here in case of an error on the client
@@ -102,10 +115,7 @@ class User(Resource):
         if len(args["display_name"]) >= DISPLAY_NAME_MAX_LEN:
             return {"error": ErrorCodes.DISPLAY_NAME_NON_CONFORMING.value}, 400
 
-        password_ok = (
-                len(args["password"]) >= MIN_PASSWORD_LEN
-                and len(args["password"]) <= MAX_PASSWORD_LEN
-        )
+        password_ok = MIN_PASSWORD_LEN <= len(args["password"]) <= MAX_PASSWORD_LEN
         if not password_ok:
             return {"error": ErrorCodes.PASSWORD_NON_CONFORMING.value}, 400
 
@@ -131,15 +141,7 @@ class User(Resource):
     @db_session
     @auth_reqd
     def patch(self):
-
-        parser = reqparse.RequestParser()
-        parser.add_argument("display_name", type=str, required=False)
-        parser.add_argument("username", type=str, required=False)
-        parser.add_argument("bio", type=str, required=False)
-        parser.add_argument("profile_pic_ref", type=str, required=False)
-        parser.add_argument("header_pic_ref", type=str, required=False)
-
-        args = parser.parse_args()
+        args = self.patch_parser.parse_args()
 
         user = get_user_from_auth_header()
 
@@ -184,17 +186,14 @@ class User(Resource):
     @db_session
     @auth_reqd
     def delete(self):
-
-        parser = reqparse.RequestParser()
-        parser.add_argument("password", type=str, required=True)
-        args = parser.parse_args()
+        args = self.delete_parser.parse_args()
 
         requesting_user = get_user_from_auth_header()
 
         if not verify_password_valid(
-                args["password"],
-                requesting_user.password_salt,
-                requesting_user.password_hash,
+            args["password"],
+            requesting_user.password_salt,
+            requesting_user.password_hash,
         ):
             return {"error": ErrorCodes.INCORRECT_PASSWORD.value}, 401
 
