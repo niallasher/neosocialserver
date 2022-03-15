@@ -16,13 +16,15 @@ from socialserver.util.auth import get_user_object_from_token_or_abort
 
 
 class LegacyInviteCodes(Resource):
-    @db_session
-    def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument(
+    def __init__(self):
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument(
             "session_token", type=str, help="Session authentication key", required=True
         )
-        args = parser.parse_args()
+
+    @db_session
+    def get(self):
+        args = self.get_parser.parse_args()
 
         get_user_object_from_token_or_abort(args["session_token"])
 
