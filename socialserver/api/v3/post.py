@@ -16,16 +16,25 @@ from socialserver.util.auth import get_user_from_auth_header, auth_reqd
 
 
 class Post(Resource):
+    def __init__(self):
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument("text_content", type=str, required=True)
+        # images & videos optional
+        self.post_parser.add_argument(
+            "images", type=str, required=False, action="append"
+        )
+        self.post_parser.add_argument("video", type=str, required=False)
+
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument("post_id", type=int, required=True)
+
+        self.delete_parser = reqparse.RequestParser()
+        self.delete_parser.add_argument("post_id", type=int, required=True)
+
     @db_session
     @auth_reqd
     def post(self):
-
-        parser = reqparse.RequestParser()
-        parser.add_argument("text_content", type=str, required=True)
-        # images & videos optional
-        parser.add_argument("images", type=str, required=False, action="append")
-        parser.add_argument("video", type=str, required=False)
-        args = parser.parse_args()
+        args = self.post_parser.parse_args()
 
         user = get_user_from_auth_header()
 
@@ -116,9 +125,7 @@ class Post(Resource):
     @auth_reqd
     def get(self):
 
-        parser = reqparse.RequestParser()
-        parser.add_argument("post_id", type=int, required=True)
-        args = parser.parse_args()
+        args = self.get_parser.parse_args()
 
         user = get_user_from_auth_header()
 
@@ -133,7 +140,7 @@ class Post(Resource):
         # we return POST_NOT_FOUND, so we don't explicitly highlight the
         # fact this post is moderated, just in case.
         if wanted_post.under_moderation is True and not (
-                user.is_admin or user.is_moderator
+            user.is_admin or user.is_moderator
         ):
             return {"error": ErrorCodes.POST_NOT_FOUND.value}, 404
 
@@ -177,34 +184,32 @@ class Post(Resource):
             pfp_blur_hash = pfp.blur_hash
 
         return {
-                   "post": {
-                       "id": wanted_post.id,
-                       "content": wanted_post.text,
-                       "creation_date": wanted_post.creation_time.timestamp(),
-                       "like_count": len(wanted_post.likes),
-                       "comment_count": len(wanted_post.comments),
-                       "additional_content_type": additional_content_type,
-                       "additional_content": additional_content,
-                   },
-                   "user": {
-                       "display_name": wanted_post.user.display_name,
-                       "username": wanted_post.user.username,
-                       "verified": wanted_post.user.is_verified,
-                       "profile_picture": {
-                           "identifier": pfp_identifier,
-                           "blur_hash": pfp_blur_hash,
-                       },
-                       "liked_post": user_has_liked_post,
-                       "own_post": user_owns_post,
-                   },
-               }, 201
+            "post": {
+                "id": wanted_post.id,
+                "content": wanted_post.text,
+                "creation_date": wanted_post.creation_time.timestamp(),
+                "like_count": len(wanted_post.likes),
+                "comment_count": len(wanted_post.comments),
+                "additional_content_type": additional_content_type,
+                "additional_content": additional_content,
+            },
+            "user": {
+                "display_name": wanted_post.user.display_name,
+                "username": wanted_post.user.username,
+                "verified": wanted_post.user.is_verified,
+                "profile_picture": {
+                    "identifier": pfp_identifier,
+                    "blur_hash": pfp_blur_hash,
+                },
+                "liked_post": user_has_liked_post,
+                "own_post": user_owns_post,
+            },
+        }, 201
 
     @db_session
     @auth_reqd
     def delete(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument("post_id", type=int, required=True)
-        args = parser.parse_args()
+        args = self.delete_parser.parse_args()
 
         user = get_user_from_auth_header()
 
