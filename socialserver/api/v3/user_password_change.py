@@ -13,25 +13,25 @@ from socialserver.util.auth import (
 
 
 class UserPasswordChange(Resource):
+    def __init__(self):
+        self.patch_parser = reqparse.RequestParser()
+        self.patch_parser.add_argument("old_password", type=str, required=True)
+        self.patch_parser.add_argument("new_password", type=str, required=True)
+
     @db_session
     @auth_reqd
     # patch not post, since we're not creating a new resource.
     def patch(self):
-        parser = reqparse.RequestParser()
-
-        parser.add_argument("old_password", type=str, required=True)
-        parser.add_argument("new_password", type=str, required=True)
         # Should TOTP be required? I'm thinking no, because it's for keeping a session safe,
         # and you already need to be signed in to change the password. Worth considering though.
-
-        args = parser.parse_args()
+        args = self.patch_parser.parse_args()
 
         user = get_user_from_auth_header()
 
         new_password = args["new_password"]
 
         if not verify_password_valid(
-                args["old_password"], user.password_salt, user.password_hash
+            args["old_password"], user.password_salt, user.password_hash
         ):
             return {"error": ErrorCodes.INCORRECT_PASSWORD.value}, 401
 
