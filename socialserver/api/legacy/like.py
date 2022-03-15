@@ -8,16 +8,27 @@ from datetime import datetime
 
 
 class LegacyLike(Resource):
-    @db_session
-    def post(self):
-        parser = reqparse.RequestParser()
-
-        parser.add_argument(
+    def __init__(self):
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument(
             "session_token", type=str, help="Authentication token", required=True
         )
-        parser.add_argument("post_id", type=int, help="PostID to toggle like on")
+        self.post_parser.add_argument(
+            "post_id", type=int, help="PostID to toggle like on"
+        )
 
-        args = parser.parse_args()
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument(
+            "session_token", type=str, help="Authentication Tokens", required=True
+        )
+        # this should be an int, but it wasn't in the old server, so it's a string.
+        self.get_parser.add_argument(
+            "like_id", type=str, help="Authentication Tokens", required=True
+        )
+
+    @db_session
+    def post(self):
+        args = self.post_parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args["session_token"])
 
@@ -40,17 +51,7 @@ class LegacyLike(Resource):
     @db_session
     def get(self):
 
-        parser = reqparse.RequestParser()
-
-        parser.add_argument(
-            "session_token", type=str, help="Authentication Tokens", required=True
-        )
-        # this should be an int, but it wasn't in the old server, so it's a string.
-        parser.add_argument(
-            "like_id", type=str, help="Authentication Tokens", required=True
-        )
-
-        args = parser.parse_args()
+        args = self.get_parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args["session_token"])
 
