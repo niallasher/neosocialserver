@@ -8,29 +8,55 @@ from socialserver.util.auth import get_user_object_from_token_or_abort
 
 
 class LegacyModQueue(Resource):
-    @db_session
-    def post(self):
-        parser = reqparse.RequestParser()
+    def __init__(self):
+        self.post_parser = reqparse.RequestParser()
         # this used to be required=False for some reason, but no server code
         # ever did anything if it was invalid, so why even keep it that way I guess?
-        parser.add_argument(
+        self.post_parser.add_argument(
             "session_token",
             type=str,
             help="Key for session authentication.",
             required=True,
         )
         # same here
-        parser.add_argument(
+        self.post_parser.add_argument(
             "post_id", type=int, help="Post to hide and add", required=True
         )
 
-        args = parser.parse_args()
+        self.delete_parser = reqparse.RequestParser()
+        self.delete_parser.add_argument(
+            "session_token",
+            type=str,
+            help="Key for session authentication.",
+            required=True,
+        )
+        self.delete_parser.add_argument(
+            "post_id", type=int, help="Post to hide and add", required=True
+        )
+
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument(
+            "session_token",
+            type=str,
+            help="Key for session authentication.",
+            required=True,
+        )
+        self.get_parser.add_argument(
+            "count", type=int, required=True, help="Amount of posts to return."
+        )
+        self.get_parser.add_argument(
+            "offset", type=int, required=True, help="Amount of posts to skip."
+        )
+
+    @db_session
+    def post(self):
+        args = self.post_parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args["session_token"])
         if True not in [user.is_moderator, user.is_admin]:
             return {
-                       "err": LegacyErrorCodes.INSUFFICIENT_PERMISSIONS_TO_ACCESS_MODQUEUE.value
-                   }, 401
+                "err": LegacyErrorCodes.INSUFFICIENT_PERMISSIONS_TO_ACCESS_MODQUEUE.value
+            }, 401
 
         post = db.Post.get(id=args["post_id"])
         if post is None:
@@ -41,27 +67,14 @@ class LegacyModQueue(Resource):
 
     @db_session
     def delete(self):
-        parser = reqparse.RequestParser()
-        # this used to be required=False for some reason, but no server code
-        # ever did anything if it was invalid, so why even keep it that way I guess?
-        parser.add_argument(
-            "session_token",
-            type=str,
-            help="Key for session authentication.",
-            required=True,
-        )
-        # same here
-        parser.add_argument(
-            "post_id", type=int, help="Post to hide and add", required=True
-        )
 
-        args = parser.parse_args()
+        args = self.delete_parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args["session_token"])
         if True not in [user.is_moderator, user.is_admin]:
             return {
-                       "err": LegacyErrorCodes.INSUFFICIENT_PERMISSIONS_TO_ACCESS_MODQUEUE.value
-                   }, 401
+                "err": LegacyErrorCodes.INSUFFICIENT_PERMISSIONS_TO_ACCESS_MODQUEUE.value
+            }, 401
 
         post = db.Post.get(id=args["post_id"])
         if post is None:
@@ -72,33 +85,18 @@ class LegacyModQueue(Resource):
 
     @db_session
     def get(self):
-
-        parser = reqparse.RequestParser()
-        parser.add_argument(
-            "session_token",
-            type=str,
-            help="Key for session authentication.",
-            required=True,
-        )
-        parser.add_argument(
-            "count", type=int, required=True, help="Amount of posts to return."
-        )
-        parser.add_argument(
-            "offset", type=int, required=True, help="Amount of posts to skip."
-        )
-
-        args = parser.parse_args()
+        args = self.get_parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args["session_token"])
         if True not in [user.is_moderator, user.is_admin]:
             return {
-                       "err": LegacyErrorCodes.INSUFFICIENT_PERMISSIONS_TO_ACCESS_MODQUEUE.value
-                   }, 401
+                "err": LegacyErrorCodes.INSUFFICIENT_PERMISSIONS_TO_ACCESS_MODQUEUE.value
+            }, 401
 
         posts = (
             select(post for post in db.Post if post.under_moderation is True)
-                .order_by(desc(db.Post.id))
-                .limit(args["count"], offset=args["offset"])
+            .order_by(desc(db.Post.id))
+            .limit(args["count"], offset=args["offset"])
         )
         post_ids = []
         for post in posts:
