@@ -25,20 +25,43 @@ from flask_restful import Resource, reqparse
 
 
 class LegacyUser(Resource):
-    @db_session
-    def get(self):
-
-        parser = reqparse.RequestParser()
-        parser.add_argument(
+    def __init__(self):
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument(
             "session_token", type=str, help="Session authentication key", required=True
         )
-        parser.add_argument("username", type=str, help="username to get")
-        parser.add_argument(
+        self.get_parser.add_argument("username", type=str, help="username to get")
+        self.get_parser.add_argument(
             "disable_include_images",
             type=str,
             help="Set to not include images in the returned data.",
         )
-        args = parser.parse_args()
+
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument(
+            "username", type=str, help="Username for created account", required=True
+        )
+        self.post_parser.add_argument(
+            "password", type=str, help="Password for created account", required=True
+        )
+        self.post_parser.add_argument(
+            "display_name",
+            type=str,
+            help="Display name for created account",
+            required=True,
+        )
+
+        self.delete_parser = reqparse.RequestParser()
+        self.delete_parser.add_argument(
+            "session_token", type=str, help="Session authentication key", required=True
+        )
+        self.delete_parser.add_argument(
+            "password", type=str, help="password to delete user"
+        )
+
+    @db_session
+    def get(self):
+        args = self.get_parser.parse_args()
 
         r_user = get_user_object_from_token_or_abort(args["session_token"])
         if r_user is None:
@@ -84,32 +107,24 @@ class LegacyUser(Resource):
         is_blocked = db.Block.get(user=r_user, blocking=user) is not None
 
         return {
-                   "displayName": user.display_name,
-                   "username": user.username,
-                   "headerData": header_data,
-                   "avatarData": avatar_data,
-                   "isVerified": user.is_verified,
-                   "isAdmin": user.is_admin,
-                   "isModerator": user.is_moderator,
-                   "isOwnPage": user_owns_page,
-                   "isEarlyAdopter": AccountAttributes.OG.value in user.account_attributes,
-                   "followerCount": follower_count,
-                   "followingCount": following_count,
-                   "isFollowing": following_user,
-                   "isBlocked": is_blocked,
-               }, 200
+            "displayName": user.display_name,
+            "username": user.username,
+            "headerData": header_data,
+            "avatarData": avatar_data,
+            "isVerified": user.is_verified,
+            "isAdmin": user.is_admin,
+            "isModerator": user.is_moderator,
+            "isOwnPage": user_owns_page,
+            "isEarlyAdopter": AccountAttributes.OG.value in user.account_attributes,
+            "followerCount": follower_count,
+            "followingCount": following_count,
+            "isFollowing": following_user,
+            "isBlocked": is_blocked,
+        }, 200
 
     @db_session
     def delete(self):
-
-        parser = reqparse.RequestParser()
-
-        parser.add_argument(
-            "session_token", type=str, help="Session authentication key", required=True
-        )
-        parser.add_argument("password", type=str, help="password to delete user")
-
-        args = parser.parse_args()
+        args = self.delete_parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args["session_token"])
 
@@ -120,7 +135,7 @@ class LegacyUser(Resource):
             return {}, 401
 
         if verify_password_valid(
-                args["password"], user.password_salt, user.password_hash
+            args["password"], user.password_salt, user.password_hash
         ):
             user.delete()
             return {}, 201
@@ -129,7 +144,6 @@ class LegacyUser(Resource):
 
     @db_session
     def post(self):
-
         # we don't really have a better error to launch back here,
         # since the old client doesn't support any others
         if not config.legacy_api_interface.signup_enabled:
@@ -141,23 +155,9 @@ class LegacyUser(Resource):
         if config.auth.registration.approval_required:
             return {"err": LegacyErrorCodes.GENERIC_SERVER_ERROR.value}, 400
 
-        parser = reqparse.RequestParser()
-
-        parser.add_argument(
-            "username", type=str, help="Username for created account", required=True
-        )
-        parser.add_argument(
-            "password", type=str, help="Password for created account", required=True
-        )
-        parser.add_argument(
-            "display_name",
-            type=str,
-            help="Display name for created account",
-            required=True,
-        )
         # parser.add_argument('invite_code', type=str, help="Invite code to socialshare", required=False)
 
-        args = parser.parse_args()
+        args = self.post_parser.parse_args()
 
         # NOTE: this isn't *exactly* compatible, since the old version had basically no validation
         # for usernames, but we've gotta diverge a bit here since the new server does
