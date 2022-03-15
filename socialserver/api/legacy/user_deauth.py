@@ -11,24 +11,26 @@ from pony.orm import db_session
 
 # removes all sessions from a user
 class LegacyAllDeauth(Resource):
-    @db_session
-    def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument(
+    def __init__(self):
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument(
             "session_token", type=str, required=True, help="Authentication Token"
         )
-        parser.add_argument(
+        self.post_parser.add_argument(
             "password",
             type=str,
             required=True,
             help="Account password for confirmation",
         )
-        args = parser.parse_args()
+
+    @db_session
+    def post(self):
+        args = self.post_parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args["session_token"])
 
         if not verify_password_valid(
-                args["password"], user.password_salt, user.password_hash
+            args["password"], user.password_salt, user.password_hash
         ):
             return {"err": LegacyErrorCodes.INCORRECT_PASSWORD.value}, 401
 
