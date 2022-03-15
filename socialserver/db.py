@@ -2,8 +2,15 @@
 
 from pony import orm
 import datetime
-from socialserver.constants import BIO_MAX_LEN, COMMENT_MAX_LEN, DISPLAY_NAME_MAX_LEN, \
-    REPORT_SUPPLEMENTARY_INFO_MAX_LEN, TAG_MAX_LEN, USERNAME_MAX_LEN, AccountAttributes
+from socialserver.constants import (
+    BIO_MAX_LEN,
+    COMMENT_MAX_LEN,
+    DISPLAY_NAME_MAX_LEN,
+    REPORT_SUPPLEMENTARY_INFO_MAX_LEN,
+    TAG_MAX_LEN,
+    USERNAME_MAX_LEN,
+    AccountAttributes,
+)
 from socialserver.util.config import config, CONFIG_PATH
 from pony.orm import OperationalError
 from socialserver.util.output import console
@@ -24,7 +31,7 @@ def define_entities(db_object):
         password_salt = orm.Required(str)
         creation_time = orm.Required(datetime.datetime)
         birthday = orm.Optional(datetime.date)
-        totp = orm.Optional('Totp')
+        totp = orm.Optional("Totp")
         # legacy accounts are the ones imported from socialserver 2.x during migration
         # this doesn't mean much now, but might become important in the future
         # so might as well have it.
@@ -32,10 +39,10 @@ def define_entities(db_object):
         # check out AccountAttributes enum in constants for more info
         account_attributes = orm.Required(orm.IntArray)
         bio = orm.Optional(str, max_len=BIO_MAX_LEN)
-        posts = orm.Set('Post', cascade_delete=True)
-        comments = orm.Set('Comment', cascade_delete=True)
-        post_likes = orm.Set('PostLike', cascade_delete=True)
-        comment_likes = orm.Set('CommentLike', cascade_delete=True)
+        posts = orm.Set("Post", cascade_delete=True)
+        comments = orm.Set("Comment", cascade_delete=True)
+        post_likes = orm.Set("PostLike", cascade_delete=True)
+        comment_likes = orm.Set("CommentLike", cascade_delete=True)
         followers = orm.Set("Follow", cascade_delete=True)
         following = orm.Set("Follow", cascade_delete=True)
         blocked_users = orm.Set("Block", cascade_delete=True)
@@ -86,7 +93,7 @@ def define_entities(db_object):
 
     class Totp(db_object.Entity):
         # here as a reverse attribute
-        user = orm.Optional('User')
+        user = orm.Optional("User")
         secret = orm.Required(str)
         # a code will only be used if it's actually confirmed
         confirmed = orm.Required(bool)
@@ -102,7 +109,7 @@ def define_entities(db_object):
         # same as an API key.
         # check ApiKey for a quick explanation of why.
         access_token_hash = orm.Required(str)
-        user = orm.Required('User')
+        user = orm.Required("User")
         creation_ip = orm.Required(str)
         creation_time = orm.Required(datetime.datetime)
         last_access_time = orm.Required(datetime.datetime)
@@ -111,24 +118,24 @@ def define_entities(db_object):
     class Post(db_object.Entity):
         # whether the post is currently in the mod-queue
         under_moderation = orm.Required(bool)
-        user = orm.Required('User')
+        user = orm.Required("User")
         creation_time = orm.Required(datetime.datetime)
         text = orm.Required(str)
         # the reason for this one is purely for relationship reasons,
         # however a set is not of any use for this application;
         # it's unordered, and we want to keep the correct order for
         # images on a post
-        images = orm.Set('Image', reverse="associated_posts")
+        images = orm.Set("Image", reverse="associated_posts")
         # this is the useful one instead, since it retains
         # the proper ordering, and can be indexed etc.
         image_ids = orm.Optional(orm.IntArray)
         # need to look into; a post can have photos *OR* videos.
         # can this be enforced with this schema?
-        video = orm.Optional('Video')
-        comments = orm.Set('Comment', cascade_delete=True)
-        likes = orm.Set('PostLike', cascade_delete=True)
-        hashtags = orm.Set('Hashtag')
-        reports = orm.Set('PostReport', cascade_delete=True)
+        video = orm.Optional("Video")
+        comments = orm.Set("Comment", cascade_delete=True)
+        likes = orm.Set("PostLike", cascade_delete=True)
+        hashtags = orm.Set("Hashtag")
+        reports = orm.Set("PostReport", cascade_delete=True)
 
         @property
         def get_images(self):
@@ -162,8 +169,8 @@ def define_entities(db_object):
         # since if somebody reports illegal content, and then
         # deletes their account, we still want to know about
         # the report, so we can take action
-        reporter = orm.Optional('User', reverse="submitted_reports")
-        post = orm.Required('Post', reverse="reports")
+        reporter = orm.Optional("User", reverse="submitted_reports")
+        post = orm.Required("Post", reverse="reports")
         creation_time = orm.Required(datetime.datetime)
         # since we do one report per post, we want to be able to
         # report multiple infringements at once, hence the array.
@@ -172,64 +179,70 @@ def define_entities(db_object):
         # check out the socialserver.constants.ReportReasons enum
         # for a list of these.
         report_reason = orm.Required(orm.IntArray)
-        supplementary_info = orm.Optional(str, max_len=REPORT_SUPPLEMENTARY_INFO_MAX_LEN)
+        supplementary_info = orm.Optional(
+            str, max_len=REPORT_SUPPLEMENTARY_INFO_MAX_LEN
+        )
 
     class Image(db_object.Entity):
-        uploader = orm.Required('User')
+        uploader = orm.Required("User")
         creation_time = orm.Required(datetime.datetime)
         # uuid used to retrieve the image from storage
         identifier = orm.Required(str)
-        associated_profile_pics = orm.Set('User', reverse='profile_pic')
-        associated_header_pics = orm.Set('User', reverse='header_pic')
-        associated_posts = orm.Set('Post', reverse='images')
-        associated_thumbnails = orm.Set('Video', reverse="thumbnail")
+        associated_profile_pics = orm.Set("User", reverse="profile_pic")
+        associated_header_pics = orm.Set("User", reverse="header_pic")
+        associated_posts = orm.Set("Post", reverse="images")
+        associated_thumbnails = orm.Set("Video", reverse="thumbnail")
         blur_hash = orm.Required(str)
 
         @property
         def is_orphan(self):
-            return len(self.associated_posts) == 0 and len(self.associated_profile_pics) == 0 \
-                   and len(self.associated_header_pics) and len(self.associated_thumbnails) == 0
+            return (
+                    len(self.associated_posts) == 0
+                    and len(self.associated_profile_pics) == 0
+                    and len(self.associated_header_pics)
+                    and len(self.associated_thumbnails) == 0
+            )
 
     class Hashtag(db_object.Entity):
         creation_time = orm.Required(datetime.datetime)
         name = orm.Required(str, max_len=TAG_MAX_LEN, unique=True)
-        posts = orm.Set('Post', reverse='hashtags')
+        posts = orm.Set("Post", reverse="hashtags")
 
     class PostLike(db_object.Entity):
-        user = orm.Required('User')
+        user = orm.Required("User")
         creation_time = orm.Required(datetime.datetime)
-        post = orm.Required('Post')
+        post = orm.Required("Post")
 
     class CommentLike(db_object.Entity):
-        user = orm.Required('User')
+        user = orm.Required("User")
         creation_time = orm.Required(datetime.datetime)
-        comment = orm.Required('Comment')
+        comment = orm.Required("Comment")
 
     class Follow(db_object.Entity):
-        user = orm.Required('User', reverse='following')
-        following = orm.Required('User', reverse='followers')
+        user = orm.Required("User", reverse="following")
+        following = orm.Required("User", reverse="followers")
         creation_time = orm.Required(datetime.datetime)
 
     class Comment(db_object.Entity):
-        user = orm.Required('User')
+        user = orm.Required("User")
         creation_time = orm.Required(datetime.datetime)
         text = orm.Required(str, max_len=COMMENT_MAX_LEN)
-        post = orm.Required('Post')
-        likes = orm.Set('CommentLike', cascade_delete=True)
+        post = orm.Required("Post")
+        likes = orm.Set("CommentLike", cascade_delete=True)
 
     class Block(db_object.Entity):
-        user = orm.Required('User', reverse='blocked_users')
-        blocking = orm.Required('User', reverse='blocked_by')
+        user = orm.Required("User", reverse="blocked_users")
+        blocking = orm.Required("User", reverse="blocked_by")
         creation_time = orm.Required(datetime.datetime)
 
     class InviteCode(db_object.Entity):
-        user = orm.Required('User')
+        user = orm.Required("User")
         creation_time = orm.Required(datetime.datetime)
         code = orm.Required(str)
         used = orm.Required(bool)
 
     class ApiKey(db_object.Entity):
-        owner = orm.Required('User')
+        owner = orm.Required("User")
         creation_time = orm.Required(datetime.datetime)
         # we store this with sha256, not pbkdf2 or argon2,
         # since we want it to be super-fast, as each request
@@ -240,12 +253,12 @@ def define_entities(db_object):
         permissions = orm.Required(orm.IntArray)  # constants.ApiKeyPermissions
 
     class Video(db_object.Entity):
-        owner = orm.Required('User')
+        owner = orm.Required("User")
         creation_time = orm.Required(datetime.datetime)
         # for both video and thumbnail.
         identifier = orm.Required(str)
-        associated_posts = orm.Set('Post', reverse="video")
-        thumbnail = orm.Required('Image', reverse="associated_thumbnails")
+        associated_posts = orm.Set("Post", reverse="video")
+        thumbnail = orm.Required("Image", reverse="associated_thumbnails")
         # this probably won't be implemented for a while, but
         # if we start transcoding, this will become important.
         processed = orm.Required(bool)
@@ -261,7 +274,7 @@ def define_entities(db_object):
 def create_test_db():
     mem_db = orm.Database()
     define_entities(mem_db)
-    mem_db.bind('sqlite', '/tmp/test.db', create_db=True)
+    mem_db.bind("sqlite", "/tmp/test.db", create_db=True)
     if mem_db.schema is None:
         mem_db.generate_mapping(create_tables=True)
     if mem_db is not None:
@@ -280,22 +293,28 @@ def create_test_db():
 
 def _bind_to_config_specified_db(db_object):
     # TODO: MariaDB support, once I actually set it up for testing
-    if config.database.connector == 'sqlite':
-        db_object.bind('sqlite', config.database.filename, create_db=True)
-    elif config.database.connector == 'postgres':
+    if config.database.connector == "sqlite":
+        db_object.bind("sqlite", config.database.filename, create_db=True)
+    elif config.database.connector == "postgres":
         try:
-            db_object.bind(provider='postgres',
-                           user=config.database.username,
-                           password=config.database.password,
-                           host=config.database.host,
-                           database=config.database.database_name)
+            db_object.bind(
+                provider="postgres",
+                user=config.database.username,
+                password=config.database.password,
+                host=config.database.host,
+                database=config.database.database_name,
+            )
         except OperationalError:
             console.log("[bold red]Couldn't connect to database!")
-            console.print(f"[bold]Please check the configuration file, located at {CONFIG_PATH}!")
+            console.print(
+                f"[bold]Please check the configuration file, located at {CONFIG_PATH}!"
+            )
             exit()
     else:
         console.log(f"[bold red]Invalid database connector specified in {CONFIG_PATH}")
-        console.print(f"[bold]Please check the configuration file, located at {CONFIG_PATH}!")
+        console.print(
+            f"[bold]Please check the configuration file, located at {CONFIG_PATH}!"
+        )
         console.print(f"[bold]Valid connectors:")
         console.print("- [bold] postgres")
         console.print("- [bold] sqlite")

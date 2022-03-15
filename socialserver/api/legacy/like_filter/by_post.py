@@ -8,31 +8,40 @@ from socialserver.constants import MAX_FEED_GET_COUNT
 
 
 class LegacyLikeFilterByPost(Resource):
+    def __init__(self):
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument(
+            "session_token", type=str, help="Authentication token", required=True
+        )
+        self.get_parser.add_argument(
+            "post_id", type=int, help="Post ID to get likes for", required=True
+        )
+        self.get_parser.add_argument(
+            "count", type=int, help="Amount of likes to get", required=True
+        )
+        self.get_parser.add_argument(
+            "offset", type=int, help="Offset to get from", required=True
+        )
 
     @db_session
     def get(self):
-        parser = reqparse.RequestParser()
+        args = self.get_parser.parse_args()
 
-        parser.add_argument("session_token", type=str, help="Authentication token", required=True)
-        parser.add_argument("post_id", type=int, help="Post ID to get likes for", required=True)
-        parser.add_argument("count", type=int, help="Amount of likes to get", required=True)
-        parser.add_argument("offset", type=int, help="Offset to get from", required=True)
+        get_user_object_from_token_or_abort(args["session_token"])
 
-        args = parser.parse_args()
-
-        get_user_object_from_token_or_abort(args['session_token'])
-
-        if args['count'] > MAX_FEED_GET_COUNT:
+        if args["count"] > MAX_FEED_GET_COUNT:
             return {}, 400
 
-        post = db.Post.get(id=args['post_id'])
+        post = db.Post.get(id=args["post_id"])
         if post is None:
             return {}, 404
 
         like_ids = []
-        likes = select(like for like in db.PostLike
-                       if like.post == post).order_by(desc(db.PostLike.id)).limit(args['count'],
-                                                                                  offset=args['offset'])[:]
+        likes = (
+            select(like for like in db.PostLike if like.post == post)
+            .order_by(desc(db.PostLike.id))
+            .limit(args["count"], offset=args["offset"])[:]
+        )
         for like in likes:
             like_ids.append(like.id)
 

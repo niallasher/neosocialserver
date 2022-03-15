@@ -1,7 +1,7 @@
 #  Copyright (c) Niall Asher 2022
 
-AFFIRMATIVE_RESPONSES = ['y', 'yes']
-NEGATIVE_RESPONSES = ['n', 'no']
+AFFIRMATIVE_RESPONSES = ["y", "yes"]
+NEGATIVE_RESPONSES = ["n", "no"]
 
 
 def get_input_bool(prompt):
@@ -27,4 +27,4 @@ def get_int_input(prompt):
             try:
                 return int(user_input)
             except ValueError:
-                print('Please enter a number')
+                print("Please enter a number")

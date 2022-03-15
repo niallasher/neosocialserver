@@ -3,7 +3,6 @@
 from flask_restful import Resource, reqparse
 from pony.orm import db_session
 from socialserver.util.auth import get_user_object_from_token_or_abort
-from socialserver.db import db
 
 """
     this class is somewhat of a stub, since invite codes are not
@@ -17,14 +16,17 @@ from socialserver.db import db
 
 
 class LegacyInviteCodes(Resource):
+    def __init__(self):
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument(
+            "session_token", type=str, help="Session authentication key", required=True
+        )
 
     @db_session
     def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument("session_token", type=str, help="Session authentication key", required=True)
-        args = parser.parse_args()
+        args = self.get_parser.parse_args()
 
-        get_user_object_from_token_or_abort(args['session_token'])
+        get_user_object_from_token_or_abort(args["session_token"])
 
         # here's the stub part :)
         return [], 201

@@ -327,7 +327,7 @@ UserModificationOptions = [
     "username",
     "bio",
     "profile_pic_reference",
-    "header_pic_reference"
+    "header_pic_reference",
 ]
 
 """
@@ -338,9 +338,7 @@ UserModificationOptions = [
   from the user.)
 """
 
-UserAuthenticationModificationOptions = [
-    "password"
-]
+UserAuthenticationModificationOptions = ["password"]
 
 """
   ImageSupportedMimeTypes
@@ -370,7 +368,7 @@ ImageSupportedMimeTypes = [
     "image/jp2",
     "image/png",
     "image/webp",
-    "image/tiff"
+    "image/tiff",
 ]
 
 """

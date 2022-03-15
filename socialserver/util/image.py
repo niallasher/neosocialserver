@@ -13,9 +13,18 @@ from pony.orm import commit, db_session
 from socialserver.util.config import config
 from socialserver.util.output import console
 from socialserver.db import db
-from socialserver.constants import ImageTypes, MAX_PIXEL_RATIO, MAX_IMAGE_SIZE_GALLERY_PREVIEW, \
-    MAX_IMAGE_SIZE_POST_PREVIEW, MAX_IMAGE_SIZE_POST, MAX_IMAGE_SIZE_PROFILE_PICTURE, \
-    MAX_IMAGE_SIZE_PROFILE_PICTURE_LARGE, ImageSupportedMimeTypes, BLURHASH_X_COMPONENTS, BLURHASH_Y_COMPONENTS
+from socialserver.constants import (
+    ImageTypes,
+    MAX_PIXEL_RATIO,
+    MAX_IMAGE_SIZE_GALLERY_PREVIEW,
+    MAX_IMAGE_SIZE_POST_PREVIEW,
+    MAX_IMAGE_SIZE_POST,
+    MAX_IMAGE_SIZE_PROFILE_PICTURE,
+    MAX_IMAGE_SIZE_PROFILE_PICTURE_LARGE,
+    ImageSupportedMimeTypes,
+    BLURHASH_X_COMPONENTS,
+    BLURHASH_Y_COMPONENTS,
+)
 from secrets import token_urlsafe
 from copy import copy
 import magic
@@ -26,7 +35,7 @@ from io import BytesIO
 IMAGE_DIR = config.media.images.storage_dir
 # where straight uploaded images are stored.
 # the optimized ones are stored one above it
-IMAGE_DIR_ORIGINAL = IMAGE_DIR + '/originals'
+IMAGE_DIR_ORIGINAL = IMAGE_DIR + "/originals"
 IMAGE_QUALITY = config.media.images.quality
 
 # check if the image directory exists,
@@ -47,14 +56,21 @@ if not path.exists(IMAGE_DIR):
 # annotations. Need to fix this.
 def save_images_to_disk(images: dict, access_id: str) -> None:
     def save_with_pixel_ratio(image, filename, pixel_ratio):
-        image.save(f"{IMAGE_DIR}/{access_id}/{filename}_{pixel_ratio}x.jpg",
-                   type="JPEG", quality=IMAGE_QUALITY, progressive=True)
+        image.save(
+            f"{IMAGE_DIR}/{access_id}/{filename}_{pixel_ratio}x.jpg",
+            type="JPEG",
+            quality=IMAGE_QUALITY,
+            progressive=True,
+        )
 
     mkdir(f"{IMAGE_DIR}/{access_id}")
     for i in images.keys():
         if i == ImageTypes.ORIGINAL:
             images[i][0].save(
-                f"{IMAGE_DIR}/{access_id}/{ImageTypes.ORIGINAL.value}.jpg", type="JPEG", quality=IMAGE_QUALITY)
+                f"{IMAGE_DIR}/{access_id}/{ImageTypes.ORIGINAL.value}.jpg",
+                type="JPEG",
+                quality=IMAGE_QUALITY,
+            )
         else:
             for j in images[i]:
                 save_with_pixel_ratio(j, i.value, images[i].index(j) + 1)
@@ -123,12 +139,7 @@ def resize_image_aspect_aware(image: PIL.Image, size: Tuple[int, int]) -> PIL.Im
             # TODO: see why the hell these are coming out as floats...
             scaled_size = (int(size[0]), int(size[1]))
         images.append(
-            ImageOps.fit(
-                image,
-                scaled_size,
-                PIL.Image.BICUBIC,
-                centering=(0.5, 0.5)
-            )
+            ImageOps.fit(image, scaled_size, PIL.Image.BICUBIC, centering=(0.5, 0.5))
         )
     return images
 
@@ -142,7 +153,9 @@ def resize_image_aspect_aware(image: PIL.Image, size: Tuple[int, int]) -> PIL.Im
 """
 
 
-def calculate_largest_fit(image: PIL.Image, max_size: Tuple[int, int]) -> Tuple[int, int]:
+def calculate_largest_fit(
+        image: PIL.Image, max_size: Tuple[int, int]
+) -> Tuple[int, int]:
     # calculate *target* aspect ratio from max size
     divisor = gcd(max_size[0], max_size[1])
     target_aspect_ratio = (max_size[0] / divisor, max_size[1] / divisor)
@@ -163,7 +176,7 @@ def calculate_largest_fit(image: PIL.Image, max_size: Tuple[int, int]) -> Tuple[
 def convert_data_url_to_byte_buffer(data_url: str) -> BytesIO:
     # strip the mime type declaration, and the data: prefix,
     # so we can convert to binary and create an image
-    data_url = re.sub(r'^data:image/.+;base64,', '', data_url)
+    data_url = re.sub(r"^data:image/.+;base64,", "", data_url)
     # we're storing in BytesIO, so we don't have to
     # write to disk, and we can use the image directly.
     # we only want to store it once processing is done.
@@ -179,7 +192,7 @@ def convert_data_url_to_byte_buffer(data_url: str) -> BytesIO:
 
 
 def convert_buffer_to_image(buffer: BytesIO) -> PIL.Image:
-    image = Image.open(buffer).convert('RGB')
+    image = Image.open(buffer).convert("RGB")
     return image
 
 
@@ -199,7 +212,7 @@ def commit_image_to_db(identifier: str, userid: int, blur_hash: str) -> None or 
             creation_time=datetime.datetime.utcnow(),
             identifier=identifier,
             uploader=db.User.get(id=userid),
-            blur_hash=blur_hash
+            blur_hash=blur_hash,
         )
         commit()
         return entry.id
@@ -333,20 +346,18 @@ def handle_upload(image: BytesIO, userid: int) -> SimpleNamespace:
     # 0 to 3, where the pixel ratio is the index + 1. except for posts.
     # we always deliver them in ''full'' quality (defined by MAX_IMAGE_SIZE_POST)
     arr_gallery_preview_image = resize_image_aspect_aware(
-        image, MAX_IMAGE_SIZE_GALLERY_PREVIEW)
+        image, MAX_IMAGE_SIZE_GALLERY_PREVIEW
+    )
 
     # if upload_type == ImageUploadTypes.PROFILE_PICTURE:
-    arr_profilepic = resize_image_aspect_aware(
-        image, MAX_IMAGE_SIZE_PROFILE_PICTURE)
+    arr_profilepic = resize_image_aspect_aware(image, MAX_IMAGE_SIZE_PROFILE_PICTURE)
     arr_profilepic_lg = resize_image_aspect_aware(
-        image, MAX_IMAGE_SIZE_PROFILE_PICTURE_LARGE)
-    img_post = fit_image_to_size(
-        image, MAX_IMAGE_SIZE_POST)
-    arr_post_preview = resize_image_aspect_aware(
-        image, MAX_IMAGE_SIZE_POST_PREVIEW)
+        image, MAX_IMAGE_SIZE_PROFILE_PICTURE_LARGE
+    )
+    img_post = fit_image_to_size(image, MAX_IMAGE_SIZE_POST)
+    arr_post_preview = resize_image_aspect_aware(image, MAX_IMAGE_SIZE_POST_PREVIEW)
 
-    arr_header = resize_image_aspect_aware(
-        image, MAX_IMAGE_SIZE_POST)
+    arr_header = resize_image_aspect_aware(image, MAX_IMAGE_SIZE_POST)
 
     images = {
         ImageTypes.ORIGINAL: [image],
@@ -360,7 +371,4 @@ def handle_upload(image: BytesIO, userid: int) -> SimpleNamespace:
 
     save_images_to_disk(images, access_id)
     entry = commit_image_to_db(access_id, userid, generate_blur_hash(image))
-    return SimpleNamespace(
-        id=entry,
-        identifier=access_id
-    )
+    return SimpleNamespace(id=entry, identifier=access_id)

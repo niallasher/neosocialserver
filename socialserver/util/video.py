@@ -45,7 +45,9 @@ def screenshot_video(video: BytesIO) -> BytesIO:
         input_file.write(video.read())
         video_object = ffmpeg.input(input_file.name)
         try:
-            output, _ = video_object.output("pipe:", format="image2", vframes="1").run(capture_stdout=True)
+            output, _ = video_object.output("pipe:", format="image2", vframes="1").run(
+                capture_stdout=True
+            )
         except ffmpeg.Error as e:
             raise InvalidVideoException
     return BytesIO(output)
@@ -78,13 +80,10 @@ def handle_video_upload(video: BytesIO, userid: int) -> SimpleNamespace:
         identifier=identifier,
         thumbnail=db.Image.get(id=thumbnail_id),
         # true since we're just direct playing right now
-        processed=True
+        processed=True,
     )
 
     # save again, so that we can
     commit()
 
-    return SimpleNamespace(
-        id=video_db.id,
-        identifier=identifier
-    )
+    return SimpleNamespace(id=video_db.id, identifier=identifier)

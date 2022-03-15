@@ -15,6 +15,8 @@ class LegacyInfo(Resource):
         return {
                    "inviteOnly": False,
                    "instanceName": "Socialserver",
-                   "instanceVersion": "2.99.0" if SHOULD_RETURN_LEGACY_VERSION_STRING else SERVER_VERSION,
-                   "userCanInvite": True
+                   "instanceVersion": "2.99.0"
+                   if SHOULD_RETURN_LEGACY_VERSION_STRING
+                   else SERVER_VERSION,
+                   "userCanInvite": True,
                }, 201

@@ -9,12 +9,9 @@ from threading import Thread
 
 
 class TestingServer(Thread):
-
     def __init__(self, application_object):
         Thread.__init__(self)
-        self.server = make_server("127.0.0.1",
-                                  9801,
-                                  application_object)
+        self.server = make_server("127.0.0.1", 9801, application_object)
         self.ctx = application_object.app_context()
         self.ctx.push()
 
@@ -42,7 +39,7 @@ def pytest_sessionfinish():
     # TODO: remove old test images & videos etc.,
     # rather then just leaving it to the OS
     application_thread.kill()
-    remove('/tmp/test.db')
+    remove("/tmp/test.db")
 
 
 application_thread = TestingServer(application)

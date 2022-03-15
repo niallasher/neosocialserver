@@ -12,7 +12,7 @@ from socialserver.constants import ErrorCodes
 
 
 def mb_to_b(mb_count: float) -> int:
-    return ceil(mb_count * 1e+6)
+    return ceil(mb_count * 1e6)
 
 
 """
@@ -22,7 +22,7 @@ def mb_to_b(mb_count: float) -> int:
 
 
 def b_to_mb(b_count: int) -> float:
-    return b_count / 1e+6
+    return b_count / 1e6
 
 
 """
@@ -39,9 +39,7 @@ def max_req_size(max_len_bytes: int):
             if content_length is not None and content_length > max_len_bytes:
                 abort(
                     make_response(
-                        jsonify(
-                            error=ErrorCodes.REQUEST_TOO_LARGE.value
-                        ), 413
+                        jsonify(error=ErrorCodes.REQUEST_TOO_LARGE.value), 413
                     )
                 )
             return f(*args, **kwargs)

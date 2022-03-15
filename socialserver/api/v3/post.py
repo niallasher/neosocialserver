@@ -5,24 +5,36 @@ import re
 from flask_restful import Resource, reqparse
 from socialserver.db import db
 from pony.orm import db_session, commit
-from socialserver.constants import MAX_IMAGES_PER_POST, POST_MAX_LEN, REGEX_HASHTAG, ErrorCodes, \
-    PostAdditionalContentTypes
+from socialserver.constants import (
+    MAX_IMAGES_PER_POST,
+    POST_MAX_LEN,
+    REGEX_HASHTAG,
+    ErrorCodes,
+    PostAdditionalContentTypes,
+)
 from socialserver.util.auth import get_user_from_auth_header, auth_reqd
 
 
 class Post(Resource):
+    def __init__(self):
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument("text_content", type=str, required=True)
+        # images & videos optional
+        self.post_parser.add_argument(
+            "images", type=str, required=False, action="append"
+        )
+        self.post_parser.add_argument("video", type=str, required=False)
+
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument("post_id", type=int, required=True)
+
+        self.delete_parser = reqparse.RequestParser()
+        self.delete_parser.add_argument("post_id", type=int, required=True)
 
     @db_session
     @auth_reqd
     def post(self):
-
-        parser = reqparse.RequestParser()
-        parser.add_argument('text_content', type=str, required=True)
-        # images & videos optional
-        parser.add_argument('images', type=str,
-                            required=False, action="append")
-        parser.add_argument('video', type=str, required=False)
-        args = parser.parse_args()
+        args = self.post_parser.parse_args()
 
         user = get_user_from_auth_header()
 
@@ -30,13 +42,13 @@ class Post(Resource):
         # we don't limit the characters used as of now (except for newlines). might look
         # into this later? probably not needed, but unicode can be weird.
 
-        text_content = args['text_content']
+        text_content = args["text_content"]
         if len(text_content) > POST_MAX_LEN:
             return {"error": ErrorCodes.POST_TOO_LONG.value}, 400
 
         # strip out any newlines. the client shouldn't allow users to add
         # them for UX purposes!
-        text_content = text_content.replace('\n', '')
+        text_content = text_content.replace("\n", "")
 
         additional_content = PostAdditionalContentTypes.NONE.value
         # images is just used for relationship purposes, and might be removed soon?
@@ -46,9 +58,9 @@ class Post(Resource):
         video = None
         image_ids = []
 
-        if args['images'] is not None:
+        if args["images"] is not None:
             images = []
-            referenced_images = args['images']
+            referenced_images = args["images"]
             # we don't want people making giant
             # image galleries in a post. !! SHOULD ALSO
             # BE ENFORCED CLIENT SIDE FOR UX !!
@@ -62,11 +74,11 @@ class Post(Resource):
                     return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404
                 images.append(image)
                 image_ids.append(image.id)
-        elif args['video'] is not None:
-            video = db.Video.get(identifier=args['video'])
+        elif args["video"] is not None:
+            video = db.Video.get(identifier=args["video"])
             if video is None:
                 return {"error": ErrorCodes.OBJECT_NOT_FOUND.value}, 404
-            video = args['video']
+            video = args["video"]
 
         # checking for hashtags in the post content
         # hashtags can be 1 to 12 chars long and only alphanumeric.
@@ -81,8 +93,7 @@ class Post(Resource):
         for tag_name in tags:
             existing_tag = db.Hashtag.get(name=tag_name)
             if existing_tag is None:
-                tag = db.Hashtag(creation_time=datetime.utcnow(),
-                                 name=tag_name)
+                tag = db.Hashtag(creation_time=datetime.utcnow(), name=tag_name)
             else:
                 tag = existing_tag
             db_tags.append(tag)
@@ -92,7 +103,8 @@ class Post(Resource):
             user=user,
             creation_time=datetime.utcnow(),
             text=text_content,
-            hashtags=db_tags)
+            hashtags=db_tags,
+        )
 
         if images is not None:
             new_post.images = images
@@ -113,13 +125,11 @@ class Post(Resource):
     @auth_reqd
     def get(self):
 
-        parser = reqparse.RequestParser()
-        parser.add_argument('post_id', type=int, required=True)
-        args = parser.parse_args()
+        args = self.get_parser.parse_args()
 
         user = get_user_from_auth_header()
 
-        wanted_post = db.Post.get(id=args['post_id'])
+        wanted_post = db.Post.get(id=args["post_id"])
         if wanted_post is None:
             return {"error": ErrorCodes.POST_NOT_FOUND.value}, 404
 
@@ -129,7 +139,9 @@ class Post(Resource):
 
         # we return POST_NOT_FOUND, so we don't explicitly highlight the
         # fact this post is moderated, just in case.
-        if wanted_post.under_moderation is True and not (user.is_admin or user.is_moderator):
+        if wanted_post.under_moderation is True and not (
+            user.is_admin or user.is_moderator
+        ):
             return {"error": ErrorCodes.POST_NOT_FOUND.value}, 404
 
         # if you've blocked a user, we don't want you to see their posts.
@@ -146,20 +158,20 @@ class Post(Resource):
         if len(post_images) >= 1:
             additional_content_type = PostAdditionalContentTypes.IMAGES.value
             for image in post_images:
-                additional_content.append({
-                    "identifier": image.identifier,
-                    "blurhash": image.blur_hash
-                })
+                additional_content.append(
+                    {"identifier": image.identifier, "blurhash": image.blur_hash}
+                )
         elif video is not None:
             additional_content_type = PostAdditionalContentTypes.VIDEO.value
-            additional_content.append({
-                "identifier": video.identifier,
-                "thumbnail_identifier": video.thumbnail.identifier,
-                "thumbnail_blurhash": video.thumbnail.blur_hash
-            })
+            additional_content.append(
+                {
+                    "identifier": video.identifier,
+                    "thumbnail_identifier": video.thumbnail.identifier,
+                    "thumbnail_blurhash": video.thumbnail.blur_hash,
+                }
+            )
 
-        user_has_liked_post = db.PostLike.get(user=user,
-                                              post=wanted_post) is not None
+        user_has_liked_post = db.PostLike.get(user=user, post=wanted_post) is not None
 
         user_owns_post = wanted_post.user == user
 
@@ -172,38 +184,36 @@ class Post(Resource):
             pfp_blur_hash = pfp.blur_hash
 
         return {
-                   "post": {
-                       "id": wanted_post.id,
-                       "content": wanted_post.text,
-                       "creation_date": wanted_post.creation_time.timestamp(),
-                       "like_count": len(wanted_post.likes),
-                       "comment_count": len(wanted_post.comments),
-                       "additional_content_type": additional_content_type,
-                       "additional_content": additional_content
-                   },
-                   "user": {
-                       "display_name": wanted_post.user.display_name,
-                       "username": wanted_post.user.username,
-                       "verified": wanted_post.user.is_verified,
-                       "profile_picture": {
-                           "identifier": pfp_identifier,
-                           "blur_hash": pfp_blur_hash
-                       },
-                       "liked_post": user_has_liked_post,
-                       "own_post": user_owns_post
-                   },
-               }, 201
+            "post": {
+                "id": wanted_post.id,
+                "content": wanted_post.text,
+                "creation_date": wanted_post.creation_time.timestamp(),
+                "like_count": len(wanted_post.likes),
+                "comment_count": len(wanted_post.comments),
+                "additional_content_type": additional_content_type,
+                "additional_content": additional_content,
+            },
+            "user": {
+                "display_name": wanted_post.user.display_name,
+                "username": wanted_post.user.username,
+                "verified": wanted_post.user.is_verified,
+                "profile_picture": {
+                    "identifier": pfp_identifier,
+                    "blur_hash": pfp_blur_hash,
+                },
+                "liked_post": user_has_liked_post,
+                "own_post": user_owns_post,
+            },
+        }, 201
 
     @db_session
     @auth_reqd
     def delete(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument("post_id", type=int, required=True)
-        args = parser.parse_args()
+        args = self.delete_parser.parse_args()
 
         user = get_user_from_auth_header()
 
-        post = db.Post.get(id=args['post_id'])
+        post = db.Post.get(id=args["post_id"])
         if post is None:
             return {"error": ErrorCodes.POST_NOT_FOUND.value}, 404
 
