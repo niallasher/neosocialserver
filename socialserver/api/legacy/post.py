@@ -20,25 +20,48 @@ SERVE_FULL_POST_IMAGES = config.legacy_api_interface.deliver_full_post_images
 
 
 class LegacyPost(Resource):
-    @db_session
-    def post(self):
-
-        parser = reqparse.RequestParser()
-
-        parser.add_argument(
+    def __init__(self):
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument(
             "session_token", type=str, help="Key for session authentication."
         )
-        parser.add_argument(
+        self.post_parser.add_argument(
             "post_text", type=str, help="Text for post to contain.", required=True
         )
-        parser.add_argument(
+        self.post_parser.add_argument(
             "post_image_hash",
             type=str,
             help="Hash for image if wanted.",
             required=False,
         )
 
-        args = parser.parse_args()
+        self.delete_parser = reqparse.RequestParser()
+        self.delete_parser.add_argument(
+            "session_token",
+            type=str,
+            help="Key for session authentication.",
+            required=True,
+        )
+        self.delete_parser.add_argument(
+            "post_id", type=int, help="Post to remove.", required=True
+        )
+
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument(
+            "session_token",
+            type=str,
+            help="Key for session authentication.",
+            required=True,
+        )
+        self.get_parser.add_argument("count", type=int, help="amount to retrieve.")
+        self.get_parser.add_argument("offset", type=int, help="amount to offset.")
+        self.get_parser.add_argument(
+            "post_id", type=int, help="Post ID to get.", default=None
+        )
+
+    @db_session
+    def post(self):
+        args = self.post_parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args["session_token"])
 
@@ -50,8 +73,8 @@ class LegacyPost(Resource):
             # causing unnecessary failures the old client wouldn't understand
             # for ux reasons.
             text_content = text_content[
-                           0: POST_MAX_LEN - 1
-                           ]  # starting from 0, so -1 from POST_MAX_LEN!
+                0 : POST_MAX_LEN - 1
+            ]  # starting from 0, so -1 from POST_MAX_LEN!
 
         # strip out any newlines that have been put in
         text_content = text_content.replace("\n", "")
@@ -99,18 +122,7 @@ class LegacyPost(Resource):
 
     @db_session
     def delete(self):
-
-        parser = reqparse.RequestParser()
-
-        parser.add_argument(
-            "session_token",
-            type=str,
-            help="Key for session authentication.",
-            required=True,
-        )
-        parser.add_argument("post_id", type=int, help="Post to remove.", required=True)
-
-        args = parser.parse_args()
+        args = self.delete_parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args["session_token"])
 
@@ -129,18 +141,7 @@ class LegacyPost(Resource):
 
     @db_session
     def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument(
-            "session_token",
-            type=str,
-            help="Key for session authentication.",
-            required=True,
-        )
-        parser.add_argument("count", type=int, help="amount to retrieve.")
-        parser.add_argument("offset", type=int, help="amount to offset.")
-        parser.add_argument("post_id", type=int, help="Post ID to get.", default=None)
-
-        args = parser.parse_args()
+        args = self.get_parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args["session_token"])
 
@@ -155,8 +156,8 @@ class LegacyPost(Resource):
 
             if post.under_moderation and True not in [user.is_moderator, user.is_admin]:
                 return {
-                           "err": LegacyErrorCodes.INSUFFICIENT_PERMISSIONS_TO_VIEW_POST.value
-                       }, 401
+                    "err": LegacyErrorCodes.INSUFFICIENT_PERMISSIONS_TO_VIEW_POST.value
+                }, 401
 
             image_data = ""
             images = post.get_images
@@ -192,20 +193,20 @@ class LegacyPost(Resource):
                 )
 
             return {
-                       "displayName": post.user.display_name,
-                       "username": post.user.username,
-                       "avatarData": profile_pic_data,
-                       "isVerified": post.user.is_verified,
-                       "postText": post.text,
-                       "imageData": image_data,
-                       "postDate": post.creation_time.strftime("%d/%m/%y"),
-                       "isOwnPost": is_own_post,
-                       "postID": post.id,
-                       "likeCount": post_like_count,
-                       "postLiked": user_liked_post,
-                       "commentCount": post_comment_count,
-                       "isHidden": post.under_moderation is True,
-                   }, 201
+                "displayName": post.user.display_name,
+                "username": post.user.username,
+                "avatarData": profile_pic_data,
+                "isVerified": post.user.is_verified,
+                "postText": post.text,
+                "imageData": image_data,
+                "postDate": post.creation_time.strftime("%d/%m/%y"),
+                "isOwnPost": is_own_post,
+                "postID": post.id,
+                "likeCount": post_like_count,
+                "postLiked": user_liked_post,
+                "commentCount": post_comment_count,
+                "isHidden": post.under_moderation is True,
+            }, 201
 
         # feed mode
         else:
@@ -224,8 +225,8 @@ class LegacyPost(Resource):
                     for p in db.Post
                     if p.user not in blocks and p.under_moderation is False
                 )
-                    .order_by(desc(db.Post.id))
-                    .limit(args["count"], offset=args["offset"])
+                .order_by(desc(db.Post.id))
+                .limit(args["count"], offset=args["offset"])
             )
 
             post_ids = []
