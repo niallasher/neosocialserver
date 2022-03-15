@@ -15,13 +15,28 @@ from pony.orm import db_session
 
 
 class Report(Resource):
+    def __init__(self):
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument("post_id", type=int, required=True)
+
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument("post_id", type=int, required=True)
+        # we are going to allow multiple infringement report reasons
+        # per post, since we're not allowing a single user to report
+        # a post multiple times.
+        self.post_parser.add_argument(
+            "report_reason", type=int, required=True, action="append"
+        )
+        self.post_parser.add_argument("supplemental_info", type=str, required=False)
+
+        self.patch_parser = reqparse.RequestParser()
+        self.patch_parser.add_argument("report_id", type=int, required=True)
+        self.patch_parser.add_argument("mark_active", type=bool, required=True)
+
     @db_session
     @auth_reqd
     def get(self):
-
-        parser = reqparse.RequestParser()
-        parser.add_argument("post_id", type=int, required=True)
-        args = parser.parse_args()
+        args = self.get_parser.parse_args()
 
         user = get_user_from_auth_header()
 
@@ -53,15 +68,7 @@ class Report(Resource):
     @db_session
     @auth_reqd
     def post(self):
-
-        parser = reqparse.RequestParser()
-        parser.add_argument("post_id", type=int, required=True)
-        # we are going to allow multiple infringement report reasons
-        # per post, since we're not allowing a single user to report
-        # a post multiple times.
-        parser.add_argument("report_reason", type=int, required=True, action="append")
-        parser.add_argument("supplemental_info", type=str, required=False)
-        args = parser.parse_args()
+        args = self.post_parser.parse_args()
 
         reporting_user_db = get_user_from_auth_header()
 
@@ -100,8 +107,8 @@ class Report(Resource):
         if args["supplemental_info"] is not None:
             if len(args["supplemental_info"]) > REPORT_SUPPLEMENTARY_INFO_MAX_LEN:
                 return {
-                           "error": ErrorCodes.POST_REPORT_SUPPLEMENTAL_INFO_TOO_LONG.value
-                       }, 400
+                    "error": ErrorCodes.POST_REPORT_SUPPLEMENTAL_INFO_TOO_LONG.value
+                }, 400
 
         db.PostReport(
             active=True,
@@ -119,11 +126,7 @@ class Report(Resource):
     @db_session
     @auth_reqd
     def patch(self):
-
-        parser = reqparse.RequestParser()
-        parser.add_argument("report_id", type=int, required=True)
-        parser.add_argument("mark_active", type=bool, required=True)
-        args = parser.parse_args()
+        args = self.patch_parser.parse_args()
 
         modifying_user_db = get_user_from_auth_header()
 
