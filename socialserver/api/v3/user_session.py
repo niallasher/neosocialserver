@@ -22,6 +22,13 @@ from user_agents import parse as ua_parse
 
 
 class UserSession(Resource):
+    def __init__(self):
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument("username", type=str, required=True)
+        self.post_parser.add_argument("password", type=str, required=True)
+        # Only needed if TOTP is enabled!
+        self.post_parser.add_argument("totp", type=str, required=False)
+
     @db_session
     @auth_reqd
     def get(self):
@@ -50,20 +57,14 @@ class UserSession(Resource):
 
     @db_session
     def post(self):
-
-        parser = reqparse.RequestParser()
-        parser.add_argument("username", type=str, required=True)
-        parser.add_argument("password", type=str, required=True)
-        # Only needed if TOTP is enabled!
-        parser.add_argument("totp", type=str, required=False)
-        args = parser.parse_args()
+        args = self.post_parser.parse_args()
 
         user = db.User.get(username=args["username"])
         if user is None:
             return {"error": ErrorCodes.USERNAME_NOT_FOUND.value}, 404
 
         if not verify_password_valid(
-                args["password"], user.password_salt, user.password_hash
+            args["password"], user.password_salt, user.password_hash
         ):
             return {"error": ErrorCodes.INCORRECT_PASSWORD.value}, 401
 
@@ -137,7 +138,7 @@ class UserSessionList(Resource):
                     # this is just to make it easy for a client to add a tag saying something
                     # like [THIS DEVICE] to an entry in the list of sessions
                     "current": s.access_token_hash
-                               == hash_plaintext_sha256(
+                    == hash_plaintext_sha256(
                         request.headers["Authorization"].split(" ")[1]
                     ),
                     # the device that created the session, this should just about always be the
