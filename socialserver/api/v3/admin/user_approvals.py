@@ -8,19 +8,26 @@ from pony.orm import db_session, select, desc
 
 
 class UserApprovals(Resource):
+    def __init__(self):
+
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument("count", type=int, required=True)
+        self.get_parser.add_argument("offset", type=int, required=True)
+        # must be a valid member of ApprovalSortTypes
+        self.get_parser.add_argument("sort", type=int, required=True)
+        # only usernames are filtered for now.
+        self.get_parser.add_argument("filter", type=str, required=False)
+
+        self.patch_parser = reqparse.RequestParser()
+        self.patch_parser.add_argument("username", type=str, required=True)
+
+        self.delete_parser = reqparse.RequestParser()
+        self.delete_parser.add_argument("username", type=str, required=True)
+
     @db_session
     @admin_reqd
     def get(self):
-        parser = reqparse.RequestParser()
-
-        parser.add_argument("count", type=int, required=True)
-        parser.add_argument("offset", type=int, required=True)
-        # one of ApprovalSortTypes
-        parser.add_argument("sort", type=int, required=True)
-        # filters only usernames right now
-        parser.add_argument("filter", type=str, required=False)
-
-        args = parser.parse_args()
+        args = self.get_parser.parse_args()
 
         if args["count"] > MAX_FEED_GET_COUNT:
             return {"error": ErrorCodes.FEED_GET_COUNT_TOO_HIGH.value}, 400
@@ -67,9 +74,7 @@ class UserApprovals(Resource):
     @admin_reqd
     # only a partial mod to a resource, so it's a patch request.
     def patch(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument("username", type=str, required=True)
-        args = parser.parse_args()
+        args = self.patch_parser.parse_args()
 
         user = db.User.get(username=args["username"])
         if user is None:
@@ -85,9 +90,7 @@ class UserApprovals(Resource):
     @admin_reqd
     # obliterate a user completely (aka reject them, deleting the unapproved account)
     def delete(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument("username", type=str, required=True)
-        args = parser.parse_args()
+        args = self.delete_parser.parse_args()
 
         user = db.User.get(username=args["username"])
         if user is None:
