@@ -8,31 +8,30 @@ from pony.orm import db_session, select, desc
 
 
 class LegacyPostFilterByUser(Resource):
-    @db_session
-    def get(self):
-        parser = reqparse.RequestParser()
-
-        # why is it not required here? who knows. but that's how it was in v1.
-
+    def __init__(self):
+        self.get_parser = reqparse.RequestParser()
         # this slightly breaks compat, but it could cause crashes in the original server, so we're changing it
         # (nothing *should* have been omitting these)
-        parser.add_argument(
+        self.get_parser.add_argument(
             "session_token",
             type=str,
             help="Key for session authentication.",
             required=True,
         )
-        parser.add_argument(
+        self.get_parser.add_argument(
             "count", type=int, help="Amount of posts to return", required=True
         )
-        parser.add_argument(
+        self.get_parser.add_argument(
             "offset", type=int, help="Amount of posts to skip.", required=True
         )
-        parser.add_argument(
+        self.get_parser.add_argument(
             "users", action="append", help="Users to filter by", required=True
         )
 
-        args = parser.parse_args()
+    @db_session
+    def get(self):
+
+        args = self.get_parser.parse_args()
 
         r_user = get_user_object_from_token_or_abort(args["session_token"])
 
@@ -60,8 +59,8 @@ class LegacyPostFilterByUser(Resource):
                 for p in db.Post
                 if p.user not in blocks and p.user in users and not p.under_moderation
             )
-                .order_by(desc(db.Post.id))
-                .limit(args["count"], offset=args["offset"])
+            .order_by(desc(db.Post.id))
+            .limit(args["count"], offset=args["offset"])
         )
 
         post_ids = []
