@@ -12,17 +12,17 @@ from pony.orm import db_session
 
 
 class LegacyAdminUserMod(Resource):
-    @db_session
-    def post(self):
-        parser = reqparse.RequestParser()
-
-        parser.add_argument(
+    def __init__(self):
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument(
             "session_token", type=str, required=True, help="Authentication Token"
         )
-        parser.add_argument("modtype", type=str, help="Modification Type")
-        parser.add_argument("username", type=str, help="Username")
+        self.post_parser.add_argument("modtype", type=str, help="Modification Type")
+        self.post_parser.add_argument("username", type=str, help="Username")
 
-        args = parser.parse_args()
+    @db_session
+    def post(self):
+        args = self.post_parser.parse_args()
 
         r_user = get_user_object_from_token_or_abort(args["session_token"])
 

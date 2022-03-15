@@ -8,16 +8,18 @@ from socialserver.db import db
 
 
 class LegacyAdminDeletePost(Resource):
-    @db_session
-    def delete(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument(
+    def __init__(self):
+        self.delete_parser = reqparse.RequestParser()
+        self.delete_parser.add_argument(
             "session_token", type=str, required=True, help="Authentication Token"
         )
-        parser.add_argument(
+        self.delete_parser.add_argument(
             "post_id", type=int, required=True, help="Post ID to admin delete"
         )
-        args = parser.parse_args()
+
+    @db_session
+    def delete(self):
+        args = self.delete_parser.parse_args()
 
         user = get_user_object_from_token_or_abort(args["session_token"])
 
