@@ -13,25 +13,28 @@ from pony import orm
 
 
 class PostFeed(Resource):
-    @db_session
-    @auth_reqd
-    def get(self):
-
-        parser = reqparse.RequestParser()
-        parser.add_argument("count", type=int, required=True)
+    def __init__(self):
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument("count", type=int, required=True)
         # maybe we should just assume zero if an offset isn't specified?
         # but I think it's better to be explicit about including it, as
         # otherwise I can see myself or others forgetting it, and wondering
         # why the same posts keep popping up.
-        parser.add_argument("offset", type=int, required=True)
+        self.get_parser.add_argument("offset", type=int, required=True)
         # a list of usernames. if supplied, only posts from those
         # usernames will be shown
-        parser.add_argument("username", type=str, required=False, action="append")
+        self.get_parser.add_argument(
+            "username", type=str, required=False, action="append"
+        )
         # basically shorthand for specifying every username in the request.
         # takes precedence over any usernames appended (overwrites any given
         # usernames with the follower list)
-        parser.add_argument("following_only", type=bool, required=False)
-        args = parser.parse_args()
+        self.get_parser.add_argument("following_only", type=bool, required=False)
+
+    @db_session
+    @auth_reqd
+    def get(self):
+        args = self.get_parser.parse_args()
 
         if args["count"] > MAX_FEED_GET_COUNT:
             return {"error": ErrorCodes.FEED_GET_COUNT_TOO_HIGH.value}, 400
@@ -75,8 +78,8 @@ class PostFeed(Resource):
                     and p.under_moderation is False
                     and p.user.username in filter_list
                 )
-                    .order_by(orm.desc(db.Post.creation_time))
-                    .limit(args.count, offset=args.offset)[::]
+                .order_by(orm.desc(db.Post.creation_time))
+                .limit(args.count, offset=args.offset)[::]
             )
         else:
             # noinspection PyTypeChecker
@@ -86,8 +89,8 @@ class PostFeed(Resource):
                     for p in db.Post
                     if p.user not in blocks and p.under_moderation is False
                 )
-                    .order_by(orm.desc(db.Post.creation_time))
-                    .limit(args.count, offset=args.offset)[::]
+                .order_by(orm.desc(db.Post.creation_time))
+                .limit(args.count, offset=args.offset)[::]
             )
 
         # TODO: this shares a schema with the single post
@@ -97,7 +100,7 @@ class PostFeed(Resource):
         for post in query:
 
             user_has_liked_post = (
-                    db.PostLike.get(user=requesting_user_db, post=post) is not None
+                db.PostLike.get(user=requesting_user_db, post=post) is not None
             )
 
             user_owns_post = post.user == requesting_user_db
@@ -150,11 +153,11 @@ class PostFeed(Resource):
             )
 
         return {
-                   "meta": {
-                       # if we have less posts left than the user
-                       # asked for, we must have reached the end!
-                       "reached_end": len(posts)
-                                      < args["count"]
-                   },
-                   "posts": posts,
-               }, 201
+            "meta": {
+                # if we have less posts left than the user
+                # asked for, we must have reached the end!
+                "reached_end": len(posts)
+                < args["count"]
+            },
+            "posts": posts,
+        }, 201
