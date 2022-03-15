@@ -8,18 +8,18 @@ from pony.orm import db_session, select, desc, count
 
 
 class CommentFeed(Resource):
+    def __init__(self):
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument("post_id", type=int, required=True)
+        self.get_parser.add_argument("count", type=int, required=True)
+        self.get_parser.add_argument("offset", type=int, required=True)
+        # one of CommentFeedSortTypes
+        self.get_parser.add_argument("sort", type=int, required=True)
+
     @db_session
     @auth_reqd
     def get(self):
-        parser = reqparse.RequestParser()
-
-        parser.add_argument("post_id", type=int, required=True)
-        parser.add_argument("count", type=int, required=True)
-        parser.add_argument("offset", type=int, required=True)
-        # one of CommentFeedSortTypes
-        parser.add_argument("sort", type=int, required=True)
-
-        args = parser.parse_args()
+        args = self.get_parser.parse_args()
 
         requesting_user_db = get_user_from_auth_header()
 
@@ -79,12 +79,12 @@ class CommentFeed(Resource):
                         "likes_comment": db.CommentLike.get(
                             user=requesting_user_db, comment=comment
                         )
-                                         is not None,
+                        is not None,
                     },
                 }
             )
 
         return {
-                   "meta": {"reached_end": len(comments_formatted) < args["count"]},
-                   "comments": comments_formatted,
-               }, 200
+            "meta": {"reached_end": len(comments_formatted) < args["count"]},
+            "comments": comments_formatted,
+        }, 200

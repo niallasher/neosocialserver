@@ -9,13 +9,19 @@ from datetime import datetime
 
 
 class Comment(Resource):
+    def __init__(self):
+
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument("text_content", type=str, required=True)
+        self.get_parser.add_argument("post_id", type=int, required=True)
+
+        self.delete_parser = reqparse.RequestParser()
+        self.delete_parser.add_argument("comment_id", type=int, required=True)
+
     @db_session
     @auth_reqd
     def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument("text_content", type=str, required=True)
-        parser.add_argument("post_id", type=int, required=True)
-        args = parser.parse_args()
+        args = self.get_parser.parse_args()
 
         user = get_user_from_auth_header()
 
@@ -47,9 +53,7 @@ class Comment(Resource):
     @db_session
     @auth_reqd
     def delete(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument("comment_id", type=int, required=True)
-        args = parser.parse_args()
+        args = self.delete_parser.parse_args()
 
         user = get_user_from_auth_header()
 
