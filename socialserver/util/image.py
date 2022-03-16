@@ -370,6 +370,8 @@ def process_image(image: Image, image_identifier: str, image_id: int) -> None:
     db_image.processed = True
     db_image.blur_hash = generate_blur_hash(image)
 
+    console.log(f"Image, id={image_id}, processed.")
+
 
 """
     handle_upload
