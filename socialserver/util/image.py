@@ -24,6 +24,7 @@ from socialserver.constants import (
     ImageSupportedMimeTypes,
     BLURHASH_X_COMPONENTS,
     BLURHASH_Y_COMPONENTS,
+    PROCESSING_BLURHASH,
 )
 from secrets import token_urlsafe
 from copy import copy
@@ -31,6 +32,7 @@ import magic
 from typing import Tuple
 import blurhash
 from io import BytesIO
+from threading import Thread
 
 IMAGE_DIR = config.media.images.storage_dir
 # where straight uploaded images are stored.
@@ -154,7 +156,7 @@ def resize_image_aspect_aware(image: PIL.Image, size: Tuple[int, int]) -> PIL.Im
 
 
 def calculate_largest_fit(
-        image: PIL.Image, max_size: Tuple[int, int]
+    image: PIL.Image, max_size: Tuple[int, int]
 ) -> Tuple[int, int]:
     # calculate *target* aspect ratio from max size
     divisor = gcd(max_size[0], max_size[1])
@@ -327,21 +329,14 @@ def generate_blur_hash(image: Image) -> str:
 
 
 """
-    handle_upload
-    Take a JSON string (read notes.md, #images) containing b64 images, and process it.
-    Will save it, store a db entry, and return
-    a SimpleNamespace with the following keys:
-        - id: db.Image ID
-        - uid: Image identifier
+    process_image
+    Convert the image into the appropriate format and commit it to the disk.
 """
 
 
-def handle_upload(image: BytesIO, userid: int) -> SimpleNamespace:
-    # check that the given data is valid.
-    _verify_image(image)
-    image = convert_buffer_to_image(image)
-    access_id = create_random_image_identifier()
-
+@db_session
+def process_image(image: Image, image_identifier: str, image_id: int) -> None:
+    console.log(f"Processing image, id={image_id}.")
     # all resized images get 4 different pixel ratios, returned in an array from
     # 0 to 3, where the pixel ratio is the index + 1. except for posts.
     # we always deliver them in ''full'' quality (defined by MAX_IMAGE_SIZE_POST)
@@ -369,6 +364,55 @@ def handle_upload(image: BytesIO, userid: int) -> SimpleNamespace:
         ImageTypes.PROFILE_PICTURE_LARGE: arr_profilepic_lg,
     }
 
-    save_images_to_disk(images, access_id)
-    entry = commit_image_to_db(access_id, userid, generate_blur_hash(image))
-    return SimpleNamespace(id=entry, identifier=access_id)
+    save_images_to_disk(images, image_identifier)
+
+    db_image = db.Image.get(id=image_id)
+    db_image.processed = True
+    db_image.blur_hash = generate_blur_hash(image)
+
+
+"""
+    handle_upload
+    Take a JSON string (read notes.md, #images) containing b64 images, and process it.
+    Will save it, store a db entry, and return
+    a SimpleNamespace with the following keys:
+        - id: db.Image ID
+        - uid: Image identifier
+"""
+
+
+@db_session
+def handle_upload(
+    image: BytesIO, userid: int, threaded: bool = True
+) -> SimpleNamespace:
+    # check that the given data is valid.
+    _verify_image(image)
+    image = convert_buffer_to_image(image)
+    access_id = create_random_image_identifier()
+
+    uploader = db.User.get(id=userid)
+    if uploader is None:
+        console.log("[bold red]Could not commit to DB: user id does not exist!")
+        raise InvalidImageException  # should maybe rename this?
+
+    # create the image entry now, so we can give back an identifier.
+    entry = db.Image(
+        creation_time=datetime.datetime.utcnow(),
+        identifier=access_id,
+        uploader=db.User.get(id=userid),
+        blur_hash=PROCESSING_BLURHASH,
+        processed=False,
+    )
+
+    commit()
+
+    if threaded:
+        Thread(target=lambda: process_image(image, access_id, entry.id)).start()
+    else:
+        process_image(image, access_id, entry.id)
+
+    # if we're not using threading, then it will have been processed by now.
+    return SimpleNamespace(id=entry.id, identifier=access_id, processed=(not threaded))
+
+    # entry = commit_image_to_db(access_id, userid, generate_blur_hash(image))
+    # return SimpleNamespace(id=entry, identifier=access_id)

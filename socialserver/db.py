@@ -193,14 +193,16 @@ def define_entities(db_object):
         associated_posts = orm.Set("Post", reverse="images")
         associated_thumbnails = orm.Set("Video", reverse="thumbnail")
         blur_hash = orm.Required(str)
+        # set to true once the image has been fully processed
+        processed = orm.Required(bool)
 
         @property
         def is_orphan(self):
             return (
-                    len(self.associated_posts) == 0
-                    and len(self.associated_profile_pics) == 0
-                    and len(self.associated_header_pics)
-                    and len(self.associated_thumbnails) == 0
+                len(self.associated_posts) == 0
+                and len(self.associated_profile_pics) == 0
+                and len(self.associated_header_pics)
+                and len(self.associated_thumbnails) == 0
             )
 
     class Hashtag(db_object.Entity):

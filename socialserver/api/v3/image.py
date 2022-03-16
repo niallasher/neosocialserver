@@ -38,6 +38,9 @@ class Image(Resource):
         if image is None:
             return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404
 
+        if image.processed is False:
+            return {"error": ErrorCodes.IMAGE_NOT_PROCESSED.value}, 400
+
         try:
             wanted_image_type = ImageTypes(args["wanted_type"])
         except ValueError:
@@ -83,4 +86,7 @@ class NewImage(Resource):
         except InvalidImageException:
             return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
 
-        return {"identifier": image_info.identifier}, 201
+        return {
+            "identifier": image_info.identifier,
+            "processed": image_info.processed,
+        }, 201
