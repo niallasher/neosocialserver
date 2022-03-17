@@ -50,3 +50,18 @@ def test_get_image_invalid_identifier(test_db, server_address, image_data_binary
     )
     assert r.status_code == 404
     assert r.json()["error"] == ErrorCodes.IMAGE_NOT_FOUND.value
+
+
+def test_upload_image_threaded(test_db, server_address, image_data_binary):
+    r = requests.post(
+        f"{server_address}/api/v3/image",
+        files={"image": image_data_binary},
+        headers={"Authorization": f"Bearer {test_db.access_token}"},
+    )
+    print(r.json())
+    assert r.status_code == 201
+    assert r.json()['processed'] is False
+    identifier = r.json()["identifier"]
+    r = requests.get(f"{server_address}/api/v3/image/{identifier}")
+    assert r.status_code == 400
+    assert r.json()['error'] == ErrorCodes.IMAGE_NOT_PROCESSED.value
