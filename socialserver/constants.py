@@ -190,6 +190,7 @@ class ErrorCodes(Enum):
     INVALID_VIDEO = 62
     OBJECT_NOT_FOUND = 63
     IMAGE_NOT_PROCESSED = 64
+    POST_NOT_PROCESSED = 65
 
 
 """

@@ -152,6 +152,10 @@ class Post(Resource):
         if wanted_post.user in user.blocked_users:
             return {"error": ErrorCodes.USER_BLOCKED.value}, 400
 
+        # if the post hasn't been processed, we're not returning it to the user.
+        if wanted_post.processed is False:
+            return {"error": ErrorCodes.POST_NOT_PROCESSED.value}, 404
+
         additional_content_type = PostAdditionalContentTypes.NONE.value
         additional_content = []
 
