@@ -8,7 +8,7 @@ import requests
 
 def test_upload_image(test_db, server_address, image_data_binary):
     r = requests.post(
-        f"{server_address}/api/v3/image",
+        f"{server_address}/api/v3/image/process_before_return",
         files={"image": image_data_binary},
         headers={"Authorization": f"Bearer {test_db.access_token}"},
     )
@@ -18,7 +18,7 @@ def test_upload_image(test_db, server_address, image_data_binary):
 
 def test_get_image(test_db, server_address, image_data_binary):
     image_identifier = requests.post(
-        f"{server_address}/api/v3/image",
+        f"{server_address}/api/v3/image/process_before_return",
         files={"image": image_data_binary},
         headers={"Authorization": f"Bearer {test_db.access_token}"},
     ).json()["identifier"]
@@ -31,7 +31,7 @@ def test_get_image(test_db, server_address, image_data_binary):
 
 def test_get_image_invalid_use(test_db, server_address, image_data_binary):
     image_identifier = requests.post(
-        f"{server_address}/api/v3/image",
+        f"{server_address}/api/v3/image/process_before_return",
         files={"image": image_data_binary},
         headers={"Authorization": f"Bearer {test_db.access_token}"},
     ).json()["identifier"]
