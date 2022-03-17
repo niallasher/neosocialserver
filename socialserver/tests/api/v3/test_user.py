@@ -301,7 +301,7 @@ def test_get_user_info_missing_data(test_db, server_address):
 def test_update_profile_pic(test_db, server_address, image_data_binary):
     # upload a new image
     image_identifier = requests.post(
-        f"{server_address}/api/v3/image",
+        f"{server_address}/api/v3/image/process_before_return",
         files={"image": image_data_binary},
         headers={"Authorization": f"Bearer {test_db.access_token}"},
     ).json()["identifier"]
@@ -324,7 +324,7 @@ def test_update_profile_pic(test_db, server_address, image_data_binary):
 def test_update_profile_pic_invalid_ref(test_db, server_address, image_data_binary):
     image_identifier = "some_random_garbage_here_129839102"
     r = requests.patch(
-        f"{server_address}/api/v3/user",
+        f"{server_address}/api/v3/user/process_before_return",
         json={"profile_pic_ref": image_identifier},
         headers={"Authorization": f"bearer {test_db.access_token}"},
     )
@@ -345,7 +345,7 @@ def test_update_profile_pic_invalid_ref(test_db, server_address, image_data_bina
 def test_update_header_pic(test_db, server_address, image_data_binary):
     # upload a new image
     image_identifier = requests.post(
-        f"{server_address}/api/v3/image",
+        f"{server_address}/api/v3/image/process_before_return",
         files={"image": image_data_binary},
         headers={"Authorization": f"Bearer {test_db.access_token}"},
     ).json()["identifier"]
