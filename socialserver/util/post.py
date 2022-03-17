@@ -36,4 +36,3 @@ def start_unprocessed_post_thread():
     )
     check_thread = Thread(target=_run, daemon=True)
     check_thread.start()
-    # atexit.register(lambda: check_thread.stop())
