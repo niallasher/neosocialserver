@@ -39,7 +39,7 @@ class Image(Resource):
             return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404
 
         if image.processed is False:
-            return {"error": ErrorCodes.IMAGE_NOT_PROCESSED.value}, 400
+            return {"error": ErrorCodes.IMAGE_NOT_PROCESSED.value}, 404
 
         try:
             wanted_image_type = ImageTypes(args["wanted_type"])
