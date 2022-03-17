@@ -123,7 +123,7 @@ class Post(Resource):
         # the new post right at the end)
         commit()
 
-        return {"post_id": new_post.id}, 200
+        return {"post_id": new_post.id, "processed": processed}, 200
 
     @db_session
     @auth_reqd
