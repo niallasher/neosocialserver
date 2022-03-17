@@ -115,6 +115,7 @@ class LegacyPost(Resource):
             images=images,
             image_ids=image_ids,
             hashtags=db_tags,
+            processed=True,
         )
 
         # api v1 didn't return the post id.
