@@ -136,6 +136,8 @@ def define_entities(db_object):
         likes = orm.Set("PostLike", cascade_delete=True)
         hashtags = orm.Set("Hashtag")
         reports = orm.Set("PostReport", cascade_delete=True)
+        # if false, won't show up in feeds. good for if media is incomplete.
+        processed = orm.Required(bool)
 
         @property
         def get_images(self):

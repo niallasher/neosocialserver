@@ -10,6 +10,7 @@ from flask_cors import CORS
 from socialserver.util.output import console
 from socialserver.util.config import config
 from socialserver.maintenance import maintenance
+from socialserver.util.post import start_unprocessed_post_thread
 
 # API Version 3
 from socialserver.api.v3.comment import Comment
@@ -78,10 +79,17 @@ def create_app():
     CORS(application)
     api = Api(application)
 
+    # stuff that gets setup before the server processes
+    # its first request.
+    @application.before_first_request
+    def _setup():
+        start_unprocessed_post_thread()
+
     if not TOTP_REPLAY_PREVENTION_ENABLED:
         console.print("[bold red]TOTP replay prevention is disabled!")
 
     if config.misc.enable_landing_page:
+
         @application.get("/")
         def landing_page():
             return render_template(
