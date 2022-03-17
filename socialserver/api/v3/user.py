@@ -171,6 +171,8 @@ class User(Resource):
             existing_image = db.Image.get(identifier=args["profile_pic_ref"])
             if existing_image is None:
                 return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404
+            if existing_image.processed is False:
+                return {"error": ErrorCodes.IMAGE_NOT_PROCESSED.value}, 404
             user.profile_pic = existing_image
             return {"profile_pic_ref": args["profile_pic_ref"]}, 201
 
@@ -178,6 +180,8 @@ class User(Resource):
             existing_image = db.Image.get(identifier=args["header_pic_ref"])
             if existing_image is None:
                 return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404
+            if existing_image.processed is False:
+                return {"error": ErrorCodes.IMAGE_NOT_PROCESSED.value}, 404
             user.header_pic = existing_image
             return {"header_pic_ref": args["header_pic_ref"]}, 201
 
