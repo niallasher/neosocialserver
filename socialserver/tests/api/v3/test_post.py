@@ -74,6 +74,20 @@ def test_get_single_post_not_exist(test_db, server_address, monkeypatch):
     assert r.json()["error"] == ErrorCodes.POST_NOT_FOUND.value
 
 
+def test_get_single_post_unprocessed(test_db, server_address, monkeypatch):
+    r = requests.get(
+        f"{server_address}/api/v3/posts/single",
+        json={
+            # we're on a blank database. 1 shouldn't exist.
+            "post_id": 1
+        },
+        headers={"Authorization": f"Bearer {test_db.access_token}"},
+    )
+
+    assert r.status_code == 404
+    assert r.json()["error"] == ErrorCodes.POST_NOT_FOUND.value
+
+
 def test_get_single_post_invalid_access_token(test_db, server_address, monkeypatch):
     new_post_id = create_post_with_request(test_db.access_token)
 
