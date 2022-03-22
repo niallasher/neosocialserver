@@ -7,6 +7,7 @@ from socialserver.util.test import (
     create_post_with_request,
     create_user_with_request,
     create_user_session_with_request,
+    image_data_binary,
 )
 from socialserver.constants import ErrorCodes
 import requests
@@ -23,6 +24,30 @@ def test_create_single_post(test_db, server_address, monkeypatch):
     assert r.status_code == 200
     # blank database, so this should be post id 1.
     assert r.json()["post_id"] == 1
+
+
+def test_create_single_post_unprocessed_image(
+    test_db, server_address, image_data_binary
+):
+    r = requests.post(
+        f"{server_address}/api/v3/image",
+        files={"image": image_data_binary},
+        headers={"Authorization": f"Bearer {test_db.access_token}"},
+    )
+    assert r.status_code == 201
+    assert r.json()["processed"] is False
+    identifier = r.json()["identifier"]
+
+    # on the off change you have a genuinely absurdly powerful
+    # system, you might fail this test if the image uploads in like 3ms :)
+    r = requests.post(
+        f"{server_address}/api/v3/posts/single",
+        json={"text_content": "Test Post", "images": [identifier]},
+        headers={"Authorization": f"bearer {test_db.access_token}"},
+    )
+    print(r.text)
+    assert r.status_code == 200
+    assert r.json()["processed"] is False
 
 
 def test_create_single_post_missing_args(test_db, server_address, monkeypatch):
