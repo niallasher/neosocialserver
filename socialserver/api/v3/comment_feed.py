@@ -3,6 +3,7 @@
 from flask_restful import Resource, reqparse
 from socialserver.constants import MAX_FEED_GET_COUNT, ErrorCodes, CommentFeedSortTypes
 from socialserver.db import db
+from socialserver.util.api.v3.post import format_userdata_v3
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header
 from pony.orm import db_session, select, desc, count
 
@@ -67,16 +68,10 @@ class CommentFeed(Resource):
                         "creation_time": comment.creation_time.timestamp(),
                         "like_count": len(comment.likes),
                     },
-                    "user": {
-                        "display_name": comment.user.display_name,
-                        "username": comment.user.username,
-                        "profile_picture": {
-                            "identifier": pfp_identifier,
-                            "blur_hash": pfp_blur_hash,
-                        },
-                        "attributes": comment.user.account_attributes,
-                        "own_comment": comment.user == requesting_user_db,
-                        "likes_comment": db.CommentLike.get(
+                    "user": format_userdata_v3(comment.user),
+                    "meta": {
+                        "user_likes_comment": comment.user == requesting_user_db,
+                        "user_owns_comment": db.CommentLike.get(
                             user=requesting_user_db, comment=comment
                         )
                         is not None,

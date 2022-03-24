@@ -2,6 +2,37 @@
 from socialserver.constants import PostAdditionalContentTypes
 
 
+def format_userdata_v3(user_object, include_header=False):
+    pfp_identifier = None
+    pfp_blur_hash = None
+
+    if user_object.profile_pic is not None:
+        pfp_identifier = user_object.profile_pic.identifier
+        pfp_blur_hash = user_object.profile_pic.blur_hash
+
+    userdata = {
+        "display_name": user_object.display_name,
+        "username": user_object.username,
+        "attributes": user_object.account_attributes,
+        "profile_picture": {"identifier": pfp_identifier, "blur_hash": pfp_blur_hash},
+    }
+
+    if include_header:
+        header_identifier = None
+        header_blur_hash = None
+
+        if user_object.header_pic is not None:
+            header_identifier = user_object.header_pic.identifier
+            header_blur_hash = user_object.header_pic.blur_hash
+
+        userdata["header_picture"] = {
+            "identifier": header_identifier,
+            "blur_hash": header_blur_hash,
+        }
+
+    return userdata
+
+
 def format_post_v3(post_object):
     # additional_content = post_object.additional_content
 

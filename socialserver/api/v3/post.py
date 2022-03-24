@@ -12,7 +12,7 @@ from socialserver.constants import (
     ErrorCodes,
     PostAdditionalContentTypes,
 )
-from socialserver.util.api.v3.post import format_post_v3
+from socialserver.util.api.v3.post import format_post_v3, format_userdata_v3
 from socialserver.util.auth import get_user_from_auth_header, auth_reqd
 
 
@@ -194,16 +194,10 @@ class Post(Resource):
 
         return {
             "post": format_post_v3(wanted_post),
-            "user": {
-                "display_name": wanted_post.user.display_name,
-                "username": wanted_post.user.username,
-                "verified": wanted_post.user.is_verified,
-                "profile_picture": {
-                    "identifier": pfp_identifier,
-                    "blur_hash": pfp_blur_hash,
-                },
-                "liked_post": user_has_liked_post,
-                "own_post": user_owns_post,
+            "user": format_userdata_v3(wanted_post.user),
+            "meta": {
+                "user_likes_post": user_has_liked_post,
+                "user_owns_post": user_owns_post,
             },
         }, 201
 

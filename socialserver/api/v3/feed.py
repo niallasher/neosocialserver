@@ -7,7 +7,7 @@ from socialserver.constants import (
     PostAdditionalContentTypes,
 )
 from socialserver.db import db
-from socialserver.util.api.v3.post import format_post_v3
+from socialserver.util.api.v3.post import format_post_v3, format_userdata_v3
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header
 from pony.orm import db_session
 from pony import orm
@@ -135,15 +135,10 @@ class PostFeed(Resource):
             posts.append(
                 {
                     "post": format_post_v3(post),
-                    "user": {
-                        "display_name": post.user.display_name,
-                        "username": post.user.username,
-                        "verified": post.user.is_verified,
-                        "profile_picture": post.user.profile_pic.identifier
-                        if post.user.has_profile_picture
-                        else None,
-                        "liked_post": user_has_liked_post,
-                        "own_post": user_owns_post,
+                    "user": format_userdata_v3(post.user),
+                    "meta": {
+                        "user_likes_post": user_has_liked_post,
+                        "user_owns_post": user_owns_post,
                     },
                 }
             )
