@@ -38,19 +38,6 @@ class UserInfo(Resource):
         if wanted_user is None:
             return {"error": ErrorCodes.USERNAME_NOT_FOUND.value}, 404
 
-        pfp_identifier = None
-        pfp_blur_hash = None
-        header_identifier = None
-        header_blur_hash = None
-
-        if wanted_user.profile_pic is not None:
-            pfp_identifier = wanted_user.profile_pic.identifier
-            pfp_blur_hash = wanted_user.profile_pic.blur_hash
-
-        if wanted_user.header_pic is not None:
-            header_identifier = wanted_user.header_pic.identifier
-            header_blur_hash = wanted_user.header_pic.blur_hash
-
         return (
             format_userdata_v3(
                 wanted_user,

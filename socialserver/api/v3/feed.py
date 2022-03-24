@@ -4,7 +4,6 @@ from flask_restful import Resource, reqparse
 from socialserver.constants import (
     MAX_FEED_GET_COUNT,
     ErrorCodes,
-    PostAdditionalContentTypes,
 )
 from socialserver.db import db
 from socialserver.util.api.v3.data_format import format_post_v3, format_userdata_v3
@@ -97,40 +96,13 @@ class PostFeed(Resource):
                 .limit(args.count, offset=args.offset)[::]
             )
 
-        # TODO: this shares a schema with the single post
-        # thing, so they should be common. maybe a class
-        # that serializes to a dict? idk.
         posts = []
         for post in query:
-
             user_has_liked_post = (
                 db.PostLike.get(user=requesting_user_db, post=post) is not None
             )
 
             user_owns_post = post.user == requesting_user_db
-
-            additional_content_type = PostAdditionalContentTypes.NONE.value
-            additional_content = []
-
-            post_images = post.get_images
-            video = post.video
-
-            # images override anything else, since you can only have 1 additional content type. (for now)
-            if len(post_images) >= 1:
-                additional_content_type = PostAdditionalContentTypes.IMAGES.value
-                for image in post_images:
-                    additional_content.append(
-                        {"identifier": image.identifier, "blurhash": image.blur_hash}
-                    )
-            elif video is not None:
-                additional_content_type = PostAdditionalContentTypes.VIDEO.value
-                additional_content.append(
-                    {
-                        "identifier": video.identifier,
-                        "thumbnail_identifier": video.thumbnail.identifier,
-                        "thumbnail_blurhash": video.thumbnail.blur_hash,
-                    }
-                )
 
             posts.append(
                 {

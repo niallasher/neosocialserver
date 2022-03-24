@@ -157,40 +157,9 @@ class Post(Resource):
         if wanted_post.processed is False:
             return {"error": ErrorCodes.POST_NOT_PROCESSED.value}, 404
 
-        additional_content_type = PostAdditionalContentTypes.NONE.value
-        additional_content = []
-
-        post_images = wanted_post.get_images
-        video = wanted_post.video
-
-        # images override anything else, since you can only have 1 additional content type. (for now)
-        if len(post_images) >= 1:
-            additional_content_type = PostAdditionalContentTypes.IMAGES.value
-            for image in post_images:
-                additional_content.append(
-                    {"identifier": image.identifier, "blurhash": image.blur_hash}
-                )
-        elif video is not None:
-            additional_content_type = PostAdditionalContentTypes.VIDEO.value
-            additional_content.append(
-                {
-                    "identifier": video.identifier,
-                    "thumbnail_identifier": video.thumbnail.identifier,
-                    "thumbnail_blurhash": video.thumbnail.blur_hash,
-                }
-            )
-
         user_has_liked_post = db.PostLike.get(user=user, post=wanted_post) is not None
 
         user_owns_post = wanted_post.user == user
-
-        pfp_identifier = None
-        pfp_blur_hash = None
-
-        if wanted_post.user.profile_pic is not None:
-            pfp = wanted_post.user.profile_pic
-            pfp_identifier = pfp.identifier
-            pfp_blur_hash = pfp.blur_hash
 
         return {
             "post": format_post_v3(wanted_post),
