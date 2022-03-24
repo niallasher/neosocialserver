@@ -261,7 +261,7 @@ def test_update_no_mod_params(test_db, server_address):
 
     assert bio_req.status_code == 400
     assert (
-            bio_req.json()["error"] == ErrorCodes.USER_MODIFICATION_NO_OPTIONS_GIVEN.value
+        bio_req.json()["error"] == ErrorCodes.USER_MODIFICATION_NO_OPTIONS_GIVEN.value
     )
 
 
@@ -301,7 +301,7 @@ def test_get_user_info_missing_data(test_db, server_address):
 def test_update_profile_pic(test_db, server_address, image_data_binary):
     # upload a new image
     image_identifier = requests.post(
-        f"{server_address}/api/v3/image",
+        f"{server_address}/api/v3/image/process_before_return",
         files={"image": image_data_binary},
         headers={"Authorization": f"Bearer {test_db.access_token}"},
     ).json()["identifier"]
@@ -345,7 +345,7 @@ def test_update_profile_pic_invalid_ref(test_db, server_address, image_data_bina
 def test_update_header_pic(test_db, server_address, image_data_binary):
     # upload a new image
     image_identifier = requests.post(
-        f"{server_address}/api/v3/image",
+        f"{server_address}/api/v3/image/process_before_return",
         files={"image": image_data_binary},
         headers={"Authorization": f"Bearer {test_db.access_token}"},
     ).json()["identifier"]
@@ -374,9 +374,7 @@ def test_update_header_pic_invalid_ref(test_db, server_address, image_data_binar
     )
     assert r.status_code == 404
     assert r.json()["error"] == ErrorCodes.IMAGE_NOT_FOUND.value
-    # make sure the PFP from user info isn't our identifier
-    # (intentionally not checking whether its None, since I'm
-    # planning on a default PFP/header system soon!)
+    # make sure the PFP from user info isn't our identifier.
     r = requests.get(
         f"{server_address}/api/v3/user/info",
         json={"username": test_db.username},

@@ -10,6 +10,7 @@ from flask_cors import CORS
 from socialserver.util.output import console
 from socialserver.util.config import config
 from socialserver.maintenance import maintenance
+from socialserver.util.post import start_unprocessed_post_thread
 
 # API Version 3
 from socialserver.api.v3.comment import Comment
@@ -20,7 +21,7 @@ from socialserver.api.v3.user import User, UserInfo
 from socialserver.api.v3.username_available import UsernameAvailable
 from socialserver.api.v3.feed import PostFeed
 from socialserver.api.v3.post import Post
-from socialserver.api.v3.image import Image, NewImage
+from socialserver.api.v3.image import Image, NewImage, NewImageProcessBeforeReturn
 from socialserver.api.v3.block import Block
 from socialserver.api.v3.follow import Follow
 from socialserver.api.v3.two_factor import (
@@ -78,10 +79,17 @@ def create_app():
     CORS(application)
     api = Api(application)
 
+    # stuff that gets setup before the server processes
+    # its first request.
+    @application.before_first_request
+    def _setup():
+        start_unprocessed_post_thread()
+
     if not TOTP_REPLAY_PREVENTION_ENABLED:
         console.print("[bold red]TOTP replay prevention is disabled!")
 
     if config.misc.enable_landing_page:
+
         @application.get("/")
         def landing_page():
             return render_template(
@@ -112,6 +120,7 @@ def create_app():
 
     api.add_resource(Image, "/api/v3/image/<imageid>")
     api.add_resource(NewImage, "/api/v3/image")
+    api.add_resource(NewImageProcessBeforeReturn, "/api/v3/image/process_before_return")
 
     api.add_resource(Video, "/api/v3/videos/<videoid>")
     api.add_resource(NewVideo, "/api/v3/videos")

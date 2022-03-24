@@ -17,6 +17,14 @@ ROOT_DIR = path.dirname(path.abspath(__file__))
 # AS THEY DO NOT BREAK CLIENT COMPATIBILITY!
 SERVER_VERSION = "3.0.0"
 
+# the interval to wait between each check of the unprocessed
+# post queue, in seconds.
+UNPROCESSED_POST_CHECK_INTERVAL = 10
+
+# The blurhash to use during image processing.
+# 000000 is just plain black.
+PROCESSING_BLURHASH = "000000"
+
 """
     Video Stuff (WIP)
 """
@@ -181,6 +189,8 @@ class ErrorCodes(Enum):
     REQUEST_TOO_LARGE = 61
     INVALID_VIDEO = 62
     OBJECT_NOT_FOUND = 63
+    IMAGE_NOT_PROCESSED = 64
+    POST_NOT_PROCESSED = 65
 
 
 """

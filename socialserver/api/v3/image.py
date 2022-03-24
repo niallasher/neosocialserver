@@ -38,6 +38,9 @@ class Image(Resource):
         if image is None:
             return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404
 
+        if image.processed is False:
+            return {"error": ErrorCodes.IMAGE_NOT_PROCESSED.value}, 404
+
         try:
             wanted_image_type = ImageTypes(args["wanted_type"])
         except ValueError:
@@ -79,8 +82,44 @@ class NewImage(Resource):
             return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
 
         try:
-            image_info = handle_upload(BytesIO(image), get_user_from_auth_header().id)
+            image_info = handle_upload(
+                BytesIO(image), get_user_from_auth_header().id, threaded=True
+            )
         except InvalidImageException:
             return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
 
-        return {"identifier": image_info.identifier}, 201
+        return {
+            "identifier": image_info.identifier,
+            "processed": image_info.processed,
+        }, 201
+
+
+class NewImageProcessBeforeReturn(Resource):
+    @max_req_size(IMAGE_MAX_REQ_SIZE)
+    @db_session
+    @auth_reqd
+    def post(self):
+        if request.files.get("image") is None:
+            return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
+
+        image: bytes = request.files.get("image").read()
+
+        # I think we still need this, since content length can be spoofed?
+        image_size_mb = b_to_mb(len(image))
+        if image_size_mb > IMAGE_MAX_REQ_SIZE_MB:
+            return {"error": ErrorCodes.REQUEST_TOO_LARGE.value}, 413
+
+        if type(image) is not bytes:
+            return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
+
+        try:
+            image_info = handle_upload(
+                BytesIO(image), get_user_from_auth_header().id, threaded=False
+            )
+        except InvalidImageException:
+            return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
+
+        return {
+            "identifier": image_info.identifier,
+            "processed": image_info.processed,
+        }, 201

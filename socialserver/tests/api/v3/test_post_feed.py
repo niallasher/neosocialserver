@@ -8,6 +8,7 @@ from socialserver.util.test import (
     create_user_with_request,
     create_user_session_with_request,
     follow_user_with_request,
+    image_data_binary,
 )
 from socialserver.constants import ErrorCodes, MAX_FEED_GET_COUNT
 import requests
@@ -106,6 +107,42 @@ def test_get_posts_from_specific_usernames(test_db, server_address):
     print(r.json())
     assert r.status_code == 201
     assert len(r.json()["posts"]) == 2
+
+
+def test_get_posts_unprocessed_in_feed(test_db, server_address, image_data_binary):
+    r = requests.post(
+        f"{server_address}/api/v3/posts/single",
+        json={"text_content": "Test Post"},
+        headers={"Authorization": f"bearer {test_db.access_token}"},
+    )
+
+    r = requests.post(
+        f"{server_address}/api/v3/image",
+        files={"image": image_data_binary},
+        headers={"Authorization": f"Bearer {test_db.access_token}"},
+    )
+    assert r.status_code == 201
+    assert r.json()["processed"] is False
+    identifier = r.json()["identifier"]
+
+    # on the off change you have a genuinely absurdly powerful
+    # system, you might fail this test if the image uploads in like 3ms :)
+    r = requests.post(
+        f"{server_address}/api/v3/posts/single",
+        json={"text_content": "Test Post", "images": [identifier]},
+        headers={"Authorization": f"bearer {test_db.access_token}"},
+    )
+    print(r.text)
+    assert r.status_code == 200
+    assert r.json()["processed"] is False
+
+    r = requests.get(
+        f"{server_address}/api/v3/posts/feed",
+        json={"count": 15, "offset": 0},
+        headers={"authorization": f"bearer {test_db.access_token}"},
+    )
+    # only the first post should show up.
+    assert len(r.json()["posts"]) == 1
 
 
 def test_get_posts_from_followed_accounts(test_db, server_address):

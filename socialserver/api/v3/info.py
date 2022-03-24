@@ -14,6 +14,6 @@ class ServerInfo(Resource):
     # noinspection PyMethodMayBeStatic
     def get(self):
         return {
-                   "version": SERVER_VERSION,
-                   "approval_required": config.auth.registration.approval_required,
-               }, 201
+            "version": SERVER_VERSION,
+            "approval_required": config.auth.registration.approval_required,
+        }, 201

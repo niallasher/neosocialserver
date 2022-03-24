@@ -35,7 +35,10 @@ class LegacyImage(Resource):
         user = get_user_object_from_token_or_abort(args["session_token"])
 
         try:
-            image_info = handle_upload(image, user.id)
+            # legacy doesn't have any ux to handle unprocessed posts/images,
+            # so we're not going to enable threading for now.
+            # TODO: maybe this should be a configurable?
+            image_info = handle_upload(image, user.id, threaded=False)
         except InvalidImageException:
             return {}, 400
 

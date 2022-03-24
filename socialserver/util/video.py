@@ -67,7 +67,7 @@ def handle_video_upload(video: BytesIO, userid: int) -> SimpleNamespace:
     console.log("Generating image upload from thumbnail capture")
     # we're using the database ID since it's internal,
     # not the user facing identifier
-    thumbnail_id = handle_image_upload(thumbnail_image, userid).id
+    thumbnail_id = handle_image_upload(thumbnail_image, userid, threaded=False).id
 
     # thumbnail_db = db.Image()
 

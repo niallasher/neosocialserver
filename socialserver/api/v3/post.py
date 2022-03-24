@@ -54,6 +54,7 @@ class Post(Resource):
         # images is just used for relationship purposes, and might be removed soon?
         # this is due to it being a set (in db), and therefore not being indexable,
         # and not keeping it's order
+        processed = True
         images = None
         video = None
         image_ids = []
@@ -70,6 +71,8 @@ class Post(Resource):
             # for storage
             for image_identifier in referenced_images:
                 image = db.Image.get(identifier=image_identifier)
+                if image.processed is False:
+                    processed = False
                 if image is None:
                     return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404
                 images.append(image)
@@ -104,6 +107,7 @@ class Post(Resource):
             creation_time=datetime.utcnow(),
             text=text_content,
             hashtags=db_tags,
+            processed=processed,
         )
 
         if images is not None:
@@ -119,7 +123,7 @@ class Post(Resource):
         # the new post right at the end)
         commit()
 
-        return {"post_id": new_post.id}, 200
+        return {"post_id": new_post.id, "processed": processed}, 200
 
     @db_session
     @auth_reqd
@@ -147,6 +151,10 @@ class Post(Resource):
         # if you've blocked a user, we don't want you to see their posts.
         if wanted_post.user in user.blocked_users:
             return {"error": ErrorCodes.USER_BLOCKED.value}, 400
+
+        # if the post hasn't been processed, we're not returning it to the user.
+        if wanted_post.processed is False:
+            return {"error": ErrorCodes.POST_NOT_PROCESSED.value}, 404
 
         additional_content_type = PostAdditionalContentTypes.NONE.value
         additional_content = []

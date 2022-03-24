@@ -76,6 +76,7 @@ class PostFeed(Resource):
                     for p in db.Post
                     if p.user not in blocks
                     and p.under_moderation is False
+                    and p.processed is True
                     and p.user.username in filter_list
                 )
                 .order_by(orm.desc(db.Post.creation_time))
@@ -87,7 +88,9 @@ class PostFeed(Resource):
                 orm.select(
                     p
                     for p in db.Post
-                    if p.user not in blocks and p.under_moderation is False
+                    if p.user not in blocks
+                    and p.under_moderation is False
+                    and p.processed is True
                 )
                 .order_by(orm.desc(db.Post.creation_time))
                 .limit(args.count, offset=args.offset)[::]
