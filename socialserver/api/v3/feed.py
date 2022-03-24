@@ -7,6 +7,7 @@ from socialserver.constants import (
     PostAdditionalContentTypes,
 )
 from socialserver.db import db
+from socialserver.util.api.v3.post import format_post_v3
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header
 from pony.orm import db_session
 from pony import orm
@@ -133,15 +134,7 @@ class PostFeed(Resource):
 
             posts.append(
                 {
-                    "post": {
-                        "id": post.id,
-                        "content": post.text,
-                        "creation_date": post.creation_time.timestamp(),
-                        "like_count": len(post.likes),
-                        "comment_count": len(post.comments),
-                        "additional_content_type": additional_content_type,
-                        "additional_content": additional_content,
-                    },
+                    "post": format_post_v3(post),
                     "user": {
                         "display_name": post.user.display_name,
                         "username": post.user.username,

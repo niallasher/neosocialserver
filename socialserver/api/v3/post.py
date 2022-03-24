@@ -12,6 +12,7 @@ from socialserver.constants import (
     ErrorCodes,
     PostAdditionalContentTypes,
 )
+from socialserver.util.api.v3.post import format_post_v3
 from socialserver.util.auth import get_user_from_auth_header, auth_reqd
 
 
@@ -192,15 +193,7 @@ class Post(Resource):
             pfp_blur_hash = pfp.blur_hash
 
         return {
-            "post": {
-                "id": wanted_post.id,
-                "content": wanted_post.text,
-                "creation_date": wanted_post.creation_time.timestamp(),
-                "like_count": len(wanted_post.likes),
-                "comment_count": len(wanted_post.comments),
-                "additional_content_type": additional_content_type,
-                "additional_content": additional_content,
-            },
+            "post": format_post_v3(wanted_post),
             "user": {
                 "display_name": wanted_post.user.display_name,
                 "username": wanted_post.user.username,
