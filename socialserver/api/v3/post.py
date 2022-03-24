@@ -12,7 +12,7 @@ from socialserver.constants import (
     ErrorCodes,
     PostAdditionalContentTypes,
 )
-from socialserver.util.api.v3.post import format_post_v3, format_userdata_v3
+from socialserver.util.api.v3.data_format import format_post_v3, format_userdata_v3
 from socialserver.util.auth import get_user_from_auth_header, auth_reqd
 
 

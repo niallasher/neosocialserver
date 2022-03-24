@@ -7,7 +7,7 @@ from socialserver.constants import (
     PostAdditionalContentTypes,
 )
 from socialserver.db import db
-from socialserver.util.api.v3.post import format_post_v3, format_userdata_v3
+from socialserver.util.api.v3.data_format import format_post_v3, format_userdata_v3
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header
 from pony.orm import db_session
 from pony import orm

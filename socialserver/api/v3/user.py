@@ -12,6 +12,7 @@ from socialserver.constants import (
     ErrorCodes,
     REGEX_USERNAME_VALID,
 )
+from socialserver.util.api.v3.data_format import format_userdata_v3
 from socialserver.util.auth import (
     generate_salt,
     hash_password,
@@ -50,20 +51,15 @@ class UserInfo(Resource):
             header_identifier = wanted_user.header_pic.identifier
             header_blur_hash = wanted_user.header_pic.blur_hash
 
-        return {
-            "username": wanted_user.username,
-            "display_name": wanted_user.display_name,
-            "birthday": wanted_user.birthday,
-            "account_attributes": wanted_user.account_attributes,
-            "bio": wanted_user.bio,
-            "follower_count": wanted_user.followers.count(),
-            "following_count": wanted_user.following.count(),
-            "profile_picture": {
-                "identifier": pfp_identifier,
-                "blur_hash": pfp_blur_hash,
-            },
-            "header": {"identifier": header_identifier, "blur_hash": header_blur_hash},
-        }, 200
+        return (
+            format_userdata_v3(
+                wanted_user,
+                include_header=True,
+                include_bio=True,
+                include_follower_info=True,
+            ),
+            200,
+        )
 
 
 class User(Resource):

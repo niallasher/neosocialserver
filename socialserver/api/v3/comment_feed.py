@@ -3,7 +3,7 @@
 from flask_restful import Resource, reqparse
 from socialserver.constants import MAX_FEED_GET_COUNT, ErrorCodes, CommentFeedSortTypes
 from socialserver.db import db
-from socialserver.util.api.v3.post import format_userdata_v3
+from socialserver.util.api.v3.data_format import format_userdata_v3
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header
 from pony.orm import db_session, select, desc, count
 

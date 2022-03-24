@@ -2,7 +2,9 @@
 from socialserver.constants import PostAdditionalContentTypes
 
 
-def format_userdata_v3(user_object, include_header=False):
+def format_userdata_v3(
+    user_object, include_header=False, include_bio=False, include_follower_info=False
+):
     pfp_identifier = None
     pfp_blur_hash = None
 
@@ -29,6 +31,13 @@ def format_userdata_v3(user_object, include_header=False):
             "identifier": header_identifier,
             "blur_hash": header_blur_hash,
         }
+
+    if include_bio:
+        userdata["bio"] = user_object.bio
+
+    if include_follower_info:
+        userdata["follower_count"] = user_object.followers.count()
+        userdata["following_count"] = user_object.following.count()
 
     return userdata
 

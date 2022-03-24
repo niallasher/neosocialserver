@@ -362,7 +362,7 @@ def test_update_header_pic(test_db, server_address, image_data_binary):
         headers={"Authorization": f"Bearer {test_db.access_token}"},
     )
     assert r.status_code == 200
-    assert r.json()["header"]["identifier"] == image_identifier
+    assert r.json()["header_picture"]["identifier"] == image_identifier
 
 
 def test_update_header_pic_invalid_ref(test_db, server_address, image_data_binary):
@@ -381,4 +381,4 @@ def test_update_header_pic_invalid_ref(test_db, server_address, image_data_binar
         headers={"Authorization": f"Bearer {test_db.access_token}"},
     )
     assert r.status_code == 200
-    assert r.json()["header"]["identifier"] != image_identifier
+    assert r.json()["header_picture"]["identifier"] != image_identifier
