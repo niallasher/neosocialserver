@@ -324,7 +324,7 @@ def test_update_profile_pic(test_db, server_address, image_data_binary):
 def test_update_profile_pic_invalid_ref(test_db, server_address, image_data_binary):
     image_identifier = "some_random_garbage_here_129839102"
     r = requests.patch(
-        f"{server_address}/api/v3/user/process_before_return",
+        f"{server_address}/api/v3/user",
         json={"profile_pic_ref": image_identifier},
         headers={"Authorization": f"bearer {test_db.access_token}"},
     )
