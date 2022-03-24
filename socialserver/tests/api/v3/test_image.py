@@ -2,7 +2,7 @@
 
 # noinspection PyUnresolvedReferences
 from socialserver.util.test import test_db, server_address, image_data_binary
-from socialserver.constants import ErrorCodes
+from socialserver.constants import ErrorCodes, ImageTypes
 import requests
 
 
@@ -60,8 +60,11 @@ def test_upload_image_threaded(test_db, server_address, image_data_binary):
     )
     print(r.json())
     assert r.status_code == 201
-    assert r.json()['processed'] is False
+    assert r.json()["processed"] is False
     identifier = r.json()["identifier"]
-    r = requests.get(f"{server_address}/api/v3/image/{identifier}")
-    assert r.status_code == 400
-    assert r.json()['error'] == ErrorCodes.IMAGE_NOT_PROCESSED.value
+    r = requests.get(
+        f"{server_address}/api/v3/image/{identifier}",
+        json={"wanted_type": ImageTypes.POST.value, "pixel_ratio": 1},
+    )
+    assert r.status_code == 404
+    assert r.json()["error"] == ErrorCodes.IMAGE_NOT_PROCESSED.value
