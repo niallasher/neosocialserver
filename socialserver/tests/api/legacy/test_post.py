@@ -7,10 +7,37 @@ from socialserver.util.test import (
     create_post_with_request,
     create_user_with_request,
     create_user_session_with_request,
+    image_data_binary,
 )
 import requests
 from socialserver.constants import LegacyErrorCodes, MAX_FEED_GET_COUNT
 from secrets import token_urlsafe
+
+
+def test_get_post_feed_unprocessed_posts_legacy(
+    test_db, server_address, image_data_binary
+):
+    # create normal post
+    post_id_1 = create_post_with_request(
+        auth_token=test_db.access_token, text_content="test"
+    )
+    # create unprocessed post
+    image = requests.post(
+        f"{server_address}/api/v3/image",
+        files={"image": image_data_binary},
+        headers={"Authorization": f"Bearer {test_db.access_token}"},
+    ).json()["identifier"]
+    post_id_2 = requests.post(
+        f"{server_address}/api/v3/posts/single",
+        json={"text_content": "test", "images": [image]},
+    ).json()
+    # get feed
+    r = requests.get(
+        f"{server_address}/api/v1/posts",
+        json={"session_token": test_db.access_token, "count": 10, "offset": 0},
+    )
+    assert len(r.json()) == 1
+    assert post_id_2 not in r.json()
 
 
 def test_get_post_feed_legacy(test_db, server_address):
@@ -23,7 +50,6 @@ def test_get_post_feed_legacy(test_db, server_address):
     )
     assert r.status_code == 201
     assert r.json()[0] == post_id
-    assert len(r.json()) == 1
 
 
 def test_get_post_feed_count_too_high_legacy(test_db, server_address):
@@ -175,3 +201,22 @@ def test_delete_post_invalid_token_legacy(test_db, server_address):
     )
 
     assert r.status_code == 401
+
+
+def test_get_post_unprocessed_legacy(test_db, server_address, image_data_binary):
+    image = requests.post(
+        f"{server_address}/api/v3/image",
+        files={"image": image_data_binary},
+        headers={"Authorization": f"Bearer {test_db.access_token}"},
+    ).json()["identifier"]
+    post_id = requests.post(
+        f"{server_address}/api/v3/posts/single",
+        json={"text_content": "test", "images": [image]},
+        headers={"Authorization": f"Bearer {test_db.access_token}"},
+    ).json()["post_id"]
+    r = requests.get(
+        f"{server_address}/api/v1/posts",
+        json={"session_token": test_db.access_token, "post_id": post_id},
+    )
+    assert r.status_code == 401
+    assert r.json()["err"] == LegacyErrorCodes.POST_NOT_FOUND.value
