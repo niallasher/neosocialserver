@@ -155,6 +155,9 @@ class LegacyPost(Resource):
                 # (yes, it does return not authorized if it can't find anything lol)
                 return {"err": LegacyErrorCodes.POST_NOT_FOUND.value}, 401
 
+            if post.processed is False:
+                return {"err": LegacyErrorCodes.POST_NOT_FOUND.value}, 401
+
             if post.under_moderation and True not in [user.is_moderator, user.is_admin]:
                 return {
                     "err": LegacyErrorCodes.INSUFFICIENT_PERMISSIONS_TO_VIEW_POST.value
@@ -215,7 +218,7 @@ class LegacyPost(Resource):
             if None in [args["count"], args["offset"]]:
                 return {}, 400
 
-            # also a slight breaking change, but don't think there's any other option here
+            # this is also a slight breaking change, but don't think there's any other option here
             if args["count"] >= MAX_FEED_GET_COUNT:
                 return {}, 400
 
@@ -224,7 +227,9 @@ class LegacyPost(Resource):
                 select(
                     p
                     for p in db.Post
-                    if p.user not in blocks and p.under_moderation is False
+                    if p.user not in blocks
+                    and p.under_moderation is False
+                    and p.processed is True
                 )
                 .order_by(desc(db.Post.id))
                 .limit(args["count"], offset=args["offset"])
