@@ -5,7 +5,9 @@ import toml
 from socialserver.util.output import console
 from pathlib import Path
 from socialserver.util.namespace import dict_to_simple_namespace
+from socialserver.constants import ROOT_DIR
 from types import SimpleNamespace
+from string import Template
 
 # if the user doesn't specify a server root storage dir,
 # we're going to store everything in $HOME/socialserver.
@@ -34,112 +36,8 @@ DEFAULT_CONFIG_PATH = f"{FILE_ROOT}/config.toml"
 
 CONFIG_PATH = os.getenv("SOCIALSERVER_CONFIG_FILE", default=DEFAULT_CONFIG_PATH)
 
-DEFAULT_CONFIG = f"""
-[network]
-host = "0.0.0.0"
-port = 51672
-
-[misc]
-# if this is enabled, the server will
-# serve templates/server_landing.html
-# at root. this page can be customized.
-enable_landing_page = true
-
-[database]
-# supported connectors right now:
-# sqlite, postgres
-connector = "sqlite"
-# filename is only used for sqlite connections
-filename = "{FILE_ROOT}/socialserver.db"
-# the following fields are only used for postgres connections.
-username = ""
-password = ""
-database_name = ""
-host = ""
-
-[media.images]
-# this quality will be applied to 
-# all non post images, except the saved
-# original copy.
-quality = 80
-post_quality = 90
-storage_dir = "{FILE_ROOT}/media/images"
-# max size of an image upload request in megabytes. (float)
-# make sure that anything in the way of the server e.g. nginx,
-# is configured to allow a request of at least this size!
-max_image_request_size_mb = 16
-
-[media.videos]
-storage_dir = "{FILE_ROOT}/media/videos"
-
-[auth.registration]
-enabled = true
-# if enabled, any admins will be
-# able to get a list of requested
-# signups, and approve or deny them
-# before they are allowed in
-approval_required = false
-# if true, any accounts in the approval queue will
-# be automatically approved on the next launch after
-# the approval requirement is disabled. if false, the
-# accounts will be left in the queue.
-auto_approve_when_approval_disabled = false
-
-[auth.totp]
-# good for security, however the old server didn't implement it.
-# you should keep it on, since it will cause minor ux paper-cuts for the
-# old client, while providing a pretty good boost in security just in case somebody
-# is watching a user sign in etc.
-replay_prevention_enabled = true
-# the issuer string returned with otp urls
-issuer = "socialserver"
-# the time after which an unconfirmed totp will expire and be removed
-# from the database. should be high enough to give the user a good chance
-# to confirm it.
-unconfirmed_expiry_time = 300 # 5 minutes
-
-[posts]
-# this is an anti-spam tactic; socialserver
-# allows for each user to report a specific post
-# once. if enabled, the user will not be informed
-# that their second report on a post didn't go through,
-# hopefully preventing them from spamming reports on an
-# undeserving post.
-silent_fail_on_double_report = false
-
-[legacy_api_interface]
-# the legacy api is not going to get any new features
-# and it cannot really benefit from the better efficiency
-# of the modern one. it does get somewhat better image
-# efficiency though, which is a definite plus.
-enable = true
-# api v1 doesn't have an interface for providing a pixel ratio
-# so we can't optimize images there. you can define a default here.
-# 2 is a somewhat sane default, since a lot of people are on phones
-# with high dpi screens now
-image_pixel_ratio = 2
-signup_enabled = true
-# enabling this will server full post images to legacy clients,
-# instead of post preview images. enabling this gives them far higher
-# quality, however it causes a drastic increase in payload size when loading
-# a post. as a side note, this will deliver the image in it's proper aspect ratio
-# instead of a square, which makes v1 clients a lot more useful tbf but it really
-# does hurt network transfer size.
-deliver_full_post_images = false
-# this option toggles whether the legacy API will return the current server
-# version, or 2.99.0 when /server_info is requested. this is a workaround for
-# some possible incompatibilities with older versions of the socialshare client, 
-# which, IIRC, only checked the minor server semver version, when determining server
-# availability.
-report_legacy_version = false
-# the legacy api does not require confirmation of the previous password before
-# switching to a new one. if disabled, this setting will prevent any legacy password
-# change requests from going through. best to keep this disabled unless trying to keep
-# maximum compatibility with 1.x clients.
-enable_less_secure_password_change = false
-
-
-"""
+with open(f"{ROOT_DIR}/resources/default_config.toml", "r") as config_file:
+    DEFAULT_CONFIG = Template(config_file.read()).substitute({"FILE_ROOT": FILE_ROOT})
 
 """
     _test_config
