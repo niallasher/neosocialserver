@@ -296,7 +296,8 @@ def create_test_db():
 
 
 def _bind_to_config_specified_db(db_object):
-    # TODO: MariaDB support, once I actually set it up for testing
+    # config.database.connector is already validated by pydantic.
+    # we don't need to handle an incorrect value here.
     if config.database.connector == "sqlite":
         db_object.bind("sqlite", config.database.filename, create_db=True)
     elif config.database.connector == "postgres":
@@ -314,15 +315,6 @@ def _bind_to_config_specified_db(db_object):
                 f"[bold]Please check the configuration file, located at {CONFIG_PATH}!"
             )
             exit()
-    else:
-        console.log(f"[bold red]Invalid database connector specified in {CONFIG_PATH}")
-        console.print(
-            f"[bold]Please check the configuration file, located at {CONFIG_PATH}!"
-        )
-        console.print(f"[bold]Valid connectors:")
-        console.print("- [bold] postgres")
-        console.print("- [bold] sqlite")
-        exit()
     db_object.generate_mapping(create_tables=True)
 
 

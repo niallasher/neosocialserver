@@ -11,12 +11,20 @@ from socialserver.constants import (
     MAX_FEED_GET_COUNT,
     POST_MAX_LEN,
     REGEX_HASHTAG,
+    ROOT_DIR,
 )
 import re
 from pony.orm import db_session, select, desc
 from datetime import datetime
+from base64 import b64encode
 
 SERVE_FULL_POST_IMAGES = config.legacy_api_interface.deliver_full_post_images
+
+# preload video_unsupported_image, so we don't have to read it from disk every time.
+with open(f"{ROOT_DIR}/static/video_unsupported_legacy_client.jpg", "rb") as image_file:
+    video_unsupported_image = (
+        "data:image/jpg;base64," + b64encode(image_file.read()).decode()
+    )
 
 
 class LegacyPost(Resource):
@@ -177,6 +185,11 @@ class LegacyPost(Resource):
                 image_data = get_image_data_url_legacy(
                     images[0].identifier, image_serve_type
                 )
+            elif post.video is not None:
+                # serve full. it's just 512x512 anyway.
+                image_serve_type = ImageTypes.POST
+                image_data = video_unsupported_image
+                pass
 
             is_own_post = post.user == user
 
