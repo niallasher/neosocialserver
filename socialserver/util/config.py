@@ -9,6 +9,7 @@ from socialserver.constants import ROOT_DIR
 from socialserver.resources.config.schema import ServerConfig
 from string import Template
 from toml import loads, TomlDecodeError
+from pydantic import ValidationError
 
 # if the user doesn't specify a server root storage dir,
 # we're going to store everything in $HOME/socialserver.
@@ -68,7 +69,13 @@ def _load_config(filename: str) -> ServerConfig:
         config_data = _load_toml(config_file.read())
         # pydantic handles the validation, so we just need to return the model.
         # any missing fields will raise an exception.
-        return ServerConfig(**config_data)
+        try:
+            return ServerConfig(**config_data)
+        except ValidationError as e:
+            # pydantic already gives us a pretty great rundown of what's wrong,
+            # so we might as well just use it.
+            print(e)
+            exit(1)
 
 
 """

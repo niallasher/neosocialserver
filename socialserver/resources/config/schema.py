@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel, IPvAnyAddress, Field, validator
 from socialserver.constants import MAX_PIXEL_RATIO
-from typing import Literal
+from typing import Literal, Optional
 
 
 class _ServerConfigNetwork(BaseModel):
@@ -16,12 +16,31 @@ class _ServerConfigMisc(BaseModel):
 
 
 class _ServerConfigDatabase(BaseModel):
+    # these are optional depending on the connector,
+    # handled by the connection_validation validator below.
+    filename: Optional[str]
+    username: Optional[str]
+    password: Optional[str]
+    database_name: Optional[str]
+    host: Optional[str]
     connector: Literal["sqlite", "postgres"]
-    filename: str
-    username: str
-    password: str
-    database_name: str
-    host: str
+
+    @validator("connector")
+    def connector_validation(cls, value, values):
+        if value == "sqlite":
+            filename = values.get("filename")
+            assert filename not in [
+                None,
+                "",
+            ], "filename required when using the sqlite connector"
+        if value == "postgres":
+            required_values = ["username", "password", "database_name", "host"]
+            for reqd_value in required_values:
+                assert (
+                    values.get(reqd_value) is not None
+                ), "username, password, filename, database_name, host required when using the postgres connector"
+
+        return value
 
 
 class _ServerConfigMediaImages(BaseModel):
