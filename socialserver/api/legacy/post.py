@@ -21,7 +21,9 @@ from base64 import b64encode
 SERVE_FULL_POST_IMAGES = config.legacy_api_interface.deliver_full_post_images
 
 # preload video_unsupported_image, so we don't have to read it from disk every time.
-with open(f"{ROOT_DIR}/static/video_unsupported_legacy_client.jpg", "rb") as image_file:
+with open(
+    f"{ROOT_DIR}/resources/legacy/video_unsupported_legacy_client.jpg", "rb"
+) as image_file:
     video_unsupported_image = (
         "data:image/jpg;base64," + b64encode(image_file.read()).decode()
     )
