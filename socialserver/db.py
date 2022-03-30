@@ -191,7 +191,7 @@ def define_entities(db_object):
         # identifier used to retrieve an image object
         identifier = orm.Required(str)
         # sha256 hash of the image, for detecting duplicate uploads.
-        sha256_hash = orm.Required(str)
+        sha256sum = orm.Required(str)
         # identifier used to store the image on disk. can be shared if multiple users
         # post an image with the same SHA256 hash.
         file_identifier = orm.Required(str)
@@ -206,10 +206,10 @@ def define_entities(db_object):
         @property
         def is_orphan(self):
             return (
-                    len(self.associated_posts) == 0
-                    and len(self.associated_profile_pics) == 0
-                    and len(self.associated_header_pics)
-                    and len(self.associated_thumbnails) == 0
+                len(self.associated_posts) == 0
+                and len(self.associated_profile_pics) == 0
+                and len(self.associated_header_pics)
+                and len(self.associated_thumbnails) == 0
             )
 
     class Hashtag(db_object.Entity):
@@ -266,7 +266,7 @@ def define_entities(db_object):
         creation_time = orm.Required(datetime.datetime)
         identifier = orm.Required(str)
         file_identifier = orm.Required(str)
-        sha256_hash = orm.Required(str)
+        sha256sum = orm.Required(str)
         associated_posts = orm.Set("Post", reverse="video")
         thumbnail = orm.Required("Image", reverse="associated_thumbnails")
         # this probably won't be implemented for a while, but
