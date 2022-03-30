@@ -190,11 +190,9 @@ def define_entities(db_object):
         creation_time = orm.Required(datetime.datetime)
         # identifier used to retrieve an image object
         identifier = orm.Required(str)
-        # sha256 hash of the image, for detecting duplicate uploads.
+        # sha256 hash of the image, for detecting duplicate uploads,
+        # and for storage purposes.
         sha256sum = orm.Required(str)
-        # identifier used to store the image on disk. can be shared if multiple users
-        # post an image with the same SHA256 hash.
-        file_identifier = orm.Required(str)
         associated_profile_pics = orm.Set("User", reverse="profile_pic")
         associated_header_pics = orm.Set("User", reverse="header_pic")
         associated_posts = orm.Set("Post", reverse="images")
@@ -265,7 +263,7 @@ def define_entities(db_object):
         owner = orm.Required("User")
         creation_time = orm.Required(datetime.datetime)
         identifier = orm.Required(str)
-        file_identifier = orm.Required(str)
+        # videos are stored by their sha256sum.
         sha256sum = orm.Required(str)
         associated_posts = orm.Set("Post", reverse="video")
         thumbnail = orm.Required("Image", reverse="associated_thumbnails")
