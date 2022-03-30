@@ -9,11 +9,12 @@ from types import SimpleNamespace
 from io import BytesIO
 from socialserver.constants import VIDEO_SUPPORTED_FORMATS
 from socialserver.db import db
-from pony.orm import commit
+from pony.orm import commit, select
 from socialserver.util.config import config
 from socialserver.util.output import console
 from os import makedirs, path, mkdir
 from tempfile import NamedTemporaryFile
+from hashlib import sha256
 
 VIDEO_DIR = config.media.videos.storage_dir
 
@@ -31,9 +32,10 @@ def _verify_video(video: BytesIO):
         raise InvalidVideoException
 
 
-def write_video(video: BytesIO, access_id: str) -> None:
-    mkdir(f"{VIDEO_DIR}/{access_id}")
-    with open(f"{VIDEO_DIR}/{access_id}/video.mp4", "wb") as video_file:
+def write_video(video: BytesIO, video_hash: str) -> None:
+    console.log(f"Writing new video, hash={video_hash}")
+    mkdir(f"{VIDEO_DIR}/{video_hash}")
+    with open(f"{VIDEO_DIR}/{video_hash}/video.mp4", "wb") as video_file:
         video_file.write(video.read())
 
 
@@ -41,8 +43,11 @@ def write_video(video: BytesIO, access_id: str) -> None:
 def screenshot_video(video: BytesIO) -> BytesIO:
     with NamedTemporaryFile() as input_file:
         # it's not nice to use a file on disk, but it has benefits here.
+        # ^^ what did i mean by this?
         video.seek(0)
         input_file.write(video.read())
+        # return cursor since we're sharing this buffer.
+        video.seek(0)
         video_object = ffmpeg.input(input_file.name)
         try:
             output, _ = video_object.output("pipe:", format="image2", vframes="1").run(
@@ -60,8 +65,18 @@ def handle_video_upload(video: BytesIO, userid: int) -> SimpleNamespace:
     # we already know the user exists,
     # since we're calling this from an authenticated API route!
     user = db.User.get(id=userid)
-    write_video(video, identifier)
 
+    video_hash = sha256(video.read()).hexdigest()
+    video.seek(0)
+
+    existing_video = select(
+        video for video in db.Video if video.sha256sum is video_hash
+    ).limit(1)[::]
+    existing_video = existing_video[0] if len(existing_video) >= 1 else None
+
+    # we're not reusing thumbnails directly; we want the thumbnail object
+    # to be owned by the user who uploaded the video. an identical video will have
+    # an identical screenshot anyway, so it will still be handled properly.
     console.log("Capturing thumbnail from video")
     thumbnail_image = screenshot_video(video)
     console.log("Generating image upload from thumbnail capture")
@@ -69,15 +84,16 @@ def handle_video_upload(video: BytesIO, userid: int) -> SimpleNamespace:
     # not the user facing identifier
     thumbnail_id = handle_image_upload(thumbnail_image, userid, threaded=False).id
 
-    # thumbnail_db = db.Image()
-
-    # save the thumbnail, so we can reference it in the video db entry.
     commit()
+
+    if existing_video is None:
+        write_video(video, video_hash)
 
     video_db = db.Video(
         owner=user,
         creation_time=datetime.now(),
         identifier=identifier,
+        sha256sum=video_hash,
         thumbnail=db.Image.get(id=thumbnail_id),
         # true since we're just direct playing right now
         processed=True,
