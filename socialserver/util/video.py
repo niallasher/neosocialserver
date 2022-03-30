@@ -34,6 +34,9 @@ def _verify_video(video: BytesIO):
 
 def write_video(video: BytesIO, video_hash: str) -> None:
     console.log(f"Writing new video, hash={video_hash}")
+    # FIXME: testing needs work before this is removed.
+    if path.exists(f"{VIDEO_DIR}/{video_hash}"):
+        return
     mkdir(f"{VIDEO_DIR}/{video_hash}")
     with open(f"{VIDEO_DIR}/{video_hash}/video.mp4", "wb") as video_file:
         video_file.write(video.read())

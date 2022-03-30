@@ -22,7 +22,7 @@ class Video(Resource):
         if video is None:
             return {"error": ErrorCodes.OBJECT_NOT_FOUND.value}, 404
 
-        file = f"{VIDEO_DIR}/{kwargs.get('videoid')}/video.mp4"
+        file = f"{VIDEO_DIR}/{video.sha256sum}/video.mp4"
 
         return send_file(file)
 

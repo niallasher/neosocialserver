@@ -12,7 +12,7 @@ def test_upload_image(test_db, server_address, image_data_binary):
         files={"image": image_data_binary},
         headers={"Authorization": f"Bearer {test_db.access_token}"},
     )
-    print(r.json())
+    print(r.text)
     assert r.status_code == 201
 
 
@@ -22,6 +22,7 @@ def test_get_image(test_db, server_address, image_data_binary):
         files={"image": image_data_binary},
         headers={"Authorization": f"Bearer {test_db.access_token}"},
     ).json()["identifier"]
+    print(image_identifier)
     r = requests.get(
         f"{server_address}/api/v3/image/{image_identifier}",
         json={"wanted_type": "post", "pixel_ratio": 1},

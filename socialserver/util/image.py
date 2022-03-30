@@ -66,6 +66,9 @@ def save_images_to_disk(images: dict, image_hash: str) -> None:
             progressive=True,
         )
 
+    # FIXME: this is due to some deficiencies in the testing process.
+    if path.exists(f"{IMAGE_DIR}/{image_hash}"):
+        return
     mkdir(f"{IMAGE_DIR}/{image_hash}")
     for i in images.keys():
         if i == ImageTypes.ORIGINAL:
@@ -370,6 +373,8 @@ def process_image(image: Image, image_hash: str, image_id: int) -> None:
     db_image = db.Image.get(id=image_id)
     db_image.processed = True
     db_image.blur_hash = generate_blur_hash(image)
+
+    commit()
 
     console.log(f"Image, id={image_id}, processed.")
 
