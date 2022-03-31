@@ -188,8 +188,11 @@ def define_entities(db_object):
     class Image(db_object.Entity):
         uploader = orm.Required("User")
         creation_time = orm.Required(datetime.datetime)
-        # uuid used to retrieve the image from storage
+        # identifier used to retrieve an image object
         identifier = orm.Required(str)
+        # sha256 hash of the image, for detecting duplicate uploads,
+        # and for storage purposes.
+        sha256sum = orm.Required(str)
         associated_profile_pics = orm.Set("User", reverse="profile_pic")
         associated_header_pics = orm.Set("User", reverse="header_pic")
         associated_posts = orm.Set("Post", reverse="images")
@@ -259,8 +262,9 @@ def define_entities(db_object):
     class Video(db_object.Entity):
         owner = orm.Required("User")
         creation_time = orm.Required(datetime.datetime)
-        # for both video and thumbnail.
         identifier = orm.Required(str)
+        # videos are stored by their sha256sum.
+        sha256sum = orm.Required(str)
         associated_posts = orm.Set("Post", reverse="video")
         thumbnail = orm.Required("Image", reverse="associated_thumbnails")
         # this probably won't be implemented for a while, but

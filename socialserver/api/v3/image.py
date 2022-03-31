@@ -11,6 +11,7 @@ from socialserver.util.config import config
 from socialserver.util.image import handle_upload, InvalidImageException
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header
 from socialserver.util.file import max_req_size, mb_to_b, b_to_mb
+from socialserver.util.output import console
 
 from flask_restful import Resource, reqparse
 from pony.orm import db_session
@@ -55,7 +56,7 @@ class Image(Resource):
         if args["wanted_type"] == "post":
             pixel_ratio = 1
 
-        file = f"{IMAGE_DIR}/{kwargs.get('imageid')}/{wanted_image_type.value}_{pixel_ratio}x.jpg"
+        file = f"{IMAGE_DIR}/{image.sha256sum}/{wanted_image_type.value}_{pixel_ratio}x.jpg"
 
         if not path.exists(file):
             return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404
@@ -71,15 +72,23 @@ class NewImage(Resource):
         if request.files.get("image") is None:
             return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
 
+        console.log("Files package parsed OK!")
+
         image: bytes = request.files.get("image").read()
+
+        print("Image bytes retrieved successfully!")
 
         # I think we still need this, since content length can be spoofed?
         image_size_mb = b_to_mb(len(image))
         if image_size_mb > IMAGE_MAX_REQ_SIZE_MB:
             return {"error": ErrorCodes.REQUEST_TOO_LARGE.value}, 413
 
+        print("Passed size check!")
+
         if type(image) is not bytes:
             return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
+
+        print("Passed the weird (redundant?) type check.")
 
         try:
             image_info = handle_upload(

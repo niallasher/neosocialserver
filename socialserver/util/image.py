@@ -9,7 +9,7 @@ from types import SimpleNamespace
 from base64 import b64encode
 import PIL
 from PIL import Image, ImageOps
-from pony.orm import commit, db_session
+from pony.orm import commit, db_session, select
 from socialserver.util.config import config
 from socialserver.util.output import console
 from socialserver.db import db
@@ -33,6 +33,7 @@ from typing import Tuple
 import blurhash
 from io import BytesIO
 from threading import Thread
+from hashlib import sha256
 
 IMAGE_DIR = config.media.images.storage_dir
 # where straight uploaded images are stored.
@@ -56,20 +57,23 @@ if not path.exists(IMAGE_DIR):
 
 # TODO: not sure how to best represent a dict with pythons type
 # annotations. Need to fix this.
-def save_images_to_disk(images: dict, access_id: str) -> None:
+def save_images_to_disk(images: dict, image_hash: str) -> None:
     def save_with_pixel_ratio(image, filename, pixel_ratio):
         image.save(
-            f"{IMAGE_DIR}/{access_id}/{filename}_{pixel_ratio}x.jpg",
+            f"{IMAGE_DIR}/{image_hash}/{filename}_{pixel_ratio}x.jpg",
             type="JPEG",
             quality=IMAGE_QUALITY,
             progressive=True,
         )
 
-    mkdir(f"{IMAGE_DIR}/{access_id}")
+    # FIXME: this is due to some deficiencies in the testing process.
+    if path.exists(f"{IMAGE_DIR}/{image_hash}"):
+        return
+    mkdir(f"{IMAGE_DIR}/{image_hash}")
     for i in images.keys():
         if i == ImageTypes.ORIGINAL:
             images[i][0].save(
-                f"{IMAGE_DIR}/{access_id}/{ImageTypes.ORIGINAL.value}.jpg",
+                f"{IMAGE_DIR}/{image_hash}/{ImageTypes.ORIGINAL.value}.jpg",
                 type="JPEG",
                 quality=IMAGE_QUALITY,
             )
@@ -335,8 +339,8 @@ def generate_blur_hash(image: Image) -> str:
 
 
 @db_session
-def process_image(image: Image, image_identifier: str, image_id: int) -> None:
-    console.log(f"Processing image, id={image_id}.")
+def process_image(image: Image, image_hash: str, image_id: int) -> None:
+    console.log(f"Processing image, id={image_id}. sha256sum={image_hash}")
     # all resized images get 4 different pixel ratios, returned in an array from
     # 0 to 3, where the pixel ratio is the index + 1. except for posts.
     # we always deliver them in ''full'' quality (defined by MAX_IMAGE_SIZE_POST)
@@ -364,11 +368,13 @@ def process_image(image: Image, image_identifier: str, image_id: int) -> None:
         ImageTypes.PROFILE_PICTURE_LARGE: arr_profilepic_lg,
     }
 
-    save_images_to_disk(images, image_identifier)
+    save_images_to_disk(images, image_hash)
 
     db_image = db.Image.get(id=image_id)
     db_image.processed = True
     db_image.blur_hash = generate_blur_hash(image)
+
+    commit()
 
     console.log(f"Image, id={image_id}, processed.")
 
@@ -389,13 +395,28 @@ def handle_upload(
 ) -> SimpleNamespace:
     # check that the given data is valid.
     _verify_image(image)
-    image = convert_buffer_to_image(image)
-    access_id = create_random_image_identifier()
 
     uploader = db.User.get(id=userid)
     if uploader is None:
         console.log("[bold red]Could not commit to DB: user id does not exist!")
         raise InvalidImageException  # should maybe rename this?
+
+    # before we bother processing the image, we check if any image with an identical
+    # hash exists, since there is no point duplicating them in storage.
+
+    # get the hash of the image
+    image_hash = sha256(image.read()).hexdigest()
+    image.seek(0)
+
+    # and try to find an existing Image with the same one.
+    # if this != null, we'll use it to fill in some Image entry fields later.
+    existing_image = select(
+        image for image in db.Image if image.sha256sum is image_hash
+    ).limit(1)[::]
+    existing_image = existing_image[0] if len(existing_image) >= 1 else None
+
+    image = convert_buffer_to_image(image)
+    access_id = create_random_image_identifier()
 
     # create the image entry now, so we can give back an identifier.
     entry = db.Image(
@@ -403,18 +424,21 @@ def handle_upload(
         identifier=access_id,
         uploader=db.User.get(id=userid),
         blur_hash=PROCESSING_BLURHASH,
+        sha256sum=image_hash,
         processed=False,
     )
 
     commit()
 
+    if existing_image is not None:
+        entry.blur_hash = existing_image.blur_hash
+        entry.processed = True
+        return SimpleNamespace(id=entry.id, identifier=access_id, processed=True)
+
     if threaded:
-        Thread(target=lambda: process_image(image, access_id, entry.id)).start()
+        Thread(target=lambda: process_image(image, image_hash, entry.id)).start()
     else:
-        process_image(image, access_id, entry.id)
+        process_image(image, image_hash, entry.id)
 
     # if we're not using threading, then it will have been processed by now.
     return SimpleNamespace(id=entry.id, identifier=access_id, processed=(not threaded))
-
-    # entry = commit_image_to_db(access_id, userid, generate_blur_hash(image))
-    # return SimpleNamespace(id=entry, identifier=access_id)
