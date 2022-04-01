@@ -40,6 +40,7 @@ def pytest_sessionfinish():
     # rather then just leaving it to the OS
     application_thread.kill()
     remove("/tmp/test.db")
+    exit(0)
 
 
 application_thread = TestingServer(application)
