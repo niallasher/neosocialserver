@@ -3,7 +3,7 @@
     <h1 style="margin-top:0;margin-bottom:5px;">socialserver</h1>
 </div>
 
-The server side of an open shurce social media platform. This is a rewrite of a previous implementation, that adds a new
+The server side of an open source social media platform. This is a rewrite of a previous implementation, that adds a new
 API, and many more features, including actually being stable (eventually), actually working properly (eventually), being
 easy to deploy and work with (eventually), and being far more maintainable.
 
