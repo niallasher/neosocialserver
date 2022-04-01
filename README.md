@@ -13,23 +13,26 @@ In the early stages of development currently, and there isn't much (read: any) i
 
 ### Quickstart
 
-- Clone repository
-- Install dependencies (use a virtual environment.)
-- Set the ```SOCIALSERVER_ROOT``` environment variable to the folder you want server data stored in. The default is
-  ```$HOME/socialserver```.
-- ```python3 -m socialserver devel-run``` for development. Otherwise just point some WSGI server at the
-  ```socialserver``` module and you're good to go.
-- Configure ```$SOCIALSERVER_ROOT/config.toml``` to your liking. Config location can be over-ridden with the
-  ```SOCIALSERVER_CONFIG_FILE``` environment variable.
+This project uses pipenv for dependency management, so you'll want to have it installed.
+
+- Clone the repository
+- Run `pipenv install` to install dependencies
+- Set ``SOCIALSERVER_ROOT`` in your environment, to define the folder you want server data stored in.
+  - If unset, the default is `$HOME/socialserver`.
+- Run `pipenv run devel` for a development server.
+  -  Any WSGI server *should* work fine. Gunicorn is a good choice for when you're ready to move away from the Flask dev server.
+- A configuration file will be placed at `$SOCIALSERVER_ROOT/config.toml`.
+  - You can overwrite this location by setting `SOCIALSERVER_CONFIG_FILE` in your environment.
 - ???
 - Profit
 
 ### Tests
 
-The test suite is written using pytest. Just run ```pytest socialserver``` from the repository root, or, alternatively
-```python3 -m socialserver test```.
+Run `pipenv run tests`. Or `pytest socialserver`.
 
 ### Notes
 
 - There is no proper way to create an admin user, due to the initial setup not being done yet. For now, you can
   run ```python3 -m socialserver mk-user```. This will allow you to create a user with the administrator attribute.
+    - If you're using the Pipenv setup, you'll want to use pipenv shell first, to ensure all dependencies are available.
+    - It's a pretty sketchy little script, and will be replaced in the future.
