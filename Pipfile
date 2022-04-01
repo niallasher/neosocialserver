@@ -59,3 +59,7 @@ Werkzeug = "==2.1.0"
 
 [requires]
 python_version = "3.9"
+
+[scripts]
+devel = "python -m socialserver devel-run"
+tests = "python -m socialserver test"
