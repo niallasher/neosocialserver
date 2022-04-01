@@ -301,7 +301,8 @@ def check_image_exists(identifier: str):
 
 
 def get_image_data_url_legacy(identifier: str, image_type: ImageTypes) -> str:
-    if not check_image_exists(identifier):
+    image = db.Image.get(identifier=identifier)
+    if image is None:
         raise InvalidImageException
 
     pixel_ratio = config.legacy_api_interface.image_pixel_ratio
@@ -310,7 +311,7 @@ def get_image_data_url_legacy(identifier: str, image_type: ImageTypes) -> str:
         # no other pixel ratio variants exist!
         pixel_ratio = 1
 
-    file = f"{IMAGE_DIR}/{identifier}/{image_type.value}_{pixel_ratio}x.jpg"
+    file = f"{IMAGE_DIR}/{image.sha256sum}/{image_type.value}_{pixel_ratio}x.jpg"
 
     # data_url = re.sub(r'^data:image/.+;base64,', '', data_url)
 
