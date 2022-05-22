@@ -10,9 +10,7 @@ from pony.orm import db_session
 from socialserver.util.auth import get_user_from_auth_header, auth_reqd
 from socialserver.util.video import handle_video_upload, InvalidVideoException
 from socialserver.db import db
-from socialserver.util.config import config
-
-VIDEO_DIR = config.media.videos.storage_dir
+from socialserver.util.filesystem import fs_videos
 
 
 class Video(Resource):
@@ -22,9 +20,14 @@ class Video(Resource):
         if video is None:
             return {"error": ErrorCodes.OBJECT_NOT_FOUND.value}, 404
 
-        file = f"{VIDEO_DIR}/{video.sha256sum}/video.mp4"
+        file = f"/{video.sha256sum}/video.mp4"
+        if not fs_videos.exists(file):
+            return {"error": ErrorCodes.OBJECT_NOT_FOUND.value}, 404
 
-        return send_file(file)
+        # doesn't seem very efficient.
+        file_buffer = BytesIO(fs_videos.readbytes(file))
+
+        return send_file(file_buffer, download_name="video.mp4")
 
 
 class NewVideo(Resource):

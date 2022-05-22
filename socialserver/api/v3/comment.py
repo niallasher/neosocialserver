@@ -11,9 +11,9 @@ from datetime import datetime
 class Comment(Resource):
     def __init__(self):
 
-        self.get_parser = reqparse.RequestParser()
-        self.get_parser.add_argument("text_content", type=str, required=True)
-        self.get_parser.add_argument("post_id", type=int, required=True)
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument("text_content", type=str, required=True)
+        self.post_parser.add_argument("post_id", type=int, required=True)
 
         self.delete_parser = reqparse.RequestParser()
         self.delete_parser.add_argument("comment_id", type=int, required=True)
@@ -21,7 +21,7 @@ class Comment(Resource):
     @db_session
     @auth_reqd
     def post(self):
-        args = self.get_parser.parse_args()
+        args = self.post_parser.parse_args()
 
         user = get_user_from_auth_header()
 

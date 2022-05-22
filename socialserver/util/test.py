@@ -12,6 +12,7 @@ from socialserver.util.namespace import dict_to_simple_namespace
 from socialserver.constants import ROOT_DIR
 from base64 import urlsafe_b64decode
 from io import BytesIO
+from fs.memoryfs import MemoryFS
 
 UA = (
     "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 "
@@ -133,18 +134,17 @@ def get_server_address():
 
 
 def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -> None:
-    monkeypatch.setattr(
-        "socialserver.util.image.IMAGE_DIR", "/tmp/socialserver_image_testing"
-    )
-    monkeypatch.setattr(
-        "socialserver.api.v3.image.IMAGE_DIR", "/tmp/socialserver_image_testing"
-    )
-    monkeypatch.setattr(
-        "socialserver.util.video.VIDEO_DIR", "/tmp/socialserver_video_testing"
-    )
-    monkeypatch.setattr(
-        "socialserver.api.v3.video.VIDEO_DIR", "/tmp/socialserver_video_testing"
-    )
+    # swap in memory filesystems for video & images, since we only want
+    # temporary storage of test media
+    temp_image_fs = MemoryFS()
+    temp_video_fs = MemoryFS()
+
+    monkeypatch.setattr("socialserver.util.image.fs_images", temp_image_fs)
+    monkeypatch.setattr("socialserver.api.v3.image.fs_images", temp_image_fs)
+
+    monkeypatch.setattr("socialserver.util.video.fs_videos", temp_video_fs)
+    monkeypatch.setattr("socialserver.api.v3.video.fs_videos", temp_video_fs)
+
     monkeypatch.setattr("socialserver.util.auth.db", db)
     monkeypatch.setattr("socialserver.util.image.db", db)
     monkeypatch.setattr("socialserver.util.video.db", db)
