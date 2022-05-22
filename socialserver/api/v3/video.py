@@ -34,13 +34,7 @@ class Video(Resource):
         # doesn't seem very efficient.
         file_buffer = BytesIO(fs_videos.readbytes(file))
 
-        print(args)
-
         download_name = f"{video.sha256sum}.mp4"
-        if args["download"] is True:
-            print("Abc")
-
-        file_object = fs_videos.open(file, "rb")
 
         return send_file(
             file_buffer,
