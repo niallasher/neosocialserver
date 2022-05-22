@@ -29,6 +29,7 @@ class Image(Resource):
         # this is a float since we want it to actually pass this parse
         # check, so we can round it after!
         self.get_parser.add_argument("pixel_ratio", type=float, required=True)
+        self.get_parser.add_argument("download", type=bool, required=False)
 
     # kwargs.imageid contains the image identifier
     @db_session
@@ -63,7 +64,12 @@ class Image(Resource):
 
         file_object = fs_images.open(file, "rb")
 
-        return send_file(file_object, mimetype="image/jpeg")
+        download_name = f"{image.sha256sum}.jpeg"
+
+        return send_file(
+            file_object, mimetype="image/jpeg", download_name=download_name,
+            as_attachment=args["download"] is True
+        )
 
 
 class NewImage(Resource):
@@ -78,19 +84,13 @@ class NewImage(Resource):
 
         image: bytes = request.files.get("image").read()
 
-        print("Image bytes retrieved successfully!")
-
         # I think we still need this, since content length can be spoofed?
         image_size_mb = b_to_mb(len(image))
         if image_size_mb > IMAGE_MAX_REQ_SIZE_MB:
             return {"error": ErrorCodes.REQUEST_TOO_LARGE.value}, 413
 
-        print("Passed size check!")
-
         if type(image) is not bytes:
             return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
-
-        print("Passed the weird (redundant?) type check.")
 
         try:
             image_info = handle_upload(
@@ -100,9 +100,9 @@ class NewImage(Resource):
             return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
 
         return {
-            "identifier": image_info.identifier,
-            "processed": image_info.processed,
-        }, 201
+                   "identifier": image_info.identifier,
+                   "processed": image_info.processed,
+               }, 201
 
 
 class NewImageProcessBeforeReturn(Resource):
@@ -131,6 +131,6 @@ class NewImageProcessBeforeReturn(Resource):
             return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
 
         return {
-            "identifier": image_info.identifier,
-            "processed": image_info.processed,
-        }, 201
+                   "identifier": image_info.identifier,
+                   "processed": image_info.processed,
+               }, 201

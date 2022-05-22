@@ -2,7 +2,7 @@
 
 from io import BytesIO
 from flask.helpers import send_file
-from flask_restful import Resource
+from flask_restful import Resource, reqparse
 from flask import request
 from socialserver.constants import ErrorCodes, MAX_VIDEO_SIZE_MB
 from socialserver.util.file import mb_to_b, max_req_size, b_to_mb
@@ -14,8 +14,15 @@ from socialserver.util.filesystem import fs_videos
 
 
 class Video(Resource):
+    def __init__(self):
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument("download", type=bool, required=False)
+
     @db_session
     def get(self, **kwargs):
+
+        args = self.get_parser.parse_args()
+
         video = db.Video.get(identifier=kwargs.get("videoid"))
         if video is None:
             return {"error": ErrorCodes.OBJECT_NOT_FOUND.value}, 404
@@ -27,7 +34,19 @@ class Video(Resource):
         # doesn't seem very efficient.
         file_buffer = BytesIO(fs_videos.readbytes(file))
 
-        return send_file(file_buffer, download_name="video.mp4")
+        print(args)
+
+        download_name = f"{video.sha256sum}.mp4"
+        if args["download"] is True:
+            print("Abc")
+
+        file_object = fs_videos.open(file, "rb")
+
+        return send_file(
+            file_buffer,
+            download_name=download_name,
+            as_attachment=args["download"] is True,
+        )
 
 
 class NewVideo(Resource):
