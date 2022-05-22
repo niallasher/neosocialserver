@@ -4,7 +4,6 @@ import datetime
 import re
 from base64 import urlsafe_b64decode
 from math import gcd
-from os import makedirs, mkdir, path
 from types import SimpleNamespace
 from base64 import b64encode
 import PIL
@@ -13,6 +12,7 @@ from pony.orm import commit, db_session, select
 from socialserver.util.config import config
 from socialserver.util.output import console
 from socialserver.db import db
+from socialserver.util.filesystem import fs_images
 from socialserver.constants import (
     ImageTypes,
     MAX_PIXEL_RATIO,
@@ -35,17 +35,7 @@ from io import BytesIO
 from threading import Thread
 from hashlib import sha256
 
-IMAGE_DIR = config.media.images.storage_dir
-# where straight uploaded images are stored.
-# the optimized ones are stored one above it
-IMAGE_DIR_ORIGINAL = IMAGE_DIR + "/originals"
 IMAGE_QUALITY = config.media.images.quality
-
-# check if the image directory exists,
-# if it doesn't, create it
-if not path.exists(IMAGE_DIR):
-    makedirs(IMAGE_DIR)
-    console.log(f"Created image storage directory, {IMAGE_DIR}")
 
 """
     save_imageset_to_disk
@@ -59,24 +49,48 @@ if not path.exists(IMAGE_DIR):
 # annotations. Need to fix this.
 def save_images_to_disk(images: dict, image_hash: str) -> None:
     def save_with_pixel_ratio(image, filename, pixel_ratio):
+
+        # this isn't that efficient, but I'm not aware of a better way
+        # without using syspath.
+        # using the fs object is more secure, since it can't affect anything
+        # above its root directory, limiting what could happen with paths
+
+        temp_image_buffer = BytesIO()
+        # we save to the temporary image buffer since we're
+        # using pyfilesystem now, and we don't want this step
+        # to depend on any specific backend.
         image.save(
-            f"{IMAGE_DIR}/{image_hash}/{filename}_{pixel_ratio}x.jpg",
-            type="JPEG",
+            temp_image_buffer,
+            format="JPEG",
             quality=IMAGE_QUALITY,
             progressive=True,
         )
+        temp_image_buffer.seek(0)
+        # in the future this may be abstracted further.
+        fs_images.writebytes(
+            f"/{image_hash}/{filename}_{pixel_ratio}x.jpg", temp_image_buffer.read()
+        )
+        del temp_image_buffer
 
     # FIXME: this is due to some deficiencies in the testing process.
-    if path.exists(f"{IMAGE_DIR}/{image_hash}"):
+    if fs_images.exists(f"/{image_hash}"):
         return
-    mkdir(f"{IMAGE_DIR}/{image_hash}")
+
+    fs_images.makedir(f"/{image_hash}")
+
     for i in images.keys():
         if i == ImageTypes.ORIGINAL:
+            temp_image_buffer = BytesIO()
             images[i][0].save(
-                f"{IMAGE_DIR}/{image_hash}/{ImageTypes.ORIGINAL.value}.jpg",
-                type="JPEG",
+                temp_image_buffer,
+                format="JPEG",
                 quality=IMAGE_QUALITY,
             )
+            temp_image_buffer.seek(0)
+            fs_images.writebytes(
+                f"/{image_hash}/{ImageTypes.ORIGINAL.value}.jpg", temp_image_buffer.read()
+            )
+            del temp_image_buffer
         else:
             for j in images[i]:
                 save_with_pixel_ratio(j, i.value, images[i].index(j) + 1)
@@ -160,7 +174,7 @@ def resize_image_aspect_aware(image: PIL.Image, size: Tuple[int, int]) -> PIL.Im
 
 
 def calculate_largest_fit(
-    image: PIL.Image, max_size: Tuple[int, int]
+        image: PIL.Image, max_size: Tuple[int, int]
 ) -> Tuple[int, int]:
     # calculate *target* aspect ratio from max size
     divisor = gcd(max_size[0], max_size[1])
@@ -301,7 +315,8 @@ def check_image_exists(identifier: str):
 
 
 def get_image_data_url_legacy(identifier: str, image_type: ImageTypes) -> str:
-    if not check_image_exists(identifier):
+    image = db.Image.get(identifier=identifier)
+    if image is None:
         raise InvalidImageException
 
     pixel_ratio = config.legacy_api_interface.image_pixel_ratio
@@ -310,12 +325,13 @@ def get_image_data_url_legacy(identifier: str, image_type: ImageTypes) -> str:
         # no other pixel ratio variants exist!
         pixel_ratio = 1
 
-    file = f"{IMAGE_DIR}/{identifier}/{image_type.value}_{pixel_ratio}x.jpg"
+    file = f"/{image.sha256sum}/{image_type.value}_{pixel_ratio}x.jpg"
+    if not fs_images.exists(file):
+        raise InvalidImageException
 
-    # data_url = re.sub(r'^data:image/.+;base64,', '', data_url)
+    file_data = fs_images.readbytes(file)
 
-    with open(file, "rb") as image_file:
-        return "data:image/jpg;base64," + b64encode(image_file.read()).decode()
+    return "data:image/jpg;base64," + b64encode(file_data).decode()
 
 
 """
@@ -391,7 +407,7 @@ def process_image(image: Image, image_hash: str, image_id: int) -> None:
 
 @db_session
 def handle_upload(
-    image: BytesIO, userid: int, threaded: bool = True
+        image: BytesIO, userid: int, threaded: bool = True
 ) -> SimpleNamespace:
     # check that the given data is valid.
     _verify_image(image)

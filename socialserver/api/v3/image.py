@@ -3,7 +3,6 @@
 from io import BytesIO
 from flask.helpers import send_file
 from flask import request
-from os import path
 from socialserver.constants import MAX_PIXEL_RATIO, ErrorCodes, ImageTypes
 from math import ceil
 from socialserver.db import db
@@ -12,6 +11,7 @@ from socialserver.util.image import handle_upload, InvalidImageException
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header
 from socialserver.util.file import max_req_size, mb_to_b, b_to_mb
 from socialserver.util.output import console
+from socialserver.util.filesystem import fs_images
 
 from flask_restful import Resource, reqparse
 from pony.orm import db_session
@@ -56,12 +56,14 @@ class Image(Resource):
         if args["wanted_type"] == "post":
             pixel_ratio = 1
 
-        file = f"{IMAGE_DIR}/{image.sha256sum}/{wanted_image_type.value}_{pixel_ratio}x.jpg"
+        file = f"/{image.sha256sum}/{wanted_image_type.value}_{pixel_ratio}x.jpg"
 
-        if not path.exists(file):
+        if not fs_images.exists(file):
             return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404
 
-        return send_file(file)
+        file_object = fs_images.open(file, "rb")
+
+        return send_file(file_object, mimetype="image/jpeg")
 
 
 class NewImage(Resource):

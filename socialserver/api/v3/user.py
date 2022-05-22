@@ -32,11 +32,15 @@ class UserInfo(Resource):
     @db_session
     @auth_reqd
     def get(self):
+
         args = self.get_parser.parse_args()
 
-        wanted_user = db.User.get(username=args["username"])
-        if wanted_user is None:
-            return {"error": ErrorCodes.USERNAME_NOT_FOUND.value}, 404
+        if args["username"] is None:
+            wanted_user = get_user_from_auth_header()
+        else:
+            wanted_user = db.User.get(username=args["username"])
+            if wanted_user is None:
+                return {"error": ErrorCodes.USERNAME_NOT_FOUND.value}, 404
 
         return (
             format_userdata_v3(

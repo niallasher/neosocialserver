@@ -10,17 +10,10 @@ from io import BytesIO
 from socialserver.constants import VIDEO_SUPPORTED_FORMATS
 from socialserver.db import db
 from pony.orm import commit, select
-from socialserver.util.config import config
 from socialserver.util.output import console
-from os import makedirs, path, mkdir
 from tempfile import NamedTemporaryFile
 from hashlib import sha256
-
-VIDEO_DIR = config.media.videos.storage_dir
-
-if not path.exists(VIDEO_DIR):
-    makedirs(VIDEO_DIR)
-    console.log(f"Created image storage directory, {VIDEO_DIR}")
+from socialserver.util.filesystem import fs_videos
 
 
 class InvalidVideoException(Exception):
@@ -35,18 +28,18 @@ def _verify_video(video: BytesIO):
 def write_video(video: BytesIO, video_hash: str) -> None:
     console.log(f"Writing new video, hash={video_hash}")
     # FIXME: testing needs work before this is removed.
-    if path.exists(f"{VIDEO_DIR}/{video_hash}"):
+    if fs_videos.exists(f"/{video_hash}"):
         return
-    mkdir(f"{VIDEO_DIR}/{video_hash}")
-    with open(f"{VIDEO_DIR}/{video_hash}/video.mp4", "wb") as video_file:
-        video_file.write(video.read())
+
+    fs_videos.makedir(f"/{video_hash}")
+    fs_videos.writebytes(f"/{video_hash}/video.mp4", video.read())
 
 
 # screenshot the first frame of a video, so we can make thumbnails etc. out of it.
 def screenshot_video(video: BytesIO) -> BytesIO:
     with NamedTemporaryFile() as input_file:
         # it's not nice to use a file on disk, but it has benefits here.
-        # ^^ what did i mean by this?
+        # ^^ what did I mean by this?
         video.seek(0)
         input_file.write(video.read())
         # return cursor since we're sharing this buffer.
@@ -56,7 +49,7 @@ def screenshot_video(video: BytesIO) -> BytesIO:
             output, _ = video_object.output("pipe:", format="image2", vframes="1").run(
                 capture_stdout=True
             )
-        except ffmpeg.Error as e:
+        except ffmpeg.Error:
             raise InvalidVideoException
     return BytesIO(output)
 
@@ -67,6 +60,7 @@ def handle_video_upload(video: BytesIO, userid: int) -> SimpleNamespace:
 
     # we already know the user exists,
     # since we're calling this from an authenticated API route!
+    # (or at least we should be...)
     user = db.User.get(id=userid)
 
     video_hash = sha256(video.read()).hexdigest()
@@ -102,7 +96,7 @@ def handle_video_upload(video: BytesIO, userid: int) -> SimpleNamespace:
         processed=True,
     )
 
-    # save again, so that we can
+    # save again, so that we can get the id of the stored object
     commit()
 
     return SimpleNamespace(id=video_db.id, identifier=identifier)

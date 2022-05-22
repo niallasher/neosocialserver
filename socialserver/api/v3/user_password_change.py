@@ -31,7 +31,7 @@ class UserPasswordChange(Resource):
         new_password = args["new_password"]
 
         if not verify_password_valid(
-            args["old_password"], user.password_salt, user.password_hash
+                args["old_password"], user.password_salt, user.password_hash
         ):
             return {"error": ErrorCodes.INCORRECT_PASSWORD.value}, 401
 
