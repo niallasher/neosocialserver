@@ -91,6 +91,8 @@ class _ServerConfigLegacyApiInterface(BaseModel):
     deliver_full_post_images: bool
     report_legacy_version: bool
     enable_less_secure_password_change: bool
+    provide_legacy_video_thumbnails: bool
+    provide_incompatible_video_thumbnail_text_overlay: bool
 
 
 class ServerConfig(BaseModel):

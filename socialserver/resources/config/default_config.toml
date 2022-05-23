@@ -102,3 +102,11 @@ report_legacy_version = false
 # change requests from going through. best to keep this disabled unless trying to keep
 # maximum compatibility with 1.x clients.
 enable_less_secure_password_change = false
+# provide a thumbnail of a video to legacy clients that don't support videos.
+# if disabled, the file located at socialserver.resources.legacy.video_unsupported_legacy_client.jpg
+# will be served instead
+provide_legacy_video_thumbnails = false
+# this will paste a message about incompatibility over top of the thumbnail before serving it.
+# could cause a considerable performance impact if a lot of requests are coming in at once.
+# it will be pregenerated in the future.
+provide_incompatible_video_thumbnail_text_overlay = false

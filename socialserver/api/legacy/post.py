@@ -4,6 +4,7 @@ from socialserver.db import db
 from flask_restful import Resource, reqparse
 from socialserver.util.auth import get_user_object_from_token_or_abort
 from socialserver.util.config import config
+from socialserver.util.filesystem import fs_images
 from socialserver.util.image import get_image_data_url_legacy
 from socialserver.constants import (
     LegacyErrorCodes,
@@ -17,6 +18,8 @@ import re
 from pony.orm import db_session, select, desc
 from datetime import datetime
 from base64 import b64encode
+from PIL import Image
+from io import BytesIO
 
 SERVE_FULL_POST_IMAGES = config.legacy_api_interface.deliver_full_post_images
 
@@ -173,25 +176,57 @@ class LegacyPost(Resource):
                     "err": LegacyErrorCodes.INSUFFICIENT_PERMISSIONS_TO_VIEW_POST.value
                 }, 401
 
+            image_serve_type = (
+                ImageTypes.POST if SERVE_FULL_POST_IMAGES else ImageTypes.POST_PREVIEW
+            )
+
             image_data = ""
             images = post.get_images
             if len(images) >= 1:
                 # the legacy api can only handle one image per post, so we're gonna send the first one.
                 # in the future, we might stitch them together in a collage form, but for now I just want
                 # basic functionality.
-                image_serve_type = (
-                    ImageTypes.POST
-                    if SERVE_FULL_POST_IMAGES
-                    else ImageTypes.POST_PREVIEW
-                )
                 image_data = get_image_data_url_legacy(
                     images[0].identifier, image_serve_type
                 )
             elif post.video is not None:
-                # serve full. it's just 512x512 anyway.
-                image_serve_type = ImageTypes.POST
-                image_data = video_unsupported_image
-                pass
+                if config.legacy_api_interface.provide_legacy_video_thumbnails:
+                    # yeah. it's a mouthful
+                    if (
+                        not config.legacy_api_interface.provide_incompatible_video_thumbnail_text_overlay
+                    ):
+                        image_data = get_image_data_url_legacy(
+                            post.video.thumbnail.identifier, image_serve_type
+                        )
+                    else:
+                        # this should probably be pre-generated in the future,
+                        # but for now it seems pretty quick.
+                        thumbnail_data = BytesIO(
+                            fs_images.readbytes(
+                                f"/{post.video.thumbnail.sha256sum}"
+                                + f"/{ImageTypes.POST_PREVIEW.value}_"
+                                + f"{config.legacy_api_interface.image_pixel_ratio}x.jpg"
+                            )
+                        )
+                        thumbnail = Image.open(thumbnail_data)
+                        # we want the overlay to be of consistent size.
+                        # we can safely assume its aspect ratio is 1:1 because
+                        # it's cropped as such when generated.
+                        if thumbnail.width < 512 or thumbnail.width > 512:
+                            thumbnail = thumbnail.resize((512, 512))
+                        overlay = Image.open(
+                            f"{ROOT_DIR}/resources/legacy/video_unsupported_overlay.png"
+                        )
+                        thumbnail.paste(overlay, (0, 0), overlay)
+                        output_buffer = BytesIO()
+                        thumbnail.save(output_buffer, format="JPEG")
+                        output_buffer.seek(0)
+                        image_data = (
+                            "data:image/jpg;base64,"
+                            + b64encode(output_buffer.read()).decode()
+                        )
+                else:
+                    image_data = video_unsupported_image
 
             is_own_post = post.user == user
 
