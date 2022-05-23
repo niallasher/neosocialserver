@@ -199,6 +199,8 @@ class LegacyPost(Resource):
                             post.video.thumbnail.identifier, image_serve_type
                         )
                     else:
+                        # this should probably be pre-generated in the future,
+                        # but for now it seems pretty quick.
                         thumbnail_data = BytesIO(
                             fs_images.readbytes(
                                 f"/{post.video.thumbnail.sha256sum}"
