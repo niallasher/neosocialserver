@@ -56,6 +56,27 @@ def test_get_comment_feed(server_address, test_db):
     assert len(r.json()["comments"]) == 10
 
 
+def test_get_comment_feed_check_total_count(server_address, test_db):
+    post_id = create_post_with_request(test_db.access_token)
+    comment_count = 15
+    for i in range(0, comment_count):
+        create_comment_with_request(test_db.access_token, post_id)
+
+    r = requests.get(
+        f"{server_address}/api/v3/comments/feed",
+        json={
+            "count": 10,
+            "offset": 0,
+            "sort": CommentFeedSortTypes.CREATION_TIME_DESCENDING.value,
+            "post_id": post_id,
+        },
+        headers={"Authorization": f"bearer {test_db.access_token}"},
+    )
+
+    assert r.status_code == 200
+    assert r.json()["meta"]["comment_count"] == comment_count
+
+
 def test_get_comment_feed_count_higher_than_comment_count(server_address, test_db):
     post_id = create_post_with_request(test_db.access_token)
     comment_count = 15

@@ -40,6 +40,8 @@ class CommentFeed(Resource):
             if comment.user not in blocks and comment.post is post
         )
 
+        total_comment_count = comments.count()
+
         if args["sort"] == CommentFeedSortTypes.CREATION_TIME_DESCENDING.value:
             comments.order_by(desc(db.Comment.creation_time))
         elif args["sort"] == CommentFeedSortTypes.LIKE_COUNT.value:
@@ -80,6 +82,9 @@ class CommentFeed(Resource):
             )
 
         return {
-            "meta": {"reached_end": len(comments_formatted) < args["count"]},
+            "meta": {
+                "reached_end": len(comments_formatted) < args["count"],
+                "comment_count": total_comment_count,
+            },
             "comments": comments_formatted,
         }, 200
