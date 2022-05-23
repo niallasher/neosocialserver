@@ -173,25 +173,28 @@ class LegacyPost(Resource):
                     "err": LegacyErrorCodes.INSUFFICIENT_PERMISSIONS_TO_VIEW_POST.value
                 }, 401
 
+            image_serve_type = (
+                ImageTypes.POST if SERVE_FULL_POST_IMAGES else ImageTypes.POST_PREVIEW
+            )
+
             image_data = ""
             images = post.get_images
             if len(images) >= 1:
                 # the legacy api can only handle one image per post, so we're gonna send the first one.
                 # in the future, we might stitch them together in a collage form, but for now I just want
                 # basic functionality.
-                image_serve_type = (
-                    ImageTypes.POST
-                    if SERVE_FULL_POST_IMAGES
-                    else ImageTypes.POST_PREVIEW
-                )
                 image_data = get_image_data_url_legacy(
                     images[0].identifier, image_serve_type
                 )
             elif post.video is not None:
+                if config.legacy_api_interface.provide_legacy_video_thumbnails:
+                    image_data = get_image_data_url_legacy(
+                        post.video.thumbnail.identifier, image_serve_type
+                    )
                 # serve full. it's just 512x512 anyway.
-                image_serve_type = ImageTypes.POST
-                image_data = video_unsupported_image
-                pass
+                else:
+                    image_serve_type = ImageTypes.POST
+                    image_data = video_unsupported_image
 
             is_own_post = post.user == user
 
