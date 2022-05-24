@@ -27,7 +27,7 @@ from socialserver.util.config import config
 class UserInfo(Resource):
     def __init__(self):
         self.get_parser = reqparse.RequestParser()
-        self.get_parser.add_argument("username", type=str, required=True)
+        self.get_parser.add_argument("username", type=str)
 
     @db_session
     @auth_reqd
