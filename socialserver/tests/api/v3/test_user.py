@@ -288,6 +288,18 @@ def test_get_user_info_invalid_username(test_db, server_address):
     assert info_req.json()["error"] == ErrorCodes.USERNAME_NOT_FOUND.value
 
 
+def test_get_user_info_missing_data(test_db, server_address):
+    info_req = requests.get(
+        f"{server_address}/api/v3/user/info",
+        json={},
+        headers={"Authorization": f"Bearer {test_db.access_token}"},
+    )
+
+    assert info_req.status_code == 200
+    # no username given should provide us with our own info.
+    assert info_req.json()["username"] == test_db.username
+
+
 def test_update_profile_pic(test_db, server_address, image_data_binary):
     # upload a new image
     image_identifier = requests.post(
