@@ -21,6 +21,7 @@ from socialserver.api.v3.user import User, UserInfo
 from socialserver.api.v3.username_available import UsernameAvailable
 from socialserver.api.v3.feed import PostFeed
 from socialserver.api.v3.post import Post
+from socialserver.api.v3.post_like import PostLike
 from socialserver.api.v3.image import Image, NewImage, NewImageProcessBeforeReturn
 from socialserver.api.v3.block import Block
 from socialserver.api.v3.follow import Follow
@@ -113,6 +114,7 @@ def create_app():
     api.add_resource(Post, "/api/v3/posts/single")
     api.add_resource(PostFeed, "/api/v3/posts/feed")
     api.add_resource(Report, "/api/v3/posts/report")
+    api.add_resource(PostLike, "/api/v3/posts/like")
 
     api.add_resource(Comment, "/api/v3/comments")
     api.add_resource(CommentFeed, "/api/v3/comments/feed")
