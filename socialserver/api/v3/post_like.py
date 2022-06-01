@@ -27,7 +27,7 @@ class PostLike(Resource):
         if post is None:
             return {"error": ErrorCodes.POST_NOT_FOUND.value}, 404
 
-        existing_like = db.PostLike.get(comment=post, user=user)
+        existing_like = db.PostLike.get(post=post, user=user)
         if existing_like is not None:
             return {"error": ErrorCodes.OBJECT_ALREADY_LIKED.value}, 400
 
