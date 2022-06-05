@@ -70,7 +70,7 @@ class CommentFeed(Resource):
                         "creation_time": comment.creation_time.timestamp(),
                         "like_count": len(comment.likes),
                     },
-                    "user": format_userdata_v3(comment.user),
+                    "user": format_userdata_v3(comment.user, requesting_user_db),
                     "meta": {
                         "user_likes_comment": comment.user == requesting_user_db,
                         "user_owns_comment": db.CommentLike.get(

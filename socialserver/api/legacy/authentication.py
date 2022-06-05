@@ -52,7 +52,7 @@ class LegacyAuthentication(Resource):
             # for whatever reason, this was what API v1 did.
             return {"err": LegacyErrorCodes.PASSWORD_DAMAGED.value}, 401
 
-        if user.totp is not None:
+        if user.totp is not None and user.totp.confirmed is True:
             if args["totp"] == "" or args["totp"] is None:
                 return {"err": LegacyErrorCodes.TOTP_REQUIRED.value}, 401
             try:

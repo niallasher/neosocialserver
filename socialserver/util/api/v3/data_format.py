@@ -1,9 +1,10 @@
 #  Copyright (c) Niall Asher 2022
 from socialserver.constants import PostAdditionalContentTypes
+from socialserver.db import db
 
 
 def format_userdata_v3(
-    user_object, include_header=False, include_bio=False, include_follower_info=False
+    user_object, current_user_object, include_header=False, include_bio=False, include_follower_info=False
 ):
     pfp_identifier = None
     pfp_blur_hash = None
@@ -17,6 +18,7 @@ def format_userdata_v3(
         "username": user_object.username,
         "attributes": user_object.account_attributes,
         "profile_picture": {"identifier": pfp_identifier, "blur_hash": pfp_blur_hash},
+        "followed": db.Follow.get(user=current_user_object, following=user_object) is not None
     }
 
     if include_header:

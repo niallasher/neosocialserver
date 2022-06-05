@@ -35,8 +35,10 @@ class UserInfo(Resource):
 
         args = self.get_parser.parse_args()
 
+        user = get_user_from_auth_header()
+
         if args["username"] is None:
-            wanted_user = get_user_from_auth_header()
+            wanted_user = user
         else:
             wanted_user = db.User.get(username=args["username"])
             if wanted_user is None:
@@ -45,6 +47,7 @@ class UserInfo(Resource):
         return (
             format_userdata_v3(
                 wanted_user,
+                user,
                 include_header=True,
                 include_bio=True,
                 include_follower_info=True,

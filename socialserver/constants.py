@@ -191,6 +191,8 @@ class ErrorCodes(Enum):
     OBJECT_NOT_FOUND = 63
     IMAGE_NOT_PROCESSED = 64
     POST_NOT_PROCESSED = 65
+    OPTION_UNIMPLEMENTED = 66
+    INVALID_LIST_TYPE = 67
 
 
 """
@@ -409,3 +411,26 @@ class PostAdditionalContentTypes(Enum):
     IMAGES = 1
     VIDEO = 2
     POLL = 3
+
+
+"""
+    types of sorts to apply
+"""
+
+
+class FollowListSortTypes(Enum):
+    USERNAME_ALPHABETICAL = 0
+    DISPLAY_NAME_ALPHABETICAL = 1
+    AGE_ASCENDING = 2
+    AGE_DESCENDING = 3
+
+
+"""
+    type of follow list to get
+"""
+
+
+class FollowListListTypes(Enum):
+    FOLLOWERS = 0
+    FOLLOWING = 1
+
