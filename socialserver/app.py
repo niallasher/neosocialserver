@@ -25,6 +25,7 @@ from socialserver.api.v3.post_like import PostLike
 from socialserver.api.v3.image import Image, NewImage, NewImageProcessBeforeReturn
 from socialserver.api.v3.block import Block
 from socialserver.api.v3.follow import Follow
+from socialserver.api.v3.follow_list import FollowList
 from socialserver.api.v3.two_factor import (
     TwoFactorAuthentication,
     TwoFactorAuthenticationVerification,
@@ -110,6 +111,7 @@ def create_app():
     api.add_resource(TwoFactorAuthenticationVerification, "/api/v3/user/2fa/verify")
     api.add_resource(Follow, "/api/v3/user/follow")
     api.add_resource(Block, "/api/v3/user/block")
+    api.add_resource(FollowList, "/api/v3/user/follow_list")
 
     api.add_resource(Post, "/api/v3/posts/single")
     api.add_resource(PostFeed, "/api/v3/posts/feed")
