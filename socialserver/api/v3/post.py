@@ -163,7 +163,7 @@ class Post(Resource):
 
         return {
             "post": format_post_v3(wanted_post),
-            "user": format_userdata_v3(wanted_post.user, user),
+            "user": format_userdata_v3(wanted_post.user),
             "meta": {
                 "user_likes_post": user_has_liked_post,
                 "user_owns_post": user_owns_post,

@@ -107,7 +107,7 @@ class PostFeed(Resource):
             posts.append(
                 {
                     "post": format_post_v3(post),
-                    "user": format_userdata_v3(post.user, requesting_user_db),
+                    "user": format_userdata_v3(post.user),
                     "meta": {
                         "user_likes_post": user_has_liked_post,
                         "user_owns_post": user_owns_post,
