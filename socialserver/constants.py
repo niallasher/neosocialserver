@@ -409,3 +409,20 @@ class PostAdditionalContentTypes(Enum):
     IMAGES = 1
     VIDEO = 2
     POLL = 3
+
+
+""" 
+    sort types for follow lists
+"""
+
+
+class FollowListSortTypes:
+    AGE_ASCENDING = 0
+    AGE_DESCENDING = 1
+
+
+# Exceptions
+
+# pretty self-explanatory
+class UserNotFoundException(Exception):
+    pass
