@@ -10,7 +10,19 @@ from pony.orm import select, desc
 def get_follow_info_for_user(user_object: db.User, count: int, offset: int, sort_type: int,
                              list_type: int) -> (dict, int):
 
-    query = select(fe for fe in user_object.followers)
+    def extract_correct_userdata(fe):
+        if is_following_list:
+            return format_userdata_v3(fe.following)
+        else:
+            return format_userdata_v3(fe.user)
+        pass
+
+    is_following_list = False
+    if list_type == FollowListListTypes.FOLLOWERS:
+        query = select(fe for fe in user_object.followers)
+    elif list_type == FollowListListTypes.FOLLOWING:
+        is_following_list = True
+        query = select(fe for fe in user_object.following)
 
     # sort the query based on what the user's looking for.
     if sort_type == FollowListSortTypes.AGE_ASCENDING.value:
@@ -29,9 +41,7 @@ def get_follow_info_for_user(user_object: db.User, count: int, offset: int, sort
 
     user_objects = []
     for fe in query:
-        user_objects.append(
-            format_userdata_v3(fe.user)
-        )
+        user_objects.append(extract_correct_userdata(fe))
 
     return {
                "meta": {
