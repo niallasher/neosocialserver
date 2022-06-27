@@ -36,3 +36,11 @@ Run `pipenv run tests`. Or `pytest socialserver`.
   run ```python3 -m socialserver mk-user```. This will allow you to create a user with the administrator attribute.
     - If you're using the Pipenv setup, you'll want to use pipenv shell first, to ensure all dependencies are available.
     - It's a pretty sketchy little script, and will be replaced in the future.
+
+
+### Important stuff that needs doing sometime
+
+- The whole server needs to migrate away from using ``reqparse``
+  - ``reqparse`` doesn't seem to work properly with ``werkzeug >= 2.1``
+  - It seems to be EOL and using another solution would be preferable to a forked version.
+  - Maybe marshmallow?
