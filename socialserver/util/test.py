@@ -151,7 +151,6 @@ def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -
     monkeypatch.setattr("socialserver.api.v3.block.db", db)
     monkeypatch.setattr("socialserver.api.v3.feed.db", db)
     monkeypatch.setattr("socialserver.api.v3.follow.db", db)
-    monkeypatch.setattr("socialserver.api.v3.follow_list.db", db)
     monkeypatch.setattr("socialserver.api.v3.image.db", db)
     monkeypatch.setattr("socialserver.api.v3.post.db", db)
     monkeypatch.setattr("socialserver.api.v3.post_like.db", db)
