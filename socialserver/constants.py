@@ -416,10 +416,19 @@ class PostAdditionalContentTypes(Enum):
 """
 
 
-class FollowListSortTypes:
+class FollowListSortTypes(Enum):
     AGE_ASCENDING = 0
     AGE_DESCENDING = 1
 
+
+"""
+    the type of follow(er||ing) information to get
+    internal. no need for the api to utilize this!
+"""
+
+class FollowListListTypes(Enum):
+    FOLLOWERS = 0
+    FOLLOWING = 1
 
 # Exceptions
 
