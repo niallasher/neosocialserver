@@ -145,6 +145,7 @@ def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -
     monkeypatch.setattr("socialserver.util.video.fs_videos", temp_video_fs)
     monkeypatch.setattr("socialserver.api.v3.video.fs_videos", temp_video_fs)
 
+    monkeypatch.setattr("socialserver.util.user.db", db)
     monkeypatch.setattr("socialserver.util.api.v3.follow_info.db", db)
 
     monkeypatch.setattr("socialserver.util.auth.db", db)
