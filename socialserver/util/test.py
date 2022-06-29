@@ -289,5 +289,4 @@ def follow_user_with_request(auth_token: str, username: str):
         json={"username": username},
         headers={"Authorization": f"Bearer {auth_token}"},
     )
-    print(r.json())
     assert r.status_code == 201
