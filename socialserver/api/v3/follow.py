@@ -3,9 +3,12 @@
 from datetime import datetime
 from flask_restful import Resource, reqparse
 from socialserver.db import db
+from socialserver.util.api.v3.error_format import format_error_return_v3
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header
-from socialserver.constants import ErrorCodes
+from socialserver.constants import ErrorCodes, UserNotFoundException
 from pony.orm import db_session
+
+from socialserver.util.user import get_user_from_db
 
 
 class Follow(Resource):
@@ -25,17 +28,19 @@ class Follow(Resource):
 
         requesting_user_db = get_user_from_auth_header()
 
-        user_to_follow = db.User.get(username=args["username"])
-        if user_to_follow is None:
-            return {"error": ErrorCodes.USERNAME_NOT_FOUND.value}, 404
+        try:
+            user_to_follow = get_user_from_db(username=args.username)
+        except UserNotFoundException:
+            return format_error_return_v3(ErrorCodes.USERNAME_NOT_FOUND, 404)
+
         if user_to_follow is requesting_user_db:
-            return {"error": ErrorCodes.CANNOT_FOLLOW_SELF.value}, 400
+            return format_error_return_v3(ErrorCodes.CANNOT_FOLLOW_SELF, 400)
 
         existing_follow = db.Follow.get(
             user=requesting_user_db, following=user_to_follow
         )
         if existing_follow is not None:
-            return {"error": ErrorCodes.FOLLOW_ALREADY_EXISTS.value}, 400
+            return format_error_return_v3(ErrorCodes.FOLLOW_ALREADY_EXISTS, 400)
 
         db.Follow(
             user=requesting_user_db,
@@ -52,16 +57,19 @@ class Follow(Resource):
 
         requesting_user_db = get_user_from_auth_header()
 
-        user_to_unfollow = db.User.get(username=args["username"])
+        try:
+            user_to_unfollow = get_user_from_db(username=args.username)
+        except UserNotFoundException:
+            return format_error_return_v3(ErrorCodes.USERNAME_NOT_FOUND, 404)
         if user_to_unfollow is None:
-            return {"error": ErrorCodes.USERNAME_NOT_FOUND.value}, 404
+            return format_error_return_v3(ErrorCodes.USERNAME_NOT_FOUND, 404)
 
         existing_follow = db.Follow.get(
             user=requesting_user_db, following=user_to_unfollow
         )
 
         if existing_follow is None:
-            return {"error": ErrorCodes.CANNOT_FIND_FOLLOW_ENTRY.value}, 404
+            return format_error_return_v3(ErrorCodes.CANNOT_FIND_FOLLOW_ENTRY, 404)
 
         existing_follow.delete()
         return {}, 204
