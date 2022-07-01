@@ -69,7 +69,7 @@ class Image(Resource):
 
         return send_file(
             file_object, mimetype="image/jpeg", download_name=download_name,
-            as_attachment=args["download"] is True
+            as_attachment=args.download is True
         )
 
 
@@ -112,7 +112,7 @@ class NewImageProcessBeforeReturn(Resource):
     @auth_reqd
     def post(self):
         if request.files.get("image") is None:
-            return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
+            return format_error_return_v3(ErrorCodes.INVALID_IMAGE_PACKAGE, 400)
 
         image: bytes = request.files.get("image").read()
 
