@@ -2,6 +2,7 @@
 
 from socialserver.constants import ErrorCodes
 from socialserver.db import db
+from socialserver.util.api.v3.error_format import format_error_return_v3
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header
 from flask_restful import reqparse, Resource
 from pony.orm import db_session, commit, select
@@ -23,13 +24,13 @@ class PostLike(Resource):
 
         user = get_user_from_auth_header()
 
-        post = db.Post.get(id=args["post_id"])
+        post = db.Post.get(id=args.post_id)
         if post is None:
-            return {"error": ErrorCodes.POST_NOT_FOUND.value}, 404
+            return format_error_return_v3(ErrorCodes.POST_NOT_FOUND, 404)
 
         existing_like = db.PostLike.get(post=post, user=user)
         if existing_like is not None:
-            return {"error": ErrorCodes.OBJECT_ALREADY_LIKED.value}, 400
+            return format_error_return_v3(ErrorCodes.OBJECT_ALREADY_LIKED, 400)
 
         db.PostLike(user=user, post=post, creation_time=datetime.now())
 
@@ -49,13 +50,13 @@ class PostLike(Resource):
 
         user = get_user_from_auth_header()
 
-        post = db.Post.get(id=args["post_id"])
+        post = db.Post.get(id=args.post_id)
         if post is None:
-            return {"error": ErrorCodes.POST_NOT_FOUND.value}, 404
+            return format_error_return_v3(ErrorCodes.POST_NOT_FOUND, 404)
 
         existing_like = db.PostLike.get(post=post, user=user)
         if existing_like is None:
-            return {"error": ErrorCodes.OBJECT_NOT_LIKED.value}, 400
+            return format_error_return_v3(ErrorCodes.OBJECT_NOT_LIKED, 400)
 
         existing_like.delete()
 
