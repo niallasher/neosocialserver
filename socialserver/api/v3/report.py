@@ -9,6 +9,7 @@ from socialserver.constants import (
     ReportReasons,
 )
 from socialserver.db import db
+from socialserver.util.api.v3.error_format import format_error_return_v3
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header
 from socialserver.util.config import config
 from pony.orm import db_session
@@ -41,11 +42,11 @@ class Report(Resource):
         user = get_user_from_auth_header()
 
         if not (user.is_admin or user.is_moderator):
-            return {"error": ErrorCodes.USER_NOT_MODERATOR_OR_ADMIN.value}, 401
+            return format_error_return_v3(ErrorCodes.USER_NOT_MODERATOR_OR_ADMIN, 401)
 
-        wanted_post = db.Post.get(id=args["post_id"])
+        wanted_post = db.Post.get(id=args.post_id)
         if wanted_post is None:
-            return {"error": ErrorCodes.POST_NOT_FOUND.value}, 404
+            return format_error_return_v3(ErrorCodes.POST_NOT_FOUND, 404)
 
         reports = []
         for r in wanted_post.reports:
@@ -72,13 +73,13 @@ class Report(Resource):
 
         reporting_user_db = get_user_from_auth_header()
 
-        post_to_be_reported = db.Post.get(id=args["post_id"])
+        post_to_be_reported = db.Post.get(id=args.post_id)
         if post_to_be_reported is None:
-            return {"error": ErrorCodes.POST_NOT_FOUND.value}, 404
+            return format_error_return_v3(ErrorCodes.POST_NOT_FOUND, 404)
 
         post_belongs_to_user = post_to_be_reported in reporting_user_db.posts
         if post_belongs_to_user:
-            return {"error": ErrorCodes.CANNOT_REPORT_OWN_POST.value}, 400
+            return format_error_return_v3(ErrorCodes.CANNOT_REPORT_OWN_POST, 400)
 
         existing_report = db.PostReport.get(
             reporter=reporting_user_db, post=post_to_be_reported
@@ -91,7 +92,7 @@ class Report(Resource):
             if config.posts.silent_fail_on_double_report:
                 return {}, 201
             else:
-                return {"error": ErrorCodes.POST_ALREADY_REPORTED.value}, 400
+                return format_error_return_v3(ErrorCodes.POST_ALREADY_REPORTED, 400)
 
         # append turns the args into an array, that is appended
         # to with each duplicate, hence it being a list
@@ -102,13 +103,11 @@ class Report(Resource):
         # outdated list of report reasons.
         for reason in post_report_reasons:
             if reason not in [e.value for e in ReportReasons]:
-                return {"error": ErrorCodes.POST_REPORT_REASON_INVALID.value}, 400
+                return format_error_return_v3(ErrorCodes.POST_REPORT_REASON_INVALID, 400)
 
         if args["supplemental_info"] is not None:
             if len(args["supplemental_info"]) > REPORT_SUPPLEMENTARY_INFO_MAX_LEN:
-                return {
-                    "error": ErrorCodes.POST_REPORT_SUPPLEMENTAL_INFO_TOO_LONG.value
-                }, 400
+                return format_error_return_v3(ErrorCodes.POST_REPORT_SUPPLEMENTAL_INFO_TOO_LONG, 400)
 
         db.PostReport(
             active=True,
@@ -116,8 +115,8 @@ class Report(Resource):
             post=post_to_be_reported,
             creation_time=datetime.utcnow(),
             report_reason=post_report_reasons,
-            supplementary_info=args["supplemental_info"]
-            if args["supplemental_info"] is not None
+            supplementary_info=args.supplemental_info
+            if args.supplemental_info is not None
             else "",
         )
 
@@ -132,12 +131,12 @@ class Report(Resource):
 
         # only a moderator or admin should be able to influence this
         if True not in [modifying_user_db.is_moderator, modifying_user_db.is_admin]:
-            return {"error": ErrorCodes.USER_NOT_MODERATOR_OR_ADMIN.value}, 403
+            return format_error_return_v3(ErrorCodes.USER_NOT_MODERATOR_OR_ADMIN, 403)
 
         existing_report = db.PostReport.get(id=args["report_id"])
         if existing_report is None:
-            return {"error": ErrorCodes.REPORT_NOT_FOUND.value}, 404
+            return format_error_return_v3(ErrorCodes.REPORT_NOT_FOUND, 404)
 
-        existing_report.active = args["mark_active"]
+        existing_report.active = args.mark_active
 
-        return {"active": args["mark_active"]}, 201
+        return {"active": args.mark_active}, 201
