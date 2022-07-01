@@ -2,6 +2,7 @@
 
 from flask_restful import Resource, reqparse
 from socialserver.db import db
+from socialserver.util.api.v3.error_format import format_error_return_v3
 from socialserver.util.auth import (
     auth_reqd,
     get_user_from_auth_header,
@@ -39,12 +40,12 @@ class TwoFactorAuthentication(Resource):
         user = get_user_from_auth_header()
 
         if not verify_password_valid(
-            args["password"], user.password_salt, user.password_hash
+            args.password, user.password_salt, user.password_hash
         ):
-            return {"error": ErrorCodes.INCORRECT_PASSWORD.value}, 401
+            return format_error_return_v3(ErrorCodes.INCORRECT_PASSWORD, 401)
 
         if user.totp is None:
-            return {"error": ErrorCodes.TOTP_NOT_ACTIVE.value}, 400
+            return format_error_return_v3(ErrorCodes.TOTP_NOT_ACTIVE, 400)
 
         totp = user.totp
         user.totp = None
@@ -60,9 +61,9 @@ class TwoFactorAuthentication(Resource):
         user = get_user_from_auth_header()
 
         if not verify_password_valid(
-            args["password"], user.password_salt, user.password_hash
+            args.password, user.password_salt, user.password_hash
         ):
-            return {"error": ErrorCodes.INCORRECT_PASSWORD.value}, 401
+            return format_error_return_v3(ErrorCodes.INCORRECT_PASSWORD, 401)
 
         # handle existing totp. we only want to fail if it's confirmed!
         if user.totp is not None:
@@ -76,7 +77,7 @@ class TwoFactorAuthentication(Resource):
                 # if the code is confirmed, it's active, and we don't want
                 # to overwrite it, so we fail out with an error
                 # (any client should explicitly remove it first!)
-                return {"error": ErrorCodes.TOTP_ALREADY_ACTIVE.value}, 400
+                return format_error_return_v3(ErrorCodes.TOTP_ALREADY_ACTIVE, 400)
 
         secret = generate_totp_secret()
         name = user.username
@@ -130,7 +131,7 @@ class TwoFactorAuthenticationVerification(Resource):
         if datetime.utcnow() > user.totp.creation_time + timedelta(
             seconds=config.auth.totp.unconfirmed_expiry_time
         ):
-            return {"error": ErrorCodes.TOTP_NOT_ACTIVE.value}, 400
+            return format_error_return_v3(ErrorCodes.TOTP_NOT_ACTIVE, 400)
 
         try:
             check_totp_valid(args["totp"], user)
@@ -139,7 +140,7 @@ class TwoFactorAuthenticationVerification(Resource):
         # a successful check_totp_valid call, and the first time that
         # can happen is a *successful* verification!
         except TotpInvalidException:
-            return {"error": ErrorCodes.TOTP_INCORRECT.value}, 400
+            return format_error_return_v3(ErrorCodes.TOTP_INCORRECT, 400)
 
         user.totp.confirmed = True
         return {}, 201
