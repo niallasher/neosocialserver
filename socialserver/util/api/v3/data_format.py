@@ -1,9 +1,10 @@
 #  Copyright (c) Niall Asher 2022
 from socialserver.constants import PostAdditionalContentTypes
+from socialserver.db import db
 
 
 def format_userdata_v3(
-    user_object, include_header=False, include_bio=False, include_follower_info=False
+    user_object, current_user=None, include_header=False, include_bio=False, include_follower_info=False
 ):
     pfp_identifier = None
     pfp_blur_hash = None
@@ -38,6 +39,11 @@ def format_userdata_v3(
     if include_follower_info:
         userdata["follower_count"] = user_object.followers.count()
         userdata["following_count"] = user_object.following.count()
+
+    if current_user is not None:
+        existing_follow = db.Follow.get(user=current_user, following=user_object)
+        print(existing_follow)
+        userdata["followed"] = existing_follow is not None
 
     return userdata
 

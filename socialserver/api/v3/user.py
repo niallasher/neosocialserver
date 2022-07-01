@@ -35,6 +35,8 @@ class UserInfo(Resource):
     @auth_reqd
     def get(self):
 
+        user = get_user_from_auth_header()
+
         args = self.get_parser.parse_args()
 
         if args.username is None:
@@ -48,6 +50,7 @@ class UserInfo(Resource):
         return (
             format_userdata_v3(
                 wanted_user,
+                current_user=user,
                 include_header=True,
                 include_bio=True,
                 include_follower_info=True,
