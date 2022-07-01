@@ -13,6 +13,7 @@ from socialserver.constants import (
     PostAdditionalContentTypes,
 )
 from socialserver.util.api.v3.data_format import format_post_v3, format_userdata_v3
+from socialserver.util.api.v3.error_format import format_error_return_v3
 from socialserver.util.auth import get_user_from_auth_header, auth_reqd
 
 
@@ -43,9 +44,9 @@ class Post(Resource):
         # we don't limit the characters used as of now (except for newlines). might look
         # into this later? probably not needed, but unicode can be weird.
 
-        text_content = args["text_content"]
+        text_content = args.text_content
         if len(text_content) > POST_MAX_LEN:
-            return {"error": ErrorCodes.POST_TOO_LONG.value}, 400
+            return format_error_return_v3(ErrorCodes.POST_TOO_LONG, 400)
 
         # strip out any newlines. the client shouldn't allow users to add
         # them for UX purposes!
@@ -60,14 +61,14 @@ class Post(Resource):
         video = None
         image_ids = []
 
-        if args["images"] is not None:
+        if args.images is not None:
             images = []
-            referenced_images = args["images"]
+            referenced_images = args.images
             # we don't want people making giant
             # image galleries in a post. !! SHOULD ALSO
             # BE ENFORCED CLIENT SIDE FOR UX !!
             if len(referenced_images) > MAX_IMAGES_PER_POST:
-                return {"error": ErrorCodes.POST_TOO_MANY_IMAGES.value}, 400
+                return format_error_return_v3(ErrorCodes.POST_TOO_MANY_IMAGES, 400)
             # we replace each image with a reference to it in the database,
             # for storage
             for image_identifier in referenced_images:
@@ -75,14 +76,14 @@ class Post(Resource):
                 if image.processed is False:
                     processed = False
                 if image is None:
-                    return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404
+                    return format_error_return_v3(ErrorCodes.IMAGE_NOT_FOUND, 404)
                 images.append(image)
                 image_ids.append(image.id)
-        elif args["video"] is not None:
-            video = db.Video.get(identifier=args["video"])
+        elif args.video is not None:
+            video = db.Video.get(identifier=args.video)
             if video is None:
-                return {"error": ErrorCodes.OBJECT_NOT_FOUND.value}, 404
-            video = args["video"]
+                return format_error_return_v3(ErrorCodes.OBJECT_NOT_FOUND, 404)
+            video = args.video
 
         # checking for hashtags in the post content
         # hashtags can be 1 to 12 chars long and only alphanumeric.
@@ -136,7 +137,7 @@ class Post(Resource):
 
         wanted_post = db.Post.get(id=args["post_id"])
         if wanted_post is None:
-            return {"error": ErrorCodes.POST_NOT_FOUND.value}, 404
+            return format_error_return_v3(ErrorCodes.POST_NOT_FOUND, 404)
 
         # we don't want to show under moderation posts to normal users,
         # even if they explicitly request them (getting posts in a feed
@@ -147,15 +148,15 @@ class Post(Resource):
         if wanted_post.under_moderation is True and not (
             user.is_admin or user.is_moderator
         ):
-            return {"error": ErrorCodes.POST_NOT_FOUND.value}, 404
+            return format_error_return_v3(ErrorCodes.POST_NOT_FOUND, 404)
 
         # if you've blocked a user, we don't want you to see their posts.
         if wanted_post.user in user.blocked_users:
-            return {"error": ErrorCodes.USER_BLOCKED.value}, 400
+            return format_error_return_v3(ErrorCodes.USER_BLOCKED, 400)
 
         # if the post hasn't been processed, we're not returning it to the user.
         if wanted_post.processed is False:
-            return {"error": ErrorCodes.POST_NOT_PROCESSED.value}, 404
+            return format_error_return_v3(ErrorCodes.POST_NOT_PROCESSED, 404)
 
         user_has_liked_post = db.PostLike.get(user=user, post=wanted_post) is not None
 
@@ -177,12 +178,12 @@ class Post(Resource):
 
         user = get_user_from_auth_header()
 
-        post = db.Post.get(id=args["post_id"])
+        post = db.Post.get(id=args.post_id)
         if post is None:
-            return {"error": ErrorCodes.POST_NOT_FOUND.value}, 404
+            return format_error_return_v3(ErrorCodes.POST_NOT_FOUND, 404)
 
         if not post.user == user:
-            return {"error": ErrorCodes.OBJECT_NOT_OWNED_BY_USER.value}, 401
+            return format_error_return_v3(ErrorCodes.OBJECT_NOT_OWNED_BY_USER, 401)
 
         post.delete()
 
