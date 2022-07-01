@@ -4,6 +4,7 @@ from flask_restful import Resource, reqparse
 from socialserver.constants import MAX_FEED_GET_COUNT, ErrorCodes, CommentFeedSortTypes
 from socialserver.db import db
 from socialserver.util.api.v3.data_format import format_userdata_v3
+from socialserver.util.api.v3.error_format import format_error_return_v3
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header
 from pony.orm import db_session, select, desc, count
 
@@ -24,12 +25,12 @@ class CommentFeed(Resource):
 
         requesting_user_db = get_user_from_auth_header()
 
-        post = db.Post.get(id=args["post_id"])
+        post = db.Post.get(id=args.post_id)
         if post is None:
-            return {"error": ErrorCodes.POST_NOT_FOUND.value}, 404
+            return format_error_return_v3(ErrorCodes.POST_NOT_FOUND, 404)
 
-        if args["count"] > MAX_FEED_GET_COUNT:
-            return {"error": ErrorCodes.FEED_GET_COUNT_TOO_HIGH.value}, 400
+        if args.count > MAX_FEED_GET_COUNT:
+            return format_error_return_v3(ErrorCodes.FEED_GET_COUNT_TOO_HIGH, 400)
 
         # we don't want to show comments from blocked users
         blocks = select(b.blocking for b in db.Block if b.user == requesting_user_db)
@@ -42,14 +43,14 @@ class CommentFeed(Resource):
 
         total_comment_count = comments.count()
 
-        if args["sort"] == CommentFeedSortTypes.CREATION_TIME_DESCENDING.value:
+        if args.sort == CommentFeedSortTypes.CREATION_TIME_DESCENDING.value:
             comments.order_by(desc(db.Comment.creation_time))
-        elif args["sort"] == CommentFeedSortTypes.LIKE_COUNT.value:
+        elif args.sort == CommentFeedSortTypes.LIKE_COUNT.value:
             comments.order_by(desc(count(db.Comment.likes)))
         else:
-            return {"error": ErrorCodes.INVALID_SORT_TYPE.value}, 400
+            return format_error_return_v3(ErrorCodes.INVALID_SORT_TYPE, 400)
 
-        comments = comments.limit(args["count"], offset=args["offset"])
+        comments = comments.limit(args.count, offset=args.offset)
 
         comments_formatted = []
         for comment in comments:
