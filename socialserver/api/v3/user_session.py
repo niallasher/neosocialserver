@@ -6,6 +6,7 @@ from flask_restful import Resource, reqparse
 from pony.orm import db_session
 from flask import request
 from socialserver.constants import ErrorCodes
+from socialserver.util.api.v3.error_format import format_error_return_v3
 from socialserver.util.auth import (
     generate_key,
     get_ip_from_request,
@@ -40,7 +41,7 @@ class UserSession(Resource):
         )
 
         if session is None:
-            return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
+            return format_error_return_v3(ErrorCodes.TOKEN_INVALID, 401)
 
         return (
             {
@@ -59,33 +60,33 @@ class UserSession(Resource):
     def post(self):
         args = self.post_parser.parse_args()
 
-        user = db.User.get(username=args["username"])
+        user = db.User.get(username=args.username)
         if user is None:
-            return {"error": ErrorCodes.USERNAME_NOT_FOUND.value}, 404
+            return format_error_return_v3(ErrorCodes.USERNAME_NOT_FOUND, 404)
 
         if not verify_password_valid(
-            args["password"], user.password_salt, user.password_hash
+            args.password, user.password_salt, user.password_hash
         ):
-            return {"error": ErrorCodes.INCORRECT_PASSWORD.value}, 401
+            return format_error_return_v3(ErrorCodes.INCORRECT_PASSWORD, 401)
 
         if config.auth.registration.approval_required:
             if user.account_approved is not True:
-                return {"error": ErrorCodes.ACCOUNT_NOT_APPROVED.value}, 401
+                return format_error_return_v3(ErrorCodes.ACCOUNT_NOT_APPROVED, 401)
 
         # if the user has totp, and hasn't specified one, send back an error
         # telling the client they'll need to supply it.
         if user.totp is not None and user.totp.confirmed:
             # default value for the unspecified arg is an
             # empty string, hence this and not args['totp'] is None!
-            if args["totp"] == "" or args["totp"] is None:
-                return {"error": ErrorCodes.TOTP_REQUIRED.value}, 400
+            if args.totp == "" or args.totp is None:
+                return format_error_return_v3(ErrorCodes.TOTP_REQUIRED, 400)
 
             try:
-                check_totp_valid(args["totp"], user)
+                check_totp_valid(args.totp, user)
             except TotpExpendedException:
-                return {"error": ErrorCodes.TOTP_EXPENDED.value}, 401
+                return format_error_return_v3(ErrorCodes.TOTP_EXPENDED, 401)
             except TotpInvalidException:
-                return {"error": ErrorCodes.TOTP_INCORRECT.value}, 401
+                return format_error_return_v3(ErrorCodes.TOTP_INCORRECT, 401)
 
         secret = generate_key()
 
@@ -110,7 +111,7 @@ class UserSession(Resource):
             )
         )
         if session is None:
-            return {"error": ErrorCodes.TOKEN_INVALID.value}, 401
+            return format_error_return_v3(ErrorCodes.TOKEN_INVALID, 401)
 
         session.delete()
         return {}, 201
