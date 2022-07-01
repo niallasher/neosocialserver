@@ -6,6 +6,7 @@ from flask import request
 from socialserver.constants import MAX_PIXEL_RATIO, ErrorCodes, ImageTypes
 from math import ceil
 from socialserver.db import db
+from socialserver.util.api.v3.error_format import format_error_return_v3
 from socialserver.util.config import config
 from socialserver.util.image import handle_upload, InvalidImageException
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header
@@ -38,29 +39,29 @@ class Image(Resource):
 
         image = db.Image.get(identifier=kwargs.get("imageid"))
         if image is None:
-            return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404
+            return format_error_return_v3(ErrorCodes.IMAGE_NOT_FOUND, 404)
 
         if image.processed is False:
-            return {"error": ErrorCodes.IMAGE_NOT_PROCESSED.value}, 404
+            return format_error_return_v3(ErrorCodes.IMAGE_NOT_PROCESSED, 404)
 
         try:
-            wanted_image_type = ImageTypes(args["wanted_type"])
+            wanted_image_type = ImageTypes(args.wanted_type)
         except ValueError:
-            return {"error": ErrorCodes.IMAGE_TYPE_INVALID.value}, 400
+            return format_error_return_v3(ErrorCodes.IMAGE_TYPE_INVALID, 400)
 
-        pixel_ratio = int(ceil(args["pixel_ratio"]))
+        pixel_ratio = int(ceil(args.pixel_ratio))
         if pixel_ratio < 1:
             pixel_ratio = 1
         if pixel_ratio > MAX_PIXEL_RATIO:
             pixel_ratio = MAX_PIXEL_RATIO
 
-        if args["wanted_type"] == "post":
+        if args.wanted_type == "post":
             pixel_ratio = 1
 
         file = f"/{image.sha256sum}/{wanted_image_type.value}_{pixel_ratio}x.jpg"
 
         if not fs_images.exists(file):
-            return {"error": ErrorCodes.IMAGE_NOT_FOUND.value}, 404
+            return format_error_return_v3(ErrorCodes.IMAGE_NOT_FOUND, 404)
 
         file_object = fs_images.open(file, "rb")
 
@@ -78,7 +79,7 @@ class NewImage(Resource):
     @auth_reqd
     def post(self):
         if request.files.get("image") is None:
-            return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
+            return format_error_return_v3(ErrorCodes.INVALID_IMAGE_PACKAGE, 400)
 
         console.log("Files package parsed OK!")
 
@@ -87,17 +88,17 @@ class NewImage(Resource):
         # I think we still need this, since content length can be spoofed?
         image_size_mb = b_to_mb(len(image))
         if image_size_mb > IMAGE_MAX_REQ_SIZE_MB:
-            return {"error": ErrorCodes.REQUEST_TOO_LARGE.value}, 413
+            return format_error_return_v3(ErrorCodes.REQUEST_TOO_LARGE, 413)
 
         if type(image) is not bytes:
-            return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
+            return format_error_return_v3(ErrorCodes.INVALID_IMAGE_PACKAGE, 400)
 
         try:
             image_info = handle_upload(
                 BytesIO(image), get_user_from_auth_header().id, threaded=True
             )
         except InvalidImageException:
-            return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
+            return format_error_return_v3(ErrorCodes.INVALID_IMAGE_PACKAGE, 400)
 
         return {
                    "identifier": image_info.identifier,
@@ -118,17 +119,17 @@ class NewImageProcessBeforeReturn(Resource):
         # I think we still need this, since content length can be spoofed?
         image_size_mb = b_to_mb(len(image))
         if image_size_mb > IMAGE_MAX_REQ_SIZE_MB:
-            return {"error": ErrorCodes.REQUEST_TOO_LARGE.value}, 413
+            return format_error_return_v3(ErrorCodes.REQUEST_TOO_LARGE, 413)
 
         if type(image) is not bytes:
-            return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
+            return format_error_return_v3(ErrorCodes.INVALID_IMAGE_PACKAGE, 400)
 
         try:
             image_info = handle_upload(
                 BytesIO(image), get_user_from_auth_header().id, threaded=False
             )
         except InvalidImageException:
-            return {"error": ErrorCodes.INVALID_IMAGE_PACKAGE.value}, 400
+            return format_error_return_v3(ErrorCodes.INVALID_IMAGE_PACKAGE, 400)
 
         return {
                    "identifier": image_info.identifier,
