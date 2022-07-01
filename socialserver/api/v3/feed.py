@@ -7,6 +7,7 @@ from socialserver.constants import (
 )
 from socialserver.db import db
 from socialserver.util.api.v3.data_format import format_post_v3, format_userdata_v3
+from socialserver.util.api.v3.error_format import format_error_return_v3
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header
 from pony.orm import db_session
 from pony import orm
@@ -36,8 +37,8 @@ class PostFeed(Resource):
     def get(self):
         args = self.get_parser.parse_args()
 
-        if args["count"] > MAX_FEED_GET_COUNT:
-            return {"error": ErrorCodes.FEED_GET_COUNT_TOO_HIGH.value}, 400
+        if args.count > MAX_FEED_GET_COUNT:
+            return format_error_return_v3(ErrorCodes.FEED_GET_COUNT_TOO_HIGH, 400)
 
         requesting_user_db = get_user_from_auth_header()
 
@@ -58,11 +59,11 @@ class PostFeed(Resource):
         filtered = False
         filter_list = []
 
-        if args["username"] is not None:
+        if args.username is not None:
             filtered = True
-            filter_list = args["username"]
+            filter_list = args.username
 
-        if args["following_only"]:
+        if args.following_only:
             filtered = True
             filter_list = orm.select(
                 f.following.username for f in requesting_user_db.following
