@@ -3,7 +3,8 @@
 from io import BytesIO
 from flask.helpers import send_file
 from flask import request
-from socialserver.constants import MAX_PIXEL_RATIO, ErrorCodes, ImageTypes
+from socialserver.constants import MAX_PIXEL_RATIO, ErrorCodes, ImageTypes, \
+    ServerSupportedImageFormats, SERVER_SUPPORTED_IMAGE_FORMATS_MIMETYPES
 from math import ceil
 from socialserver.db import db
 from socialserver.util.api.v3.error_format import format_error_return_v3
@@ -31,11 +32,18 @@ class Image(Resource):
         # check, so we can round it after!
         self.get_parser.add_argument("pixel_ratio", type=float, required=True)
         self.get_parser.add_argument("download", type=bool, required=False)
+        self.get_parser.add_argument("format", type=str, required=False)
 
     # kwargs.imageid contains the image identifier
     @db_session
     def get(self, **kwargs):
         args = self.get_parser.parse_args()
+
+        # default to jpg if no or invalid format specified; it's the most compatible.
+        try:
+            wanted_image_format = ServerSupportedImageFormats(args.format)
+        except ValueError:
+            wanted_image_format = ServerSupportedImageFormats.JPG
 
         image = db.Image.get(identifier=kwargs.get("imageid"))
         if image is None:
@@ -58,17 +66,26 @@ class Image(Resource):
         if args.wanted_type == "post":
             pixel_ratio = 1
 
-        file = f"/{image.sha256sum}/{wanted_image_type.value}_{pixel_ratio}x.jpg"
+        file = f"/{image.sha256sum}/{wanted_image_type.value}_{pixel_ratio}x."
 
-        if not fs_images.exists(file):
-            return format_error_return_v3(ErrorCodes.IMAGE_NOT_FOUND, 404)
+        # attempt to fall back to jpeg
+        if not fs_images.exists(file + wanted_image_format.value):
+            if wanted_image_format == ServerSupportedImageFormats.WEBP and \
+                    config.media.images.jpg_fallback_when_webp_not_found:
+                console.log(f"[red]Couldn't find a WEBP version of image {image.id}[/red] Attempting JPG fallback.")
+                if not fs_images.exists(file + ServerSupportedImageFormats.JPG.value):
+                    return format_error_return_v3(ErrorCodes.IMAGE_NOT_FOUND, 404)
+                wanted_image_format = ServerSupportedImageFormats.JPG
+            else:
+                return format_error_return_v3(ErrorCodes.IMAGE_NOT_FOUND, 404)
 
-        file_object = fs_images.open(file, "rb")
+        file_object = fs_images.open(file + wanted_image_format.value, "rb")
 
-        download_name = f"{image.sha256sum}.jpeg"
+        download_name = f"{image.sha256sum}.{wanted_image_format.value}"
 
         return send_file(
-            file_object, mimetype="image/jpeg", download_name=download_name,
+            file_object, mimetype=SERVER_SUPPORTED_IMAGE_FORMATS_MIMETYPES.get(wanted_image_format.value),
+            download_name=download_name,
             as_attachment=args.download is True
         )
 

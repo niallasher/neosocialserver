@@ -191,6 +191,7 @@ class ErrorCodes(Enum):
     OBJECT_NOT_FOUND = 63
     IMAGE_NOT_PROCESSED = 64
     POST_NOT_PROCESSED = 65
+    INVALID_IMAGE_FORMAT = 66
 
 
 """
@@ -426,12 +427,38 @@ class FollowListSortTypes(Enum):
     internal. no need for the api to utilize this!
 """
 
+
 class FollowListListTypes(Enum):
     FOLLOWERS = 0
     FOLLOWING = 1
+
 
 # Exceptions
 
 # pretty self-explanatory
 class UserNotFoundException(Exception):
     pass
+
+
+"""
+    SERVER_SUPPORTED_IMAGE_FORMATS
+    Formats that an image can be delivered in.
+    Makes no guarantee that they're enabled, or that any specific image has them,
+    just that they're technically supported.
+"""
+
+
+class ServerSupportedImageFormats(Enum):
+    WEBP = "webp"
+    JPG = "jpg"
+
+
+"""
+    SERVER_SUPPORTED_IMAGE_FORMATS_MIMETYPES
+    Pretty self explanatory
+"""
+
+SERVER_SUPPORTED_IMAGE_FORMATS_MIMETYPES = {
+    "webp": "image/webp",
+    "jpg": "image/jpg"
+}

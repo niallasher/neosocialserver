@@ -36,6 +36,7 @@ from threading import Thread
 from hashlib import sha256
 
 IMAGE_QUALITY = config.media.images.quality
+GENERATE_WEBP_IMAGES = config.media.images.generate_webp_images
 
 """
     rotate_image_accounting_for_exif_data
@@ -63,8 +64,13 @@ def rotate_image_accounting_for_exif_data(image_object: Image) -> Image:
 
 # TODO: not sure how to best represent a dict with pythons type
 # annotations. Need to fix this.
-def save_images_to_disk(images: dict, image_hash: str) -> None:
+def save_images_to_disk(images: dict, image_hash: str, use_webp=False) -> None:
+    image_format = "WEBP" if use_webp else "JPEG"
+    image_ext = "webp" if use_webp else "jpg"
+
     def save_with_pixel_ratio(image, filename, pixel_ratio):
+
+        print(f"\n\n\n processing image pr {pixel_ratio} \n\n\n")
 
         # this isn't that efficient, but I'm not aware of a better way
         # without using syspath.
@@ -77,41 +83,47 @@ def save_images_to_disk(images: dict, image_hash: str) -> None:
         # to depend on any specific backend.
         image.save(
             temp_image_buffer,
-            format="JPEG",
+            format=image_format,
             quality=IMAGE_QUALITY,
             progressive=True,
         )
         temp_image_buffer.seek(0)
         # in the future this may be abstracted further.
         fs_images.writebytes(
-            f"/{image_hash}/{filename}_{pixel_ratio}x.jpg", temp_image_buffer.read()
+            f"/{image_hash}/{filename}_{pixel_ratio}x.{image_ext}", temp_image_buffer.read()
         )
         del temp_image_buffer
 
     # FIXME: this is due to some deficiencies in the testing process.
-    if fs_images.exists(f"/{image_hash}"):
-        return
 
-    fs_images.makedir(f"/{image_hash}")
+    print("\n\n\n\n\n\n")
+    if not fs_images.exists(f"/{image_hash}"):
+        console.log(f"Creating images/{image_hash}...")
+        fs_images.makedir(f"/{image_hash}")
+    print("\n\n\n\n\n\n")
 
     for i in images.keys():
         if i == ImageTypes.ORIGINAL:
+            console.log(f"Saving original image ({image_ext}) for {image_hash}")
             temp_image_buffer = BytesIO()
             images[i][0].save(
                 temp_image_buffer,
-                format="JPEG",
+                format=image_format,
                 quality=IMAGE_QUALITY,
             )
             temp_image_buffer.seek(0)
             fs_images.writebytes(
-                f"/{image_hash}/{ImageTypes.ORIGINAL.value}.jpg", temp_image_buffer.read()
+                f"/{image_hash}/{ImageTypes.ORIGINAL.value}.{image_ext}", temp_image_buffer.read()
             )
             del temp_image_buffer
         else:
+            counter = 1
             for j in images[i]:
-                save_with_pixel_ratio(j, i.value, images[i].index(j) + 1)
+                console.log(f"Saving {i.value }image ({image_ext}) for {image_hash}")
+                save_with_pixel_ratio(j, i.value, counter)
+                counter += 1
                 # FIXME: incredibly hacky way of dealing with duplicates.
-                images[i][images[i].index(j)] = token_urlsafe(16)
+                # images[i][images[i].index(j)] = token_urlsafe(16)
 
 
 """
@@ -401,6 +413,9 @@ def process_image(image: Image, image_hash: str, image_id: int) -> None:
     }
 
     save_images_to_disk(images, image_hash)
+    if GENERATE_WEBP_IMAGES:
+        console.log(f"Generating WEBP images for image {image_id}...")
+        save_images_to_disk(images, image_hash, use_webp=True)
 
     db_image = db.Image.get(id=image_id)
     db_image.processed = True
