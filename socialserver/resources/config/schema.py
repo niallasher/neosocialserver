@@ -50,6 +50,8 @@ class _ServerConfigMediaImages(BaseModel):
     # max size cannot be negative. god knows what would happen if it was.
     # probably not much. but you definitely wouldn't be uploading any images.
     max_image_request_size_mb: float = Field(..., ge=0)
+    generate_webp_images: bool
+    jpg_fallback_when_webp_not_found: bool
 
 
 class _ServerConfigMediaVideos(BaseModel):
