@@ -26,24 +26,38 @@ host = ""
 # this quality will be applied to
 # all non post images, except the saved
 # original copy.
-quality = 80
-post_quality = 90
 storage_dir = "$FILE_ROOT/media/images"
 # max size of an image upload request in megabytes. (float)
 # make sure that anything in the way of the server e.g. nginx,
 # is configured to allow a request of at least this size!
 max_image_request_size_mb = 16
+jpeg_fallback_when_webp_not_found = true
+
+[media.images.jpeg]
+quality = 80
+post_quality = 90
+# progressive images load more gracefully on the end, and
+# are often a bit smaller, but a bit more intense to encode/decode.
+# recommended to keep this enabled. (It won't apply retroactively to old images
+# if changed!)
+use_progressive_images = true
+
+[media.images.webp]
 # generate webp images as well as jpgs. they're smaller, and clients
 # can use them to reduce transfer sizes. very well supported at this point,
 # but it may be better to serve jpgs for downloads, since that's what a lot of
 # people expect at this point. in the future there may be an option to disable jpgs.
 # will increase image processing time, but the potentional data savings are probably
 # worth it for most scenarios.
-generate_webp_images = true
+enabled = true
 # if enabled, the server will fall back to a jpg if an image doesn't have a webp version.
 # it's recommended to keep this enabled. if disabled, or the fallback file isn't found, an
 # imagenotfound error will be sent back to the client.
-jpeg_fallback_when_webp_not_found = true
+send_jpeg_if_not_available = true
+quality = 80
+post_quality = 90
+# same situation as jpeg above.
+use_progressive_images = true
 
 [media.videos]
 storage_dir = "$FILE_ROOT/media/videos"

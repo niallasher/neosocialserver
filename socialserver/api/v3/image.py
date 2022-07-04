@@ -71,7 +71,7 @@ class Image(Resource):
         # attempt to fall back to jpeg
         if not fs_images.exists(file + wanted_image_format.value):
             if wanted_image_format == ServerSupportedImageFormats.WEBP and \
-                    config.media.images.jpg_fallback_when_webp_not_found:
+                    config.media.images.webp.send_jpeg_if_not_available:
                 console.log(f"[red]Couldn't find a WEBP version of image {image.id}[/red] Attempting JPG fallback.")
                 if not fs_images.exists(file + ServerSupportedImageFormats.JPG.value):
                     return format_error_return_v3(ErrorCodes.IMAGE_NOT_FOUND, 404)

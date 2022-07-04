@@ -24,7 +24,7 @@ from socialserver.constants import (
     ImageSupportedMimeTypes,
     BLURHASH_X_COMPONENTS,
     BLURHASH_Y_COMPONENTS,
-    PROCESSING_BLURHASH,
+    PROCESSING_BLURHASH, ServerSupportedImageFormats,
 )
 from secrets import token_urlsafe
 from copy import copy
@@ -35,8 +35,7 @@ from io import BytesIO
 from threading import Thread
 from hashlib import sha256
 
-IMAGE_QUALITY = config.media.images.quality
-GENERATE_WEBP_IMAGES = config.media.images.generate_webp_images
+GENERATE_WEBP_IMAGES = config.media.images.webp.enabled
 
 """
     rotate_image_accounting_for_exif_data
@@ -55,6 +54,53 @@ def rotate_image_accounting_for_exif_data(image_object: Image) -> Image:
 
 
 """
+    save_image
+    saves a PIL.Image
+"""
+
+
+def save_image(image: Image, image_hash: str, filename: str, pixel_ratio: str,
+               image_format: ServerSupportedImageFormats):
+    type = ImageTypes(filename)
+    save_format = ""
+    ext = ""
+    quality = ""
+    use_progressive = False
+    if image_format == ServerSupportedImageFormats.WEBP:
+        quality = config.media.images.webp.quality \
+            if not type == ImageTypes.POST else \
+            config.media.images.webp.post_quality
+        use_progressive = config.media.images.webp.use_progressive_images
+        save_format = "WEBP"
+        ext = "webp"
+    elif image_format == ServerSupportedImageFormats.JPG:
+        quality = config.media.images.jpeg.quality \
+            if not type == ImageTypes.POST else \
+            config.media.images.jpeg.post_quality
+        use_progressive = config.media.images.jpeg.use_progressive_images
+        save_format = "JPEG"
+        ext = "jpg"
+    else:
+        raise InvalidImageException
+
+    temp_buffer = BytesIO()
+    image.save(
+        temp_buffer,
+        format=save_format,
+        quality=quality,
+        progressive=use_progressive
+    )
+
+    # return to start of buffer before saving it to disk
+    temp_buffer.seek(0)
+
+    fs_images.writebytes(f"/{image_hash}/{filename}_{pixel_ratio}x.{ext}",
+                         temp_buffer.read())
+
+    del temp_buffer
+
+
+"""
     save_imageset_to_disk
     Saves an imageset (e.g. profile pic sm, lg) to disk, in the correct directory, with consistent naming.
     Does not create a database entry.
@@ -65,6 +111,7 @@ def rotate_image_accounting_for_exif_data(image_object: Image) -> Image:
 # TODO: not sure how to best represent a dict with pythons type
 # annotations. Need to fix this.
 def save_images_to_disk(images: dict, image_hash: str, use_webp=False) -> None:
+    save_format = ServerSupportedImageFormats.WEBP if use_webp else ServerSupportedImageFormats.JPG
     image_format = "WEBP" if use_webp else "JPEG"
     image_ext = "webp" if use_webp else "jpg"
 
@@ -76,31 +123,13 @@ def save_images_to_disk(images: dict, image_hash: str, use_webp=False) -> None:
         # without using syspath.
         # using the fs object is more secure, since it can't affect anything
         # above its root directory, limiting what could happen with paths
-
-        temp_image_buffer = BytesIO()
-        # we save to the temporary image buffer since we're
-        # using pyfilesystem now, and we don't want this step
-        # to depend on any specific backend.
-        image.save(
-            temp_image_buffer,
-            format=image_format,
-            quality=IMAGE_QUALITY,
-            progressive=True,
-        )
-        temp_image_buffer.seek(0)
-        # in the future this may be abstracted further.
-        fs_images.writebytes(
-            f"/{image_hash}/{filename}_{pixel_ratio}x.{image_ext}", temp_image_buffer.read()
-        )
-        del temp_image_buffer
+        save_image(image, image_hash, filename, pixel_ratio, save_format)
 
     # FIXME: this is due to some deficiencies in the testing process.
 
-    print("\n\n\n\n\n\n")
     if not fs_images.exists(f"/{image_hash}"):
         console.log(f"Creating images/{image_hash}...")
         fs_images.makedir(f"/{image_hash}")
-    print("\n\n\n\n\n\n")
 
     for i in images.keys():
         if i == ImageTypes.ORIGINAL:
@@ -109,7 +138,7 @@ def save_images_to_disk(images: dict, image_hash: str, use_webp=False) -> None:
             images[i][0].save(
                 temp_image_buffer,
                 format=image_format,
-                quality=IMAGE_QUALITY,
+                quality=100,
             )
             temp_image_buffer.seek(0)
             fs_images.writebytes(
@@ -117,13 +146,12 @@ def save_images_to_disk(images: dict, image_hash: str, use_webp=False) -> None:
             )
             del temp_image_buffer
         else:
+            # TODO: use something less scuffed than this counter!
             counter = 1
             for j in images[i]:
-                console.log(f"Saving {i.value }image ({image_ext}) for {image_hash}")
+                console.log(f"Saving {i.value}image ({image_ext}) for {image_hash}")
                 save_with_pixel_ratio(j, i.value, counter)
                 counter += 1
-                # FIXME: incredibly hacky way of dealing with duplicates.
-                # images[i][images[i].index(j)] = token_urlsafe(16)
 
 
 """
