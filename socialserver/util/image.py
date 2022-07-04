@@ -7,7 +7,7 @@ from math import gcd
 from types import SimpleNamespace
 from base64 import b64encode
 import PIL
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ExifTags
 from pony.orm import commit, db_session, select
 from socialserver.util.config import config
 from socialserver.util.output import console
@@ -36,6 +36,22 @@ from threading import Thread
 from hashlib import sha256
 
 IMAGE_QUALITY = config.media.images.quality
+
+"""
+    rotate_image_accounting_for_exif_data
+    Reads the Exif tags associated with an uploaded image.
+    If it finds a rotation tag, it will apply the correct rotation to the image object.
+    Important for iOS image uploads, which always seem to end up the wrong way around.
+"""
+
+
+def rotate_image_accounting_for_exif_data(image_object: Image) -> Image:
+    # this may have issues with png depending on pillow version!
+    # might need to be done manually.
+    console.log("Rotating image to account for exif orientation data.")
+    rotated_image = ImageOps.exif_transpose(image_object)
+    return rotated_image
+
 
 """
     save_imageset_to_disk
@@ -432,6 +448,9 @@ def handle_upload(
     existing_image = existing_image[0] if len(existing_image) >= 1 else None
 
     image = convert_buffer_to_image(image)
+
+    image = rotate_image_accounting_for_exif_data(image)
+
     access_id = create_random_image_identifier()
 
     # create the image entry now, so we can give back an identifier.
