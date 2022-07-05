@@ -392,7 +392,6 @@ def get_image_data_url_legacy(identifier: str, image_type: ImageTypes) -> str:
             file = f"/{image.sha256sum}/{image_type.value}_{pixel_ratio}x.jpg"
 
         if not fs_images.exists(file):
-            print("\n\n\n\n WE CAN'T FIND THE FUCKING IMAGE FUCK FUCK FUCK\n\n\n")
             raise InvalidImageException
 
         file_data = fs_images.readbytes(file)
