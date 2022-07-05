@@ -24,7 +24,7 @@ from socialserver.constants import (
     ImageSupportedMimeTypes,
     BLURHASH_X_COMPONENTS,
     BLURHASH_Y_COMPONENTS,
-    PROCESSING_BLURHASH, ServerSupportedImageFormats,
+    PROCESSING_BLURHASH, ServerSupportedImageFormats, ROOT_DIR,
 )
 from secrets import token_urlsafe
 from copy import copy
@@ -376,18 +376,31 @@ def get_image_data_url_legacy(identifier: str, image_type: ImageTypes) -> str:
         raise InvalidImageException
 
     pixel_ratio = config.legacy_api_interface.image_pixel_ratio
+    send_webp = config.legacy_api_interface.send_webp_images
     if image_type == ImageTypes.POST.value:
         # only 1x for posts, since we store them at a very high size already.
         # no other pixel ratio variants exist!
         pixel_ratio = 1
 
-    file = f"/{image.sha256sum}/{image_type.value}_{pixel_ratio}x.jpg"
-    if not fs_images.exists(file):
-        raise InvalidImageException
+    ext = "webp" if send_webp else "jpg"
 
-    file_data = fs_images.readbytes(file)
+    try:
+        file = f"/{image.sha256sum}/{image_type.value}_{pixel_ratio}x.{ext}"
 
-    return "data:image/jpg;base64," + b64encode(file_data).decode()
+        if not fs_images.exists(file) and ext == "webp":
+            ext = "jpg"
+            file = f"/{image.sha256sum}/{image_type.value}_{pixel_ratio}x.jpg"
+
+        if not fs_images.exists(file):
+            print("\n\n\n\n WE CAN'T FIND THE FUCKING IMAGE FUCK FUCK FUCK\n\n\n")
+            raise InvalidImageException
+
+        file_data = fs_images.readbytes(file)
+    except InvalidImageException:
+        with open(f"{ROOT_DIR}/resources/legacy/image_not_found_legacy_client.jpg", "rb") as image_not_found_file:
+            return f"data:/image/jpg;base64," + b64encode(image_not_found_file.read()).decode()
+
+    return f"data:image/{ext};base64," + b64encode(file_data).decode()
 
 
 """

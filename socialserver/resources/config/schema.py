@@ -104,6 +104,7 @@ class _ServerConfigLegacyApiInterface(BaseModel):
     enable_less_secure_password_change: bool
     provide_legacy_video_thumbnails: bool
     provide_incompatible_video_thumbnail_text_overlay: bool
+    send_webp_images: bool
 
 
 class ServerConfig(BaseModel):
