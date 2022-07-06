@@ -25,6 +25,9 @@ class TestingServer(Thread):
 
 
 def pytest_sessionstart():
+    # we want to test webp generation, so make sure we're generating webp images
+    # as well.
+    config.media.images.webp.enabled = True
     config.auth.registration.approval_required = False
     reqd_paths = ["/tmp/socialserver_image_testing", "/tmp/socialserver_video_testing"]
     for reqd_path in reqd_paths:
