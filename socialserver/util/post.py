@@ -14,7 +14,9 @@ def _check_unprocessed_posts():
     console.log(f"Checking post process statuses. {posts.count()} in queue.")
     for post in posts:
         ok_to_mark_processed = True
-        for image in post.get_images:
+        post_images = list(filter(lambda x: x["type"] == "image", post.attachments))
+        for media_entry in post_images:
+            image = db.Image.get(identifier=media_entry["identifier"])
             if image.processed is False:
                 ok_to_mark_processed = False
         if ok_to_mark_processed:

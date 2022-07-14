@@ -192,6 +192,11 @@ class ErrorCodes(Enum):
     IMAGE_NOT_PROCESSED = 64
     POST_NOT_PROCESSED = 65
     INVALID_IMAGE_FORMAT = 66
+    INVALID_ATTACHMENT_ENTRY = 67
+    # when the same media entry is provided twice.
+    # the same media can be in a post multiple times,
+    # but not the same entry (i.e.: it can be uploaded twice)
+    DUPLICATE_MEDIA_IN_POST = 68
 
 
 """

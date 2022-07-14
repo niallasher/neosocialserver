@@ -92,16 +92,18 @@ class LegacyPost(Resource):
         # strip out any newlines that have been put in
         text_content = text_content.replace("\n", "")
 
+        attachments = []
+
         # the legacy api can only upload one image btw
-        images = []
-        image_ids = []
         if args["post_image_hash"]:
             image = db.Image.get(identifier=args["post_image_hash"])
             # make sure the image actually exists
             if image is None:
                 return {}, 404
-            images.append(image)
-            image_ids.append(image.id)
+            attachments.append({
+                "type": "image",
+                "identifier": image.identifier
+            })
 
         # while the old api doesn't understand hashtags or anything,
         # we still want to make them for people using the new one!
@@ -125,10 +127,9 @@ class LegacyPost(Resource):
             user=user,
             creation_time=datetime.utcnow(),
             text=text_content,
-            images=images,
-            image_ids=image_ids,
             hashtags=db_tags,
             processed=True,
+            attachments=attachments
         )
 
         # api v1 didn't return the post id.
@@ -181,29 +182,33 @@ class LegacyPost(Resource):
             )
 
             image_data = ""
-            images = post.get_images
-            if len(images) >= 1:
-                # the legacy api can only handle one image per post, so we're gonna send the first one.
-                # in the future, we might stitch them together in a collage form, but for now I just want
-                # basic functionality.
-                image_data = get_image_data_url_legacy(
-                    images[0].identifier, image_serve_type
-                )
-            elif post.video is not None:
+
+            attachments = post.attachments
+            image_attachments = list(filter(lambda x: x['type'] == 'image', attachments))
+
+            for image in image_attachments:
+                image = db.Image.get(image["identifier"])
+                if image is not None and image.processed is False:
+                    return {"err": LegacyErrorCodes.POST_NOT_FOUND.value}, 401
+
+            # if there are only videos, we'll serve the video not supported stuff
+            if len(image_attachments) == 0 and len(attachments) >= 1:
                 if config.legacy_api_interface.provide_legacy_video_thumbnails:
-                    # yeah. it's a mouthful
+                    # we use the first video in the attachments list
+                    req_video = db.Video.get(
+                        identifier=list(filter(lambda x: x['type'] == 'video', attachments))[0]['identifier'])
                     if (
                         not config.legacy_api_interface.provide_incompatible_video_thumbnail_text_overlay
                     ):
                         image_data = get_image_data_url_legacy(
-                            post.video.thumbnail.identifier, image_serve_type
+                            req_video.thumbnail.identifier, image_serve_type
                         )
                     else:
                         # this should probably be pre-generated in the future,
                         # but for now it seems pretty quick.
                         thumbnail_data = BytesIO(
                             fs_images.readbytes(
-                                f"/{post.video.thumbnail.sha256sum}"
+                                f"/{req_video.thumbnail.sha256sum}"
                                 + f"/{ImageTypes.POST_PREVIEW.value}_"
                                 + f"{config.legacy_api_interface.image_pixel_ratio}x.jpg"
                             )
@@ -227,6 +232,10 @@ class LegacyPost(Resource):
                         )
                 else:
                     image_data = video_unsupported_image
+            elif len(attachments) >= 1:
+                req_image = db.Image.get(identifier=image_attachments[0]["identifier"])
+                image_data = get_image_data_url_legacy(req_image.identifier,
+                                                       image_serve_type)
 
             is_own_post = post.user == user
 

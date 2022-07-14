@@ -42,7 +42,11 @@ def test_create_single_post_unprocessed_image(
     # system, you might fail this test if the image uploads in like 3ms :)
     r = requests.post(
         f"{server_address}/api/v3/posts/single",
-        json={"text_content": "Test Post", "images": [identifier]},
+        json={"text_content": "Test Post",
+              "attachments": {
+                  "type": "image",
+                  "identifier": identifier
+              }},
         headers={"Authorization": f"bearer {test_db.access_token}"},
     )
     print(r.text)
