@@ -7,7 +7,7 @@ from math import gcd
 from types import SimpleNamespace
 from base64 import b64encode
 import PIL
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ExifTags
 from pony.orm import commit, db_session, select
 from socialserver.util.config import config
 from socialserver.util.output import console
@@ -24,7 +24,7 @@ from socialserver.constants import (
     ImageSupportedMimeTypes,
     BLURHASH_X_COMPONENTS,
     BLURHASH_Y_COMPONENTS,
-    PROCESSING_BLURHASH,
+    PROCESSING_BLURHASH, ServerSupportedImageFormats, ROOT_DIR,
 )
 from secrets import token_urlsafe
 from copy import copy
@@ -35,7 +35,70 @@ from io import BytesIO
 from threading import Thread
 from hashlib import sha256
 
-IMAGE_QUALITY = config.media.images.quality
+GENERATE_WEBP_IMAGES = config.media.images.webp.enabled
+
+"""
+    rotate_image_accounting_for_exif_data
+    Reads the Exif tags associated with an uploaded image.
+    If it finds a rotation tag, it will apply the correct rotation to the image object.
+    Important for iOS image uploads, which always seem to end up the wrong way around.
+"""
+
+
+def rotate_image_accounting_for_exif_data(image_object: Image) -> Image:
+    # this may have issues with png depending on pillow version!
+    # might need to be done manually.
+    console.log("Rotating image to account for exif orientation data.")
+    rotated_image = ImageOps.exif_transpose(image_object)
+    return rotated_image
+
+
+"""
+    save_image
+    saves a PIL.Image
+"""
+
+
+def save_image(image: Image, image_hash: str, filename: str, pixel_ratio: str,
+               image_format: ServerSupportedImageFormats):
+    type = ImageTypes(filename)
+    save_format = ""
+    ext = ""
+    quality = ""
+    use_progressive = False
+    if image_format == ServerSupportedImageFormats.WEBP:
+        quality = config.media.images.webp.quality \
+            if not type == ImageTypes.POST else \
+            config.media.images.webp.post_quality
+        use_progressive = config.media.images.webp.use_progressive_images
+        save_format = "WEBP"
+        ext = "webp"
+    elif image_format == ServerSupportedImageFormats.JPG:
+        quality = config.media.images.jpeg.quality \
+            if not type == ImageTypes.POST else \
+            config.media.images.jpeg.post_quality
+        use_progressive = config.media.images.jpeg.use_progressive_images
+        save_format = "JPEG"
+        ext = "jpg"
+    else:
+        raise InvalidImageException
+
+    temp_buffer = BytesIO()
+    image.save(
+        temp_buffer,
+        format=save_format,
+        quality=quality,
+        progressive=use_progressive
+    )
+
+    # return to start of buffer before saving it to disk
+    temp_buffer.seek(0)
+
+    fs_images.writebytes(f"/{image_hash}/{filename}_{pixel_ratio}x.{ext}",
+                         temp_buffer.read())
+
+    del temp_buffer
+
 
 """
     save_imageset_to_disk
@@ -47,55 +110,48 @@ IMAGE_QUALITY = config.media.images.quality
 
 # TODO: not sure how to best represent a dict with pythons type
 # annotations. Need to fix this.
-def save_images_to_disk(images: dict, image_hash: str) -> None:
+def save_images_to_disk(images: dict, image_hash: str, use_webp=False) -> None:
+    save_format = ServerSupportedImageFormats.WEBP if use_webp else ServerSupportedImageFormats.JPG
+    image_format = "WEBP" if use_webp else "JPEG"
+    image_ext = "webp" if use_webp else "jpg"
+
     def save_with_pixel_ratio(image, filename, pixel_ratio):
+
+        print(f"\n\n\n processing image pr {pixel_ratio} \n\n\n")
 
         # this isn't that efficient, but I'm not aware of a better way
         # without using syspath.
         # using the fs object is more secure, since it can't affect anything
         # above its root directory, limiting what could happen with paths
-
-        temp_image_buffer = BytesIO()
-        # we save to the temporary image buffer since we're
-        # using pyfilesystem now, and we don't want this step
-        # to depend on any specific backend.
-        image.save(
-            temp_image_buffer,
-            format="JPEG",
-            quality=IMAGE_QUALITY,
-            progressive=True,
-        )
-        temp_image_buffer.seek(0)
-        # in the future this may be abstracted further.
-        fs_images.writebytes(
-            f"/{image_hash}/{filename}_{pixel_ratio}x.jpg", temp_image_buffer.read()
-        )
-        del temp_image_buffer
+        save_image(image, image_hash, filename, pixel_ratio, save_format)
 
     # FIXME: this is due to some deficiencies in the testing process.
-    if fs_images.exists(f"/{image_hash}"):
-        return
 
-    fs_images.makedir(f"/{image_hash}")
+    if not fs_images.exists(f"/{image_hash}"):
+        console.log(f"Creating images/{image_hash}...")
+        fs_images.makedir(f"/{image_hash}")
 
     for i in images.keys():
         if i == ImageTypes.ORIGINAL:
+            console.log(f"Saving original image ({image_ext}) for {image_hash}")
             temp_image_buffer = BytesIO()
             images[i][0].save(
                 temp_image_buffer,
-                format="JPEG",
-                quality=IMAGE_QUALITY,
+                format=image_format,
+                quality=100,
             )
             temp_image_buffer.seek(0)
             fs_images.writebytes(
-                f"/{image_hash}/{ImageTypes.ORIGINAL.value}.jpg", temp_image_buffer.read()
+                f"/{image_hash}/{ImageTypes.ORIGINAL.value}.{image_ext}", temp_image_buffer.read()
             )
             del temp_image_buffer
         else:
+            # TODO: use something less scuffed than this counter!
+            counter = 1
             for j in images[i]:
-                save_with_pixel_ratio(j, i.value, images[i].index(j) + 1)
-                # FIXME: incredibly hacky way of dealing with duplicates.
-                images[i][images[i].index(j)] = token_urlsafe(16)
+                console.log(f"Saving {i.value}image ({image_ext}) for {image_hash}")
+                save_with_pixel_ratio(j, i.value, counter)
+                counter += 1
 
 
 """
@@ -320,18 +376,30 @@ def get_image_data_url_legacy(identifier: str, image_type: ImageTypes) -> str:
         raise InvalidImageException
 
     pixel_ratio = config.legacy_api_interface.image_pixel_ratio
+    send_webp = config.legacy_api_interface.send_webp_images
     if image_type == ImageTypes.POST.value:
         # only 1x for posts, since we store them at a very high size already.
         # no other pixel ratio variants exist!
         pixel_ratio = 1
 
-    file = f"/{image.sha256sum}/{image_type.value}_{pixel_ratio}x.jpg"
-    if not fs_images.exists(file):
-        raise InvalidImageException
+    ext = "webp" if send_webp else "jpg"
 
-    file_data = fs_images.readbytes(file)
+    try:
+        file = f"/{image.sha256sum}/{image_type.value}_{pixel_ratio}x.{ext}"
 
-    return "data:image/jpg;base64," + b64encode(file_data).decode()
+        if not fs_images.exists(file) and ext == "webp":
+            ext = "jpg"
+            file = f"/{image.sha256sum}/{image_type.value}_{pixel_ratio}x.jpg"
+
+        if not fs_images.exists(file):
+            raise InvalidImageException
+
+        file_data = fs_images.readbytes(file)
+    except InvalidImageException:
+        with open(f"{ROOT_DIR}/resources/legacy/image_not_found_legacy_client.jpg", "rb") as image_not_found_file:
+            return f"data:/image/jpg;base64," + b64encode(image_not_found_file.read()).decode()
+
+    return f"data:image/{ext};base64," + b64encode(file_data).decode()
 
 
 """
@@ -385,6 +453,9 @@ def process_image(image: Image, image_hash: str, image_id: int) -> None:
     }
 
     save_images_to_disk(images, image_hash)
+    if GENERATE_WEBP_IMAGES:
+        console.log(f"Generating WEBP images for image {image_id}...")
+        save_images_to_disk(images, image_hash, use_webp=True)
 
     db_image = db.Image.get(id=image_id)
     db_image.processed = True
@@ -432,6 +503,9 @@ def handle_upload(
     existing_image = existing_image[0] if len(existing_image) >= 1 else None
 
     image = convert_buffer_to_image(image)
+
+    image = rotate_image_accounting_for_exif_data(image)
+
     access_id = create_random_image_identifier()
 
     # create the image entry now, so we can give back an identifier.

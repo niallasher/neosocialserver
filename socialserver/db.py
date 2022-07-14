@@ -204,10 +204,10 @@ def define_entities(db_object):
         @property
         def is_orphan(self):
             return (
-                len(self.associated_posts) == 0
-                and len(self.associated_profile_pics) == 0
-                and len(self.associated_header_pics)
-                and len(self.associated_thumbnails) == 0
+                    len(self.associated_posts) == 0
+                    and len(self.associated_profile_pics) == 0
+                    and len(self.associated_header_pics)
+                    and len(self.associated_thumbnails) == 0
             )
 
     class Hashtag(db_object.Entity):

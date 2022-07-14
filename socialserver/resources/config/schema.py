@@ -42,14 +42,25 @@ class _ServerConfigDatabase(BaseModel):
 
         return value
 
+class _ServerConfigMediaImagesJpeg(BaseModel):
+    quality: int = Field(..., ge=1,le=100)
+    post_quality: int = Field(..., ge=1,le=100)
+    use_progressive_images: bool
+
+class _ServerConfigMediaImagesWebp(BaseModel):
+    enabled: bool
+    send_jpeg_if_not_available: bool
+    quality: int = Field(..., ge=1,le=100)
+    post_quality: int = Field(..., ge=1,le=100)
+    use_progressive_images: bool
 
 class _ServerConfigMediaImages(BaseModel):
-    quality: int = Field(..., ge=1, le=100)
-    post_quality: int = Field(..., ge=1, le=100)
     storage_dir: str
     # max size cannot be negative. god knows what would happen if it was.
     # probably not much. but you definitely wouldn't be uploading any images.
     max_image_request_size_mb: float = Field(..., ge=0)
+    jpeg: _ServerConfigMediaImagesJpeg
+    webp: _ServerConfigMediaImagesWebp
 
 
 class _ServerConfigMediaVideos(BaseModel):
@@ -93,6 +104,7 @@ class _ServerConfigLegacyApiInterface(BaseModel):
     enable_less_secure_password_change: bool
     provide_legacy_video_thumbnails: bool
     provide_incompatible_video_thumbnail_text_overlay: bool
+    send_webp_images: bool
 
 
 class ServerConfig(BaseModel):
