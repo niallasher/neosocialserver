@@ -209,11 +209,15 @@ def test_get_post_unprocessed_legacy(test_db, server_address, image_data_binary)
         files={"image": image_data_binary},
         headers={"Authorization": f"Bearer {test_db.access_token}"},
     ).json()["identifier"]
-    post_id = requests.post(
+    post_ret = requests.post(
         f"{server_address}/api/v3/posts/single",
-        json={"text_content": "test", "images": [image]},
+        json={"text_content": "test", "attachments": {
+            "type": "image",
+            "identifier": image
+        }},
         headers={"Authorization": f"Bearer {test_db.access_token}"},
-    ).json()["post_id"]
+    ).json()
+    post_id = post_ret["post_id"]
     r = requests.get(
         f"{server_address}/api/v1/posts",
         json={"session_token": test_db.access_token, "post_id": post_id},

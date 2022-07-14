@@ -1,8 +1,12 @@
 #  Copyright (c) Niall Asher 2022
-
+import json
 from datetime import datetime
 import re
+from json import JSONDecodeError
+
 from flask_restful import Resource, reqparse
+from pydantic import ValidationError
+from socialserver.api.v3.models.post import AttachmentEntryModel, InvalidAttachmentEntryException
 from socialserver.db import db
 from pony.orm import db_session, commit
 from socialserver.constants import (
@@ -21,11 +25,7 @@ class Post(Resource):
     def __init__(self):
         self.post_parser = reqparse.RequestParser()
         self.post_parser.add_argument("text_content", type=str, required=True)
-        # images & videos optional
-        self.post_parser.add_argument(
-            "images", type=str, required=False, action="append"
-        )
-        self.post_parser.add_argument("video", type=str, required=False)
+        self.post_parser.add_argument("attachments", type=dict, required=False, action="append")
 
         self.get_parser = reqparse.RequestParser()
         self.get_parser.add_argument("post_id", type=int, required=True)
@@ -52,38 +52,55 @@ class Post(Resource):
         # them for UX purposes!
         text_content = text_content.replace("\n", "")
 
-        additional_content = PostAdditionalContentTypes.NONE.value
+        # additional_content = PostAdditionalContentTypes.NONE.value
         # images is just used for relationship purposes, and might be removed soon?
         # this is due to it being a set (in db), and therefore not being indexable,
         # and not keeping it's order
         processed = True
-        images = None
-        video = None
-        image_ids = []
+        # images = None
+        # video = None
+        # image_ids = []
 
-        if args.images is not None:
-            images = []
-            referenced_images = args.images
-            # we don't want people making giant
-            # image galleries in a post. !! SHOULD ALSO
-            # BE ENFORCED CLIENT SIDE FOR UX !!
-            if len(referenced_images) > MAX_IMAGES_PER_POST:
-                return format_error_return_v3(ErrorCodes.POST_TOO_MANY_IMAGES, 400)
-            # we replace each image with a reference to it in the database,
-            # for storage
-            for image_identifier in referenced_images:
-                image = db.Image.get(identifier=image_identifier)
-                if image.processed is False:
-                    processed = False
-                if image is None:
-                    return format_error_return_v3(ErrorCodes.IMAGE_NOT_FOUND, 404)
-                images.append(image)
-                image_ids.append(image.id)
-        elif args.video is not None:
-            video = db.Video.get(identifier=args.video)
-            if video is None:
-                return format_error_return_v3(ErrorCodes.OBJECT_NOT_FOUND, 404)
-            video = args.video
+        # prevent the same media from being included twice.
+        image_identifiers = []
+        video_identifiers = []
+
+        attachments = args.attachments or []
+        # TODO: rename to MAX_ATTACHMENTS_PER_POST
+        if len(attachments) > MAX_IMAGES_PER_POST:
+            # TODO: rename to MAX_ATTACHMENTS_PER_POST_EXCEEDED
+            return format_error_return_v3(ErrorCodes.POST_TOO_MANY_IMAGES, 400)
+        # ensure all validations are valid.
+        # pydantic will reject anything with extra fields, or non matching types,
+        # so we should be pretty safe.
+        for attachment in attachments:
+            try:
+                mdl = AttachmentEntryModel(**attachment)
+                if mdl.type == "image":
+                    resource = db.Image.get(identifier=mdl.identifier)
+                    if resource is None:
+                        # TODO: replace IMAGE_NOT_FOUND with OBJECT_NOT_FOUND everywhere.
+                        return format_error_return_v3(ErrorCodes.IMAGE_NOT_FOUND, 400)
+                    if resource.processed is False:
+                        # the post won't be ready to go immediately.
+                        processed = False
+                    image_identifiers.append(resource.identifier)
+                elif mdl.type == "video":
+                    resource = db.Video.get(identifier=mdl.identifier)
+                    if resource is None:
+                        return format_error_return_v3(ErrorCodes.OBJECT_NOT_FOUND, 400)
+                    video_identifiers.append(resource.identifier)
+                    # videos don't actually get processed yet. this will need to change soon.
+                else:
+                    return format_error_return_v3(ErrorCodes.INVALID_ATTACHMENT_ENTRY, 400)
+            except InvalidAttachmentEntryException:
+                return format_error_return_v3(ErrorCodes.INVALID_ATTACHMENT_ENTRY, 400)
+            except ValidationError:
+                return format_error_return_v3(ErrorCodes.INVALID_ATTACHMENT_ENTRY, 400)
+
+        for i in [image_identifiers, video_identifiers]:
+            if len(i) != len(set(i)):
+                return format_error_return_v3(ErrorCodes.DUPLICATE_MEDIA_IN_POST, 400)
 
         # checking for hashtags in the post content
         # hashtags can be 1 to 12 chars long and only alphanumeric.
@@ -110,14 +127,8 @@ class Post(Resource):
             text=text_content,
             hashtags=db_tags,
             processed=processed,
+            attachments=attachments
         )
-
-        if images is not None:
-            new_post.images = images
-            new_post.image_ids = image_ids
-
-        if video is not None:
-            new_post.video = db.Video.get(identifier=video)
 
         # we commit earlier than normal, so we
         # can return the ID before the function ends

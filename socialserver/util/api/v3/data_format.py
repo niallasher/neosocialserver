@@ -1,4 +1,5 @@
 #  Copyright (c) Niall Asher 2022
+from socialserver.api.v3.models.post import AttachmentEntryModel, InvalidAttachmentEntryException
 from socialserver.constants import PostAdditionalContentTypes
 from socialserver.db import db
 
@@ -54,24 +55,57 @@ def format_post_v3(post_object):
     additional_content_type = PostAdditionalContentTypes.NONE.value
     additional_content = []
 
-    post_images = post_object.get_images
-    video = post_object.video
+    int_attachments = post_object.attachments
+    ext_attachments = []
+    for attachment in int_attachments:
+        try:
+            mdl = AttachmentEntryModel(**attachment)
+            if mdl.type == "video":
+                resource = db.Video.get(identifier=mdl.identifier)
+                if resource is None:
+                    ext_attachments = []
+                    break
+                ext_attachments.append({
+                    "type": "video",
+                    "identifier": resource.identifier,
+                    "thumbnail": {
+                        "identifier": resource.thumbnail.identifier,
+                        "blurhash": resource.thumbnail.blur_hash
+                    }
+                })
+            elif mdl.type == "image":
+                resource = db.Image.get(identifier=mdl.identifier)
+                if resource is None:
+                    # this should never happen!
+                    ext_attachments = []
+                    break
+                ext_attachments.append({
+                    "type": "image",
+                    "identifier": resource.identifier,
+                    "blurhash": resource.blur_hash
+                })
+        except InvalidAttachmentEntryException:
+            ext_attachments = []
+            break
 
-    if len(post_images) >= 1:
-        additional_content_type = PostAdditionalContentTypes.IMAGES.value
-        for image in post_images:
-            additional_content.append(
-                {"identifier": image.identifier, "blurhash": image.blur_hash}
-            )
-    elif video is not None:
-        additional_content_type = PostAdditionalContentTypes.VIDEO.value
-        additional_content.append(
-            {
-                "identifier": video.identifier,
-                "thumbnail_identifier": video.thumbnail.identifier,
-                "thumbnail_blurhash": video.thumbnail.blur_hash,
-            }
-        )
+    # post_images = post_object.get_images
+    # video = post_object.video
+
+    # if len(post_images) >= 1:
+    #     additional_content_type = PostAdditionalContentTypes.IMAGES.value
+    #     for image in post_images:
+    #         additional_content.append(
+    #             {"identifier": image.identifier, "blurhash": image.blur_hash}
+    #         )
+    # elif video is not None:
+    #     additional_content_type = PostAdditionalContentTypes.VIDEO.value
+    #     additional_content.append(
+    #         {
+    #             "identifier": video.identifier,
+    #             "thumbnail_identifier": video.thumbnail.identifier,
+    #             "thumbnail_blurhash": video.thumbnail.blur_hash,
+    #         }
+    #     )
 
     return {
         "id": post_object.id,
@@ -79,6 +113,5 @@ def format_post_v3(post_object):
         "creation_date": post_object.creation_time.timestamp(),
         "like_count": len(post_object.likes),
         "comment_count": len(post_object.comments),
-        "additional_content_type": additional_content_type,
-        "additional_content": additional_content,
+        "attachments": ext_attachments
     }

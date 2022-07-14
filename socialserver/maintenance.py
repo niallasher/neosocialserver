@@ -1,5 +1,4 @@
 #  Copyright (c) Niall Asher 2022
-
 from socialserver.db import db
 from socialserver.util.output import console
 from socialserver.util.config import config

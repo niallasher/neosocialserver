@@ -125,34 +125,16 @@ def define_entities(db_object):
         # however a set is not of any use for this application;
         # it's unordered, and we want to keep the correct order for
         # images on a post
-        images = orm.Set("Image", reverse="associated_posts")
-        # this is the useful one instead, since it retains
-        # the proper ordering, and can be indexed etc.
-        image_ids = orm.Optional(orm.IntArray)
-        # need to look into; a post can have photos *OR* videos.
-        # can this be enforced with this schema?
-        video = orm.Optional("Video")
+        associated_images = orm.Set("Image", reverse="associated_posts")
+        associated_videos = orm.Set("Video", reverse="associated_posts")
         comments = orm.Set("Comment", cascade_delete=True)
         likes = orm.Set("PostLike", cascade_delete=True)
         hashtags = orm.Set("Hashtag")
         reports = orm.Set("PostReport", cascade_delete=True)
         # if false, won't show up in feeds. good for if media is incomplete.
         processed = orm.Required(bool)
-
-        @property
-        def get_images(self):
-            # this helper function will return all image
-            # objects using image_ids. the benefit of this
-            # over accessing the images property is that
-            # this retains the order, and is indexable, since it
-            # returns a list.
-            images = []
-            for i in self.image_ids:
-                # noinspection PyUnresolvedAttributeReference
-                i_db = db.Image.get(id=i)
-                if i_db is not None:
-                    images.append(i_db)
-            return images
+        # contains an array of JSON objects describing attachments.
+        attachments = orm.Optional(orm.Json)
 
     class PostReport(db_object.Entity):
         # we don't want to just delete these I don't think?
@@ -195,7 +177,7 @@ def define_entities(db_object):
         sha256sum = orm.Required(str)
         associated_profile_pics = orm.Set("User", reverse="profile_pic")
         associated_header_pics = orm.Set("User", reverse="header_pic")
-        associated_posts = orm.Set("Post", reverse="images")
+        associated_posts = orm.Set("Post", reverse="associated_images")
         associated_thumbnails = orm.Set("Video", reverse="thumbnail")
         blur_hash = orm.Required(str)
         # set to true once the image has been fully processed
@@ -265,7 +247,7 @@ def define_entities(db_object):
         identifier = orm.Required(str)
         # videos are stored by their sha256sum.
         sha256sum = orm.Required(str)
-        associated_posts = orm.Set("Post", reverse="video")
+        associated_posts = orm.Set("Post", reverse="associated_videos")
         thumbnail = orm.Required("Image", reverse="associated_thumbnails")
         # this probably won't be implemented for a while, but
         # if we start transcoding, this will become important.
