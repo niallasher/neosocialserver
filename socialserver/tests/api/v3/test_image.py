@@ -2,10 +2,9 @@
 
 # noinspection PyUnresolvedReferences
 import magic
-from socialserver.util.config import config
 from socialserver.util.test import test_db, server_address, image_data_binary
 from socialserver.constants import ErrorCodes, ImageTypes
-from magic import from_buffer
+from magic import from_buffer as magic_from_buffer
 from io import BytesIO
 import requests
 
@@ -50,7 +49,7 @@ def test_get_image_webp(test_db, server_address, image_data_binary):
     file_buf = BytesIO()
     file_buf.write(r.content)
     file_buf.seek(0)
-    assert magic.from_buffer(file_buf.read(2048), mime=True) == "image/webp"
+    assert magic_from_buffer(file_buf.read(2048), mime=True) == "image/webp"
 
 
 def test_get_image_invalid_use(test_db, server_address, image_data_binary):
