@@ -2,6 +2,8 @@
 
 from socialserver.db import db
 from flask_restful import Resource, reqparse
+
+from socialserver.util.api.legacy.thumbnail import make_unsupported_msg_thumbnail_b64
 from socialserver.util.auth import get_user_object_from_token_or_abort
 from socialserver.util.config import config
 from socialserver.util.filesystem import fs_images
@@ -204,32 +206,7 @@ class LegacyPost(Resource):
                             req_video.thumbnail.identifier, image_serve_type
                         )
                     else:
-                        # this should probably be pre-generated in the future,
-                        # but for now it seems pretty quick.
-                        thumbnail_data = BytesIO(
-                            fs_images.readbytes(
-                                f"/{req_video.thumbnail.sha256sum}"
-                                + f"/{ImageTypes.POST_PREVIEW.value}_"
-                                + f"{config.legacy_api_interface.image_pixel_ratio}x.jpg"
-                            )
-                        )
-                        thumbnail = Image.open(thumbnail_data)
-                        # we want the overlay to be of consistent size.
-                        # we can safely assume its aspect ratio is 1:1 because
-                        # it's cropped as such when generated.
-                        if thumbnail.width < 512 or thumbnail.width > 512:
-                            thumbnail = thumbnail.resize((512, 512))
-                        overlay = Image.open(
-                            f"{ROOT_DIR}/resources/legacy/video_unsupported_overlay.png"
-                        )
-                        thumbnail.paste(overlay, (0, 0), overlay)
-                        output_buffer = BytesIO()
-                        thumbnail.save(output_buffer, format="JPEG")
-                        output_buffer.seek(0)
-                        image_data = (
-                            "data:image/jpg;base64,"
-                            + b64encode(output_buffer.read()).decode()
-                        )
+                        image_data = make_unsupported_msg_thumbnail_b64(req_video.thumbnail.sha256)
                 else:
                     image_data = video_unsupported_image
             elif len(attachments) >= 1:
