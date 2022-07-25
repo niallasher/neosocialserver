@@ -86,9 +86,16 @@ class _ServerConfigAuthTotp(BaseModel):
     unconfirmed_expiry_time: int = Field(..., ge=0)
 
 
+class _ServerConfigAuthFailureLock(BaseModel):
+    enabled: bool
+    lock_time_seconds: int
+    fail_count_before_lock: int
+
+
 class _ServerConfigAuth(BaseModel):
     registration: _ServerConfigAuthRegistration
     totp: _ServerConfigAuthTotp
+    failure_lock: _ServerConfigAuthFailureLock
 
 
 class _ServerConfigPosts(BaseModel):
