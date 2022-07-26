@@ -194,6 +194,7 @@ class LegacyUser(Resource):
             # of if it was made through back-compat
             is_legacy_account=False,
             account_attributes=[],
+            recent_failed_login_count=0,
             bio="",
             # we've already returned if approval was required...
             account_approved=True,
