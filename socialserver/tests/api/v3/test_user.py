@@ -264,7 +264,7 @@ def test_update_no_mod_params(test_db, server_address):
 
     assert bio_req.status_code == 400
     assert (
-        bio_req.json()["error"] == ErrorCodes.USER_MODIFICATION_NO_OPTIONS_GIVEN.value
+            bio_req.json()["error"] == ErrorCodes.USER_MODIFICATION_NO_OPTIONS_GIVEN.value
     )
 
 
