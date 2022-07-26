@@ -333,7 +333,7 @@ def check_and_handle_account_lock_status(user: db.User) -> bool:
         unlock_at = user.last_failed_login_attempt + timedelta(seconds=lock_time_seconds)
     else:
         # in case the field is empty for some reason, just set it to current utc time + lock_time_seconds.
-        new_unlock_time = datetime.utcnow() + lock_time_seconds
+        new_unlock_time = datetime.utcnow() + timedelta(seconds=lock_time_seconds)
         user.last_failed_login_attempt = new_unlock_time
         unlock_at = new_unlock_time
 
@@ -348,3 +348,5 @@ def check_and_handle_account_lock_status(user: db.User) -> bool:
             return False
         else:
             return True
+
+    return False
