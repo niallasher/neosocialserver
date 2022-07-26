@@ -30,11 +30,10 @@ def define_entities(db_object):
         password_hash = orm.Required(str)
         password_salt = orm.Required(str)
         # reset when next signing in if the throttling time from config has elapsed.
-        # defaults to 0 for a relatively obvious reason.
-        recent_failed_login_count = orm.Optional(int, sql_default=0)
+        recent_failed_login_count = orm.Optional(int, nullable=True)
         # used to determine whether the failure limit has been tripped,
         # or whether it should be cleared.
-        last_failed_login_attempt = orm.Optional(datetime.datetime)
+        last_failed_login_attempt = orm.Optional(datetime.datetime, nullable=True)
         creation_time = orm.Required(datetime.datetime)
         birthday = orm.Optional(datetime.date)
         totp = orm.Optional("Totp")

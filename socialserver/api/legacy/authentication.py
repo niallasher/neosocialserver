@@ -11,10 +11,12 @@ from socialserver.util.auth import (
     hash_plaintext_sha256,
     check_totp_valid,
     TotpInvalidException,
-    TotpExpendedException,
+    TotpExpendedException, check_and_handle_account_lock_status,
 )
 from flask import request
-from datetime import datetime
+from datetime import datetime, timedelta
+
+from socialserver.util.config import config
 
 
 class LegacyAuthentication(Resource):
@@ -45,11 +47,18 @@ class LegacyAuthentication(Resource):
         if user is None:
             return {"err": LegacyErrorCodes.USERNAME_NOT_FOUND.value}, 404
 
+        account_locked = check_and_handle_account_lock_status(user)
+        if account_locked:
+            # we don't have a specific error for this on legacy, sadly.
+            return {"err": LegacyErrorCodes.GENERIC_SERVER_ERROR.value}, 401
+
         if not verify_password_valid(
             args["password"], user.password_salt, user.password_hash
         ):
             # yes, this is completely the wrong error to return, however,
             # for whatever reason, this was what API v1 did.
+            user.recent_failed_login_count += 1
+            user.last_failed_login_attempt = datetime.utcnow()
             return {"err": LegacyErrorCodes.PASSWORD_DAMAGED.value}, 401
 
         if user.totp is not None:

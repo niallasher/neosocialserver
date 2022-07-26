@@ -1,6 +1,6 @@
 #  Copyright (c) Niall Asher 2022
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from socialserver.db import db
 from flask_restful import Resource, reqparse
 from pony.orm import db_session
@@ -16,7 +16,7 @@ from socialserver.util.auth import (
     get_user_from_auth_header,
     check_totp_valid,
     TotpExpendedException,
-    TotpInvalidException,
+    TotpInvalidException, check_and_handle_account_lock_status,
 )
 from socialserver.util.config import config
 from user_agents import parse as ua_parse
@@ -64,9 +64,20 @@ class UserSession(Resource):
         if user is None:
             return format_error_return_v3(ErrorCodes.USERNAME_NOT_FOUND, 404)
 
+        account_locked = check_and_handle_account_lock_status(user)
+        if account_locked:
+            unlocks_at = user.last_failed_login_attempt + timedelta(seconds=config.auth.failure_lock.lock_time_seconds)
+            return format_error_return_v3(ErrorCodes.ACCOUNT_TEMPORARILY_LOCKED, 401,
+                                          {
+                                              "locked_for_seconds": config.auth.failure_lock.lock_time_seconds,
+                                              "unlocks_at": unlocks_at.timestamp()
+                                          })
+
         if not verify_password_valid(
-            args.password, user.password_salt, user.password_hash
+                args.password, user.password_salt, user.password_hash
         ):
+            user.recent_failed_login_count += 1
+            user.last_failed_login_attempt = datetime.utcnow()
             return format_error_return_v3(ErrorCodes.INCORRECT_PASSWORD, 401)
 
         if config.auth.registration.approval_required:
@@ -139,7 +150,7 @@ class UserSessionList(Resource):
                     # this is just to make it easy for a client to add a tag saying something
                     # like [THIS DEVICE] to an entry in the list of sessions
                     "current": s.access_token_hash
-                    == hash_plaintext_sha256(
+                               == hash_plaintext_sha256(
                         request.headers["Authorization"].split(" ")[1]
                     ),
                     # the device that created the session, this should just about always be the

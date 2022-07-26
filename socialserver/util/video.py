@@ -88,7 +88,7 @@ def handle_video_upload(video: BytesIO, userid: int) -> SimpleNamespace:
 
     video_db = db.Video(
         owner=user,
-        creation_time=datetime.now(),
+        creation_time=datetime.utcnow(),
         identifier=identifier,
         sha256sum=video_hash,
         thumbnail=db.Image.get(id=thumbnail_id),

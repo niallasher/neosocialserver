@@ -1,5 +1,5 @@
 #  Copyright (c) Niall Asher 2022
-
+from datetime import timedelta, datetime
 from functools import wraps
 from types import SimpleNamespace
 import argon2
@@ -317,3 +317,34 @@ class TotpExpendedException(Exception):
 
 class TotpInvalidException(Exception):
     pass
+
+
+"""
+    check_and_handle_account_lock_status
+    
+    Check whether an account is locked, and clear any locks that are no longer valid.
+    Returns True if the account is locked.
+"""
+
+
+def check_and_handle_account_lock_status(user: db.User) -> bool:
+    lock_time_seconds = config.auth.failure_lock.lock_time_seconds
+    if user.last_failed_login_attempt is not None:
+        unlock_at = user.last_failed_login_attempt + timedelta(seconds=lock_time_seconds)
+    else:
+        # in case the field is empty for some reason, just set it to current utc time + lock_time_seconds.
+        new_unlock_time = datetime.utcnow() + lock_time_seconds
+        user.last_failed_login_attempt = new_unlock_time
+        unlock_at = new_unlock_time
+
+    # no locks if the lock isn't even enabled, obviously
+    if not config.auth.failure_lock.enabled:
+        return False
+
+    if user.recent_failed_login_count > config.auth.failure_lock.fail_count_before_lock:
+        if unlock_at < datetime.utcnow():
+            # account is unlocked by now.
+            user.recent_failed_login_count = 0
+            return False
+        else:
+            return True
