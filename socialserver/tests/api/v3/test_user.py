@@ -389,7 +389,7 @@ def test_update_header_pic_invalid_ref(test_db, server_address, image_data_binar
     assert r.json()["header_picture"]["identifier"] != image_identifier
 
 
-def test_account_lock(test_db, server_address, image_data_binary):
+def test_account_lock(test_db, server_address):
     fail_lock_enabled_prev = config.auth.failure_lock.enabled
     fail_lock_time_prev = config.auth.failure_lock.lock_time_seconds
     fail_lock_count_prev = config.auth.failure_lock.fail_count_before_lock
