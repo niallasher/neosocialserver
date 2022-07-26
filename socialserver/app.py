@@ -74,6 +74,7 @@ LESS_SECURE_PASSWORD_CHANGE_ENABLED = (
     config.legacy_api_interface.enable_less_secure_password_change
 )
 LEGACY_INTERFACE_ENABLED = config.legacy_api_interface.enable
+FAILURE_LOCK_ENABLED = config.auth.failure_lock.enabled
 
 
 def create_app():
@@ -88,7 +89,10 @@ def create_app():
         start_unprocessed_post_thread()
 
     if not TOTP_REPLAY_PREVENTION_ENABLED:
-        console.print("[bold red]TOTP replay prevention is disabled!")
+        console.log("[bold red]TOTP replay prevention is disabled!")
+
+    if not FAILURE_LOCK_ENABLED:
+        console.log("[bold red]auth.failure_lock is disabled! This is not recommended for production deployments!")
 
     if config.misc.enable_landing_page:
 
@@ -134,12 +138,12 @@ def create_app():
     api.add_resource(UserApprovals, "/api/v3/admin/userApprovals")
 
     if config.legacy_api_interface.enable:
-        console.print(
+        console.log(
             "[bold red]Legacy interface enabled!\nThis might reduce security."
         )
 
         if LESS_SECURE_PASSWORD_CHANGE_ENABLED:
-            console.print(
+            console.log(
                 "[bold red]Insecure password change enabled.\n"
                 + "Please only enable this for compatibility reasons"
             )

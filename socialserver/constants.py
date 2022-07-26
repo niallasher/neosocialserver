@@ -197,6 +197,7 @@ class ErrorCodes(Enum):
     # the same media can be in a post multiple times,
     # but not the same entry (i.e.: it can be uploaded twice)
     DUPLICATE_MEDIA_IN_POST = 68
+    ACCOUNT_TEMPORARILY_LOCKED = 69
 
 
 """

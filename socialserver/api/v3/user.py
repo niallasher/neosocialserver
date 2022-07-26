@@ -124,6 +124,7 @@ class User(Resource):
             is_legacy_account=False,
             account_attributes=[],
             bio=args.bio if args.bio is not None else "",
+            recent_failed_login_count=0,
             account_approved=True
             if config.auth.registration.approval_required is False
             else False,

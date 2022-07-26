@@ -29,6 +29,11 @@ def define_entities(db_object):
         username = orm.Required(str, max_len=USERNAME_MAX_LEN, unique=True)
         password_hash = orm.Required(str)
         password_salt = orm.Required(str)
+        # reset when next signing in if the throttling time from config has elapsed.
+        recent_failed_login_count = orm.Optional(int, nullable=True)
+        # used to determine whether the failure limit has been tripped,
+        # or whether it should be cleared.
+        last_failed_login_attempt = orm.Optional(datetime.datetime, nullable=True)
         creation_time = orm.Required(datetime.datetime)
         birthday = orm.Optional(datetime.date)
         totp = orm.Optional("Totp")
@@ -58,6 +63,7 @@ def define_entities(db_object):
         # whether the account is approved. this will be made true
         # automatically if admin approval requirement is off.
         account_approved = orm.Required(bool)
+
 
         @property
         def is_private(self):

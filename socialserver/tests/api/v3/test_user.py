@@ -3,6 +3,9 @@
 # pycharm isn't detecting fixture usage, so we're
 # disabling PyUnresolvedReferences for the import.
 # noinspection PyUnresolvedReferences
+from time import sleep
+
+from socialserver.util.config import config
 from socialserver.util.test import test_db, server_address, image_data_binary
 import requests
 from pony.orm import db_session
@@ -261,7 +264,7 @@ def test_update_no_mod_params(test_db, server_address):
 
     assert bio_req.status_code == 400
     assert (
-        bio_req.json()["error"] == ErrorCodes.USER_MODIFICATION_NO_OPTIONS_GIVEN.value
+            bio_req.json()["error"] == ErrorCodes.USER_MODIFICATION_NO_OPTIONS_GIVEN.value
     )
 
 
@@ -384,3 +387,40 @@ def test_update_header_pic_invalid_ref(test_db, server_address, image_data_binar
     )
     assert r.status_code == 200
     assert r.json()["header_picture"]["identifier"] != image_identifier
+
+
+def test_account_lock(test_db, server_address):
+    fail_lock_enabled_prev = config.auth.failure_lock.enabled
+    fail_lock_time_prev = config.auth.failure_lock.lock_time_seconds
+    fail_lock_count_prev = config.auth.failure_lock.fail_count_before_lock
+    config.auth.failure_lock.enabled = True
+    # as low as it can go for test speed
+    config.auth.failure_lock.lock_time_seconds = 1
+    config.auth.failure_lock.fail_count_before_lock = 5
+
+    for i in range(0, 10):
+        r = requests.post(f"{server_address}/api/v3/user/session",
+                          json={
+                              "username": test_db.username,
+                              "password": "invalid_password"
+                          })
+        assert r.status_code == 401
+    r = requests.post(f"{server_address}/api/v3/user/session",
+                      json={
+                          "username": test_db.username,
+                          "password": "still_not_a valid password why did i not use spaces they're supported"
+                      })
+    assert r.status_code == 401
+    assert r.json()["error"] == ErrorCodes.ACCOUNT_TEMPORARILY_LOCKED.value
+    # we need to wait for the lock to expire. just be thankful the test doesn't set it to 15 minutes.
+    sleep(1)
+    r = requests.post(f"{server_address}/api/v3/user/session",
+                      json={
+                          "username": test_db.username,
+                          "password": test_db.password
+                      })
+    assert r.status_code == 200
+    # reset things
+    config.auth.failure_lock.enabled = fail_lock_enabled_prev
+    config.auth.failure_lock.lock_time_seconds = fail_lock_time_prev
+    config.auth.failure_lock.fail_count_before_lock = fail_lock_count_prev

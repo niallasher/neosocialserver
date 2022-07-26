@@ -42,7 +42,7 @@ class Comment(Resource):
             return format_error_return_v3(ErrorCodes.COMMENT_TOO_SHORT, 400)
 
         comment = db.Comment(
-            user=user, creation_time=datetime.now(), text=text, post=post
+            user=user, creation_time=datetime.utcnow(), text=text, post=post
         )
 
         # we commit to db here so that we can get the id from the comment,

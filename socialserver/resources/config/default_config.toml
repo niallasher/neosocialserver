@@ -88,6 +88,19 @@ issuer = "socialserver"
 # to confirm it.
 unconfirmed_expiry_time = 300 # 5 minutes
 
+[auth.failure_lock]
+# if enabled, accounts will be temporarily locked if a set amount of
+# failed logins occur within a specified amount of time.
+enabled = true
+# how long an account will be locked for (in seconds). defaults to 5 minutes.
+# raising this or fail_count_before_lock will unlock any accounts that would otherwise
+# be locked currently. this might change in the future.
+lock_time_seconds = 300
+# amount of failed logins allowed before locking the account.
+fail_count_before_lock = 5
+
+
+
 [posts]
 # this is an anti-spam tactic; socialserver
 # allows for each user to report a specific post

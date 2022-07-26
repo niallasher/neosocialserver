@@ -32,7 +32,7 @@ class PostLike(Resource):
         if existing_like is not None:
             return format_error_return_v3(ErrorCodes.OBJECT_ALREADY_LIKED, 400)
 
-        db.PostLike(user=user, post=post, creation_time=datetime.now())
+        db.PostLike(user=user, post=post, creation_time=datetime.utcnow())
 
         # commit here so the count is up-to-date!
         commit()
