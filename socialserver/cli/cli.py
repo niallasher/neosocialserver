@@ -1,15 +1,25 @@
 #  Copyright (c) Niall Asher 2022
 
 import click
-from socialserver import application
-from socialserver.cli.mkuser import mk_user_interactive
-from socialserver.cli.uploadimage import upload_image
-from socialserver.cli.test import run_tests
+from socialserver.cli.admin.getstats import print_server_statistics
 
 
 @click.group()
 def cli():
     pass
+
+
+@click.group()
+def admin():
+    pass
+
+
+@click.command()
+def getstats():
+    print_server_statistics()
+
+
+admin.add_command(getstats)
 
 
 @click.command()
@@ -38,36 +48,12 @@ def cli():
     help="Max file age. Default is 0.",
 )
 def devel_run(port, bind_addr, template_auto_reload, max_file_age):
+    from socialserver import application
     if template_auto_reload:
         application.config["TEMPLATES_AUTO_RELOAD"] = True
     application.config["SEND_FILE_MAX_AGE_DEFAULT"] = max_file_age
     application.run(host=bind_addr, port=port, debug=True)
 
 
-@click.command()
-@click.option(
-    "interactive", "--interactive", "-i", default=True, help="Enable interactive mode."
-)
-def mk_user(interactive):
-    if not interactive:
-        print("Sorry, non-interactive mode is not available yet.")
-    else:
-        mk_user_interactive()
-
-
-@click.command()
-@click.argument("path")
-def cli_upload_image(path):
-    upload_image(path)
-
-
-@click.command()
-def test():
-    run_tests()
-
-
-# register commands with cli group
-cli.add_command(cli_upload_image)
 cli.add_command(devel_run)
-cli.add_command(mk_user)
-cli.add_command(test)
+cli.add_command(admin)
