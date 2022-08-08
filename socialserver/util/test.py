@@ -159,6 +159,7 @@ def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -
     monkeypatch.setattr("socialserver.api.v3.image.db", db)
     monkeypatch.setattr("socialserver.api.v3.post.db", db)
     monkeypatch.setattr("socialserver.api.v3.post_like.db", db)
+    monkeypatch.setattr("socialserver.api.v3.post_like_list.db", db)
     monkeypatch.setattr("socialserver.api.v3.report.db", db)
     monkeypatch.setattr("socialserver.api.v3.user.db", db)
     monkeypatch.setattr("socialserver.api.v3.two_factor.db", db)
@@ -203,7 +204,7 @@ def monkeypatch_api_db(monkeypatch: pytest.MonkeyPatch, db: pony.orm.Database) -
 
 
 def create_comment_with_request(
-    access_token: str, post_id: int, text_content="comment"
+        access_token: str, post_id: int, text_content="comment"
 ):
     server_address = get_server_address()
     r = requests.post(
@@ -223,7 +224,7 @@ def create_comment_with_request(
 
 
 def create_user_with_request(
-    username="username", password="password", display_name="name"
+        username="username", password="password", display_name="name"
 ):
     server_address = get_server_address()
     r = requests.post(
