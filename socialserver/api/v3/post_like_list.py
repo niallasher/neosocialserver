@@ -1,6 +1,5 @@
 #  Copyright (c) Niall Asher 2022
 
-#  Copyright (c) Niall Asher 2022
 from socialserver.db import db
 from socialserver.util.api.v3.data_format import format_userdata_v3
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header
@@ -31,9 +30,11 @@ class PostLikeList(Resource):
             return format_error_return_v3(ErrorCodes.FEED_GET_COUNT_TOO_HIGH, 400)
 
         likes = select(l for l in wanted_post.likes) \
-            .order_by(db.PostLike.creation_time)
+            .order_by(db.PostLike.id)
 
         like_count = likes.count()
+
+        likes = likes.limit(args.count, offset=args.offset)
 
         formatted_likes = []
 
