@@ -8,6 +8,7 @@ from flask_cors import CORS
 # this should be the first socialserver import here.
 # it sets up traceback pretty printing when it's imported!
 from socialserver.api.v3.follow_list import FollowerList, FollowingList
+from socialserver.api.v3.post_like_list import PostLikeList
 from socialserver.util.output import console
 from socialserver.util.config import config
 from socialserver.maintenance import maintenance
@@ -123,6 +124,7 @@ def create_app():
     api.add_resource(PostFeed, "/api/v3/posts/feed")
     api.add_resource(Report, "/api/v3/posts/report")
     api.add_resource(PostLike, "/api/v3/posts/like")
+    api.add_resource(PostLikeList, "/api/v3/posts/like/feed")
 
     api.add_resource(Comment, "/api/v3/comments")
     api.add_resource(CommentFeed, "/api/v3/comments/feed")

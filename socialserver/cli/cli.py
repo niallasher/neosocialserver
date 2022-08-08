@@ -2,6 +2,9 @@
 
 import click
 from socialserver.cli.admin.getstats import print_server_statistics
+from socialserver.cli.admin.create_user import create_user_account
+from socialserver.cli.admin.usermod import verify_user, unverify_user, mod_user, unmod_user, make_user_admin, \
+    remove_user_admin_role
 
 
 @click.group()
@@ -15,11 +18,67 @@ def admin():
 
 
 @click.command()
-def getstats():
+def get_stats():
     print_server_statistics()
 
 
-admin.add_command(getstats)
+@click.group()
+def user():
+    pass
+
+
+@click.command()
+def create():
+    create_user_account()
+    pass
+
+
+@click.command()
+@click.argument("username")
+def verify(username):
+    verify_user(username)
+
+
+@click.command()
+@click.argument("username")
+def unverify(username):
+    unverify_user(username)
+
+
+@click.command()
+@click.argument("username")
+def make_mod(username):
+    mod_user(username)
+
+
+@click.command()
+@click.argument("username")
+def revoke_mod(username):
+    unmod_user(username)
+
+
+@click.command()
+@click.argument("username")
+def make_admin(username):
+    make_user_admin(username)
+
+
+@click.command()
+@click.argument("username")
+def revoke_admin(username):
+    remove_user_admin_role(username)
+
+
+user.add_command(verify)
+user.add_command(unverify)
+user.add_command(make_mod)
+user.add_command(revoke_mod)
+user.add_command(make_admin)
+user.add_command(revoke_admin)
+user.add_command(create)
+
+admin.add_command(user)
+admin.add_command(get_stats)
 
 
 @click.command()
