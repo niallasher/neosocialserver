@@ -63,7 +63,10 @@ def define_entities(db_object):
         # whether the account is approved. this will be made true
         # automatically if admin approval requirement is off.
         account_approved = orm.Required(bool)
-
+        # holds the users bookmarks. just a collection of posts that get sorted by post_id.
+        # we don't want to cascade_delete here. the user probably won't own most of their
+        # bookmarks.
+        bookmarks = orm.Set("Post", cascade_delete=False)
 
         @property
         def is_private(self):
@@ -141,6 +144,7 @@ def define_entities(db_object):
         processed = orm.Required(bool)
         # contains an array of JSON objects describing attachments.
         attachments = orm.Optional(orm.Json)
+        all_bookmarks = orm.Set("User", reverse="bookmarks")
 
     class PostReport(db_object.Entity):
         # we don't want to just delete these I don't think?
