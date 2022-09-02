@@ -154,6 +154,21 @@ def get_user_object_from_token_or_abort(session_token: str):
 
 
 """
+    get_user_session_from_token
+    returns the current user session given by the current auth token.
+    if none, you should definitely not be serving the user :)
+"""
+
+
+def get_user_session_from_token(session_token: str):
+    token_hash = hash_plaintext_sha256(session_token)
+    existing_session = db.UserSession.get(access_token_hash=token_hash)
+    if existing_session is None:
+        raise Exception("No session found for user!")
+    return existing_session
+
+
+"""
     get_ip_from_request
     returns the ip address of the requester, handles reverse proxy (if proxy configured correctly!)
 """
