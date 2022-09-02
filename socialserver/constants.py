@@ -198,6 +198,8 @@ class ErrorCodes(Enum):
     # but not the same entry (i.e.: it can be uploaded twice)
     DUPLICATE_MEDIA_IN_POST = 68
     ACCOUNT_TEMPORARILY_LOCKED = 69
+    POST_ALREADY_BOOKMARKED = 70
+    POST_NOT_BOOKMARKED = 71
 
 
 """

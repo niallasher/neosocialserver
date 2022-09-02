@@ -7,9 +7,10 @@ from flask_cors import CORS
 
 # this should be the first socialserver import here.
 # it sets up traceback pretty printing when it's imported!
+from socialserver.util.output import console
+from socialserver.api.v3.bookmark import BookmarkPost, BookmarkFeed
 from socialserver.api.v3.follow_list import FollowerList, FollowingList
 from socialserver.api.v3.post_like_list import PostLikeList
-from socialserver.util.output import console
 from socialserver.util.config import config
 from socialserver.maintenance import maintenance
 from socialserver.util.post import start_unprocessed_post_thread
@@ -96,7 +97,6 @@ def create_app():
         console.log("[bold red]auth.failure_lock is disabled! This is not recommended for production deployments!")
 
     if config.misc.enable_landing_page:
-
         @application.get("/")
         def landing_page():
             return render_template(
@@ -125,6 +125,9 @@ def create_app():
     api.add_resource(Report, "/api/v3/posts/report")
     api.add_resource(PostLike, "/api/v3/posts/like")
     api.add_resource(PostLikeList, "/api/v3/posts/like/feed")
+
+    api.add_resource(BookmarkPost, "/api/v3/posts/bookmark")
+    api.add_resource(BookmarkFeed, "/api/v3/posts/bookmark/feed")
 
     api.add_resource(Comment, "/api/v3/comments")
     api.add_resource(CommentFeed, "/api/v3/comments/feed")
