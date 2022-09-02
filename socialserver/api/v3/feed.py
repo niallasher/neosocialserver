@@ -80,8 +80,8 @@ class PostFeed(Resource):
                     and p.processed is True
                     and p.user.username in filter_list
                 )
-                .order_by(orm.desc(db.Post.creation_time))
-                .limit(args.count, offset=args.offset)[::]
+                    .order_by(orm.desc(db.Post.creation_time))
+                    .limit(args.count, offset=args.offset)[::]
             )
         else:
             # noinspection PyTypeChecker
@@ -93,14 +93,14 @@ class PostFeed(Resource):
                     and p.under_moderation is False
                     and p.processed is True
                 )
-                .order_by(orm.desc(db.Post.creation_time))
-                .limit(args.count, offset=args.offset)[::]
+                    .order_by(orm.desc(db.Post.creation_time))
+                    .limit(args.count, offset=args.offset)[::]
             )
 
         posts = []
         for post in query:
             user_has_liked_post = (
-                db.PostLike.get(user=requesting_user_db, post=post) is not None
+                    db.PostLike.get(user=requesting_user_db, post=post) is not None
             )
 
             user_owns_post = post.user == requesting_user_db
@@ -117,11 +117,10 @@ class PostFeed(Resource):
             )
 
         return {
-            "meta": {
-                # if we have less posts left than the user
-                # asked for, we must have reached the end!
-                "reached_end": len(posts)
-                < args["count"]
-            },
-            "posts": posts,
-        }, 201
+                   "meta": {
+                       # if we have less posts left than the user
+                       # asked for, we must have reached the end!
+                       "reached_end": len(posts) < args["count"]
+                   },
+                   "posts": posts,
+               }, 201
