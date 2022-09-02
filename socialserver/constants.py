@@ -448,6 +448,11 @@ class UserNotFoundException(Exception):
     pass
 
 
+# these names are pretty descriptive, huh?
+class AuthHeaderInvalidOrNotPresentException(Exception):
+    pass
+
+
 """
     SERVER_SUPPORTED_IMAGE_FORMATS
     Formats that an image can be delivered in.

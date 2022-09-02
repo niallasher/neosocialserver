@@ -10,7 +10,8 @@ from secrets import token_urlsafe
 from pony.orm import db_session
 from socialserver.db import db
 from flask import abort, request, make_response, jsonify
-from socialserver.constants import ErrorCodes, LegacyErrorCodes, AccountAttributes
+from socialserver.constants import ErrorCodes, LegacyErrorCodes, AccountAttributes, \
+    AuthHeaderInvalidOrNotPresentException
 from socialserver.util.config import config
 import pyotp
 
@@ -160,9 +161,23 @@ def get_user_object_from_token_or_abort(session_token: str):
 """
 
 
-def get_user_session_from_token(session_token: str):
-    token_hash = hash_plaintext_sha256(session_token)
-    existing_session = db.UserSession.get(access_token_hash=token_hash)
+def get_user_session_from_header():
+    try:
+        auth_token = get_token_from_auth_header(request.headers)
+    except AuthHeaderInvalidOrNotPresentException:
+        # this should never happen at this point;
+        # everything here should take place after get_user_from_auth_header(),
+        # however we'll leave it here as a safeguard, because I'm far from
+        # infallible.
+        abort(
+            make_response(jsonify(
+                error=ErrorCodes.TOKEN_INVALID.value
+            ), 401)
+        )
+        return
+
+    auth_token_hash = hash_plaintext_sha256(auth_token)
+    existing_session = db.UserSession.get(access_token_hash=auth_token_hash)
     if existing_session is None:
         raise Exception("No session found for user!")
     return existing_session
@@ -193,16 +208,15 @@ def auth_reqd(f):
     @wraps(f)
     @db_session
     def decorated_function(*args, **kwargs):
-        headers = request.headers
-        headers.get("Authorization") or abort(
-            make_response(
-                jsonify(error=ErrorCodes.AUTHORIZATION_HEADER_NOT_PRESENT.value), 401
+        try:
+            auth_token = get_token_from_auth_header(request.headers)
+        except AuthHeaderInvalidOrNotPresentException:
+            abort(
+                make_response(jsonify(
+                    error=ErrorCodes.TOKEN_INVALID.value
+                ), 401)
             )
-        )
-        # The auth header is in this form: Bearer <token>
-        # we just want <token>, and since there are no spaces in
-        # the token format anyway, it's pretty easy to parse.
-        auth_token = headers.get("Authorization").split(" ")[1]
+            return
         existing_entry = db.UserSession.get(
             access_token_hash=hash_plaintext_sha256(auth_token)
         )
@@ -248,6 +262,30 @@ def admin_reqd(f):
 
 
 """
+    get_token_from_auth_header
+    
+    try extracting the auth token from auth header.
+"""
+
+
+def get_token_from_auth_header(headers):
+    auth_header = headers.get("Authorization")
+    if auth_header is None:
+        raise AuthHeaderInvalidOrNotPresentException()
+    auth_header_space_delim = auth_header.split(" ")
+    try:
+        if len(auth_header_space_delim) == 2:
+            auth_token = auth_header_space_delim[1]
+        elif len(auth_header_space_delim) == 1:
+            auth_token = auth_header_space_delim[0]
+        else:
+            raise AuthHeaderInvalidOrNotPresentException()
+    except IndexError:
+        raise AuthHeaderInvalidOrNotPresentException()
+    return auth_token
+
+
+"""
     get_username_from_auth_header
     
     returns a database object for the signed in user, based on the token
@@ -256,13 +294,16 @@ def admin_reqd(f):
 
 
 def get_user_from_auth_header():
-    headers = request.headers
-    headers.get("Authorization") or abort(
-        make_response(
-            jsonify(error=ErrorCodes.AUTHORIZATION_HEADER_NOT_PRESENT.value), 401
+    try:
+        auth_token = get_token_from_auth_header(request.headers)
+    except AuthHeaderInvalidOrNotPresentException:
+        abort(
+            make_response(jsonify(
+                error=ErrorCodes.TOKEN_INVALID.value
+            ), 401)
         )
-    )
-    auth_token = headers.get("Authorization").split(" ")[1]
+        return
+
     existing_entry = db.UserSession.get(
         access_token_hash=hash_plaintext_sha256(auth_token)
     )
