@@ -155,7 +155,7 @@ def get_user_object_from_token_or_abort(session_token: str):
 
 
 """
-    get_user_session_from_token
+    get_user_session_from_header
     returns the current user session given by the current auth token.
     if none, you should definitely not be serving the user :)
 """
@@ -166,7 +166,8 @@ def get_user_session_from_header():
         auth_token = get_token_from_auth_header(request.headers)
     except AuthHeaderInvalidOrNotPresentException:
         # this should never happen at this point;
-        # everything here should take place after get_user_from_auth_header(),
+        # everything here should take place after get_user_from_auth_header()
+        # or @auth_reqd,
         # however we'll leave it here as a safeguard, because I'm far from
         # infallible.
         abort(

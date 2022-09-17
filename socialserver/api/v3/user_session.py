@@ -16,7 +16,7 @@ from socialserver.util.auth import (
     get_user_from_auth_header,
     check_totp_valid,
     TotpExpendedException,
-    TotpInvalidException, check_and_handle_account_lock_status,
+    TotpInvalidException, check_and_handle_account_lock_status, get_user_session_from_header,
 )
 from socialserver.util.config import config
 from user_agents import parse as ua_parse
@@ -116,13 +116,11 @@ class UserSession(Resource):
     @auth_reqd
     def delete(self):
 
-        session = db.UserSession.get(
-            access_token_hash=hash_plaintext_sha256(
-                request.headers["Authorization"].split(" ")[1]
-            )
-        )
-        if session is None:
-            return format_error_return_v3(ErrorCodes.TOKEN_INVALID, 401)
+        session = get_user_session_from_header()
+
+        # invalid tokens are handles by get_user_session_from_header.
+        # we don't need to check here; the request will just be aborted
+        # with a 401 result automatically.
 
         session.delete()
         return {}, 201

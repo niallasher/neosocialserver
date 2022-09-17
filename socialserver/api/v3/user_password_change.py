@@ -1,7 +1,8 @@
 #  Copyright (c) Niall Asher 2022
 
 from flask_restful import Resource, reqparse
-from pony.orm import db_session
+from socialserver.db import db
+from pony.orm import db_session, select
 from socialserver.constants import ErrorCodes, MIN_PASSWORD_LEN, MAX_PASSWORD_LEN
 from socialserver.util.api.v3.error_format import format_error_return_v3
 from socialserver.util.auth import (
@@ -10,6 +11,7 @@ from socialserver.util.auth import (
     get_user_from_auth_header,
     hash_password,
     generate_salt,
+    get_user_session_from_header,
 )
 
 
@@ -18,6 +20,8 @@ class UserPasswordChange(Resource):
         self.patch_parser = reqparse.RequestParser()
         self.patch_parser.add_argument("old_password", type=str, required=True)
         self.patch_parser.add_argument("new_password", type=str, required=True)
+        # assumed to be false if not given.
+        self.patch_parser.add_argument("delete_other_sessions", type=bool, required=False)
 
     @db_session
     @auth_reqd
@@ -26,8 +30,9 @@ class UserPasswordChange(Resource):
         # Should TOTP be required? I'm thinking no, because it's for keeping a session safe,
         # and you already need to be signed in to change the password. Worth considering though.
         args = self.patch_parser.parse_args()
-
         user = get_user_from_auth_header()
+
+        delete_other_sessions = args.delete_other_sessions or False
 
         new_password = args.new_password
 
@@ -44,5 +49,11 @@ class UserPasswordChange(Resource):
 
         user.password_hash = new_password_hash
         user.password_salt = new_password_salt
+
+        if delete_other_sessions:
+            cur_session = get_user_session_from_header()
+            sessions = select(s for s in user.sessions if s is not cur_session)
+            for s in sessions:
+                s.delete()
 
         return {}, 201
