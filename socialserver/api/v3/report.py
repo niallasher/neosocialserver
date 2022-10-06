@@ -14,6 +14,8 @@ from socialserver.util.auth import auth_reqd, get_user_from_auth_header
 from socialserver.util.config import config
 from pony.orm import db_session
 
+from socialserver.util.date import format_timestamp_string
+
 
 class Report(Resource):
     def __init__(self):
@@ -52,7 +54,7 @@ class Report(Resource):
         for r in wanted_post.reports:
             reports.append(
                 {
-                    "creation_time": r.creation_time.timestamp(),
+                    "creation_time": format_timestamp_string(r.creation_time),
                     # none represents a deleted account here,
                     # since the relationship will be null
                     "reporter": r.reporter.username or None,

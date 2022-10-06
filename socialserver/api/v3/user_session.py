@@ -21,6 +21,8 @@ from socialserver.util.auth import (
 from socialserver.util.config import config
 from user_agents import parse as ua_parse
 
+from socialserver.util.date import format_timestamp_string
+
 
 class UserSession(Resource):
     def __init__(self):
@@ -48,9 +50,9 @@ class UserSession(Resource):
                 "owner": session.user.username,
                 "current_ip": get_ip_from_request(),
                 "creation_ip": session.creation_ip,
-                "creation_time": session.creation_time.timestamp(),
-                "current_server_time": datetime.utcnow().timestamp(),
-                "last_access_time": session.last_access_time.timestamp(),
+                "creation_time": format_timestamp_string(session.creation_time),
+                "current_server_time": format_timestamp_string(datetime.utcnow()),
+                "last_access_time": format_timestamp_string(session.last_access_time),
                 "user_agent": session.user_agent,
             },
             200,
@@ -70,7 +72,7 @@ class UserSession(Resource):
             return format_error_return_v3(ErrorCodes.ACCOUNT_TEMPORARILY_LOCKED, 401,
                                           {
                                               "locked_for_seconds": config.auth.failure_lock.lock_time_seconds,
-                                              "unlocks_at": unlocks_at.timestamp()
+                                              "unlocks_at": format_timestamp_string(unlocks_at)
                                           })
 
         if not verify_password_valid(
@@ -142,8 +144,8 @@ class UserSessionList(Resource):
             sessions.append(
                 {
                     "creation_ip": s.creation_ip,
-                    "creation_time": s.creation_time.timestamp(),
-                    "last_access_time": s.last_access_time.timestamp(),
+                    "creation_time": format_timestamp_string(s.creation_time),
+                    "last_access_time": format_timestamp_string(s.last_access_time),
                     # current = true if this is the session the user used to request the list
                     # this is just to make it easy for a client to add a tag saying something
                     # like [THIS DEVICE] to an entry in the list of sessions

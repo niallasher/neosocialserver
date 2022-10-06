@@ -2,10 +2,11 @@
 from socialserver.api.v3.models.post import AttachmentEntryModel, InvalidAttachmentEntryException
 from socialserver.constants import PostAdditionalContentTypes
 from socialserver.db import db
+from socialserver.util.date import format_timestamp_string
 
 
 def format_userdata_v3(
-    user_object, current_user=None, include_header=False, include_bio=False, include_follower_info=False
+        user_object, current_user=None, include_header=False, include_bio=False, include_follower_info=False
 ):
     pfp_identifier = None
     pfp_blur_hash = None
@@ -110,7 +111,7 @@ def format_post_v3(post_object):
     return {
         "id": post_object.id,
         "content": post_object.text,
-        "creation_date": post_object.creation_time.timestamp(),
+        "creation_date": format_timestamp_string(post_object.creation_time),
         "like_count": len(post_object.likes),
         "comment_count": len(post_object.comments),
         "attachments": ext_attachments

@@ -6,6 +6,8 @@ from flask_restful import Resource, reqparse
 from socialserver.constants import ApprovalSortTypes, ErrorCodes, MAX_FEED_GET_COUNT
 from pony.orm import db_session, select, desc
 
+from socialserver.util.date import format_timestamp_string
+
 
 class UserApprovals(Resource):
     def __init__(self):
@@ -61,14 +63,14 @@ class UserApprovals(Resource):
             users_formatted.append(
                 {
                     "username": user.username,
-                    "creation_time": user.creation_time.timestamp(),
+                    "creation_time": format_timestamp_string(user.creation_time),
                 }
             )
 
         return {
-            "meta": {"reached_end": len(users_formatted) < args["count"]},
-            "users": users_formatted,
-        }, 200
+                   "meta": {"reached_end": len(users_formatted) < args["count"]},
+                   "users": users_formatted,
+               }, 200
 
     @db_session
     @admin_reqd
