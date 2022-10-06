@@ -8,6 +8,8 @@ from socialserver.util.api.v3.error_format import format_error_return_v3
 from socialserver.util.auth import auth_reqd, get_user_from_auth_header
 from pony.orm import db_session, select, desc, count
 
+from socialserver.util.date import format_timestamp_string
+
 
 class CommentFeed(Resource):
     def __init__(self):
@@ -68,7 +70,7 @@ class CommentFeed(Resource):
                     "comment": {
                         "id": comment.id,
                         "content": comment.text,
-                        "creation_time": comment.creation_time.timestamp(),
+                        "creation_time": format_timestamp_string(comment.creation_time),
                         "like_count": len(comment.likes),
                     },
                     "user": format_userdata_v3(comment.user),
@@ -77,15 +79,15 @@ class CommentFeed(Resource):
                         "user_owns_comment": db.CommentLike.get(
                             user=requesting_user_db, comment=comment
                         )
-                        is not None,
+                                             is not None,
                     },
                 }
             )
 
         return {
-            "meta": {
-                "reached_end": len(comments_formatted) < args["count"],
-                "comment_count": total_comment_count,
-            },
-            "comments": comments_formatted,
-        }, 200
+                   "meta": {
+                       "reached_end": len(comments_formatted) < args["count"],
+                       "comment_count": total_comment_count,
+                   },
+                   "comments": comments_formatted,
+               }, 200
